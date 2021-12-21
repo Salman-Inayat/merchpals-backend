@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Merchpals backend",
+  "main": "server.js",
+  "author": "Ayyaz Ali",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "start:server": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.1.0",
+    "express-rate-limit": "^5.5.1",
+    "helmet": "^4.6.0",
+    "mongoose": "^6.0.14",
+    "mongoose-unique-validator": "^3.0.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.15",
+    "twilio": "^3.71.2",
+    "validator": "^13.7.0",
+    "xss-clean": "^0.1.1"
+  }
+}
