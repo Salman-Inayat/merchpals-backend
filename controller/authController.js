@@ -1,15 +1,15 @@
 const twilioClient = require("../config/twilio");
-const AppError = require("../utils/appError");
+const AppError = require("../utils/appError")
 const { catchAsync } = require("./errorController");
 
-exports.userSignup = catchAsync(async (req, res, next) => {
-  const verification = await createAndSendOTP(req.body.phoneNo);
-  res.status(200).json({
-    message: "SignUp Successful",
+  exports.userSignup = catchAsync(async (req, res, next) => {
+    const verification = await createAndSendOTP(req.body.phoneNo);
+    res.status(200).json({
+      message: "SignUp Successful",
+    });
   });
-});
 
-exports.createVerificationService = catchAsync(async (req, res, next) => {
+  exports.createVerificationService = catchAsync(async (req, res, next) => {
   // Create a verification service
   const service = await twilioClient.verify.services.create({
     friendlyName: "Merchpals",
