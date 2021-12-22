@@ -13,6 +13,7 @@ const userSchema = mongoose.Schema(
       required: [true, "Please provide your email"],
       unique: true,
       lowercase: true,
+      trim: true,
       validate: [validator.isEmail, "Please enter a valid email"],
     },
     moblieNo: { type: Number, required: [true, "Mobile No is required"] },
@@ -37,7 +38,7 @@ const userSchema = mongoose.Schema(
     accountStatus: {
       type: String,
       default: "active",
-      enum: ["active", "deactive", "suspended", "pending"],
+      enum: ["active", "inactive", "suspended", "pending"],
       select: false,
     },
 
@@ -47,6 +48,11 @@ const userSchema = mongoose.Schema(
       createdAt: { type: Date },
       modifiedAt: { type: Date },
     },
+    username: { type String, required: [true, "please provide a username"] },
+    role: {
+      type: String,
+      enum: ['vendor']
+    }
   },
   { timestamps: true }
 );
@@ -136,4 +142,4 @@ userSchema.methods.createPasswordResetToken = function () {
 
 userSchema.plugin(uniqueValidator, { message: "{PATH} should be unique" });
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("users", userSchema);
