@@ -3,7 +3,9 @@ const AppError = require("../utils/appError")
 const { catchAsync } = require("./errorController");
 
   exports.userSignup = catchAsync(async (req, res, next) => {
-    const verification = await createAndSendOTP(req.body.phoneNo);
+    console.log('req.body', req.body);
+    const verification = await twilioOtpService(req.body.phoneNo);
+    console.log('verification',verification);
     res.status(200).json({
       message: "SignUp Successful",
     });
@@ -20,7 +22,7 @@ const { catchAsync } = require("./errorController");
 exports.sendOTP = catchAsync(async (req, res, next) => {
   const phoneNo = req.body.phoneNo;
   try {
-    const verification = await createAndSendOTP(phoneNo);
+    const verification = await twilioOtpService(phoneNo);
     return res.status(200).json({
       verification,
     });
@@ -29,13 +31,19 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   }
 });
 
-const createAndSendOTP = (phoneNo) => {
-  return twilioClient.verify
+const twilioOtpService = async (phoneNo) => {
+  try {
+    const response = await twilioClient.verify
     .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
     .verifications.create({
       to: phoneNo,
       channel: "sms",
-    });
+    }); 
+
+    return response;
+  } catch (error) {
+    throw new Error
+  }
 };
 
 exports.verifyOTP = catchAsync(async (req, res, next) => {
@@ -43,16 +51,14 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
     const verificationCheck = await twilioClient.verify
       .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
       .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
-
+      console.log('verificationCheck', verificationCheck);
     res.status(200).json({
       verificationCheck,
     });
   } catch (err) {
-    console.log('caught error');
     res.status(err.status).json({
         message: "Verification not found"
     })
-    // next(new AppError('verification code expired', 400));
   }
 });
  
