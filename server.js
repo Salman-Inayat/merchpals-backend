@@ -1,48 +1,32 @@
+const debug = require('debug')('node-angular');
+const http = require('http');
 const dotenv = require('dotenv');
-dotenv.config({path: './config.env'})
+const app = require('./app');
 
-const app = require("./app");
-const debug = require("debug")("node-angular");
-const http = require("http");
+dotenv.config({ path: './config.env' });
 
+const port = process.env.PORT || '3005';
 
 // Handle Uncaught exceptions before any of the code execution
-process.on('uncaughtException', err => {
-  console.log('Unhandled Exception : Shutting down...')
+process.on('uncaughtException', (err) => {
+  console.log('Unhandled Exception : Shutting down...');
   console.log(err);
   process.exit(1);
+});
 
-}) 
-
-
-const normalizePort = val => {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-};
-
-const onError = error => {
-  if (error.syscall !== "listen") {
+const onError = (error) => {
+  if (error.syscall !== 'listen') {
     throw error;
   }
-  const bind = typeof port === "string" ? "pipe " + port : "port " + port;
+
+  const bind = typeof port === 'string' ? `pipe ${port}` : `port ${port}`;
   switch (error.code) {
-    case "EACCES":
-      console.error(bind + " requires elevated privileges");
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
-    case "EADDRINUSE":
-      console.error(bind + " is already in use");
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
@@ -51,27 +35,22 @@ const onError = error => {
 };
 
 const onListening = () => {
-  const addr = server.address();
-  const bind = typeof port === "string" ? "pipe " + port : "port " + port;
-  debug("Listening on " + bind);
+  const bind = typeof port === 'string' ? `pipe ${port}` : `port ${port}`;
+  debug(`Listening on ${bind}`);
 };
 
-
-const port = normalizePort(process.env.PORT || "3000");
-app.set("port", port);
+app.set('port', port);
 
 const server = http.createServer(app);
-server.on("error", onError);
-server.on("listening", onListening);
+server.on('error', onError);
+server.on('listening', onListening);
 server.listen(port);
 
-
 // Handle Uncaught rejections - Like db password error
-process.on('unhandledRejection', err => {
-  console.log('Unhandled Rejection : Shutting down...')
-  console.log(err.name, err.message);
+process.on('unhandledRejection', (err) => {
+  console.log('Unhandled Rejection : Shutting down...');
+  console.log(err.message);
   server.close(() => {
-      process.exit(1);
-  })
-})
-
+    process.exit(1);
+  });
+});
