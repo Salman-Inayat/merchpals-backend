@@ -1,9 +1,10 @@
 const debug = require('debug')('node-angular');
 const http = require('http');
 const dotenv = require('dotenv');
-const app = require('./app');
 
 dotenv.config({ path: './config.env' });
+
+const app = require('./app');
 
 const port = process.env.PORT || '3005';
 
