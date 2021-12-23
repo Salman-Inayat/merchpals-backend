@@ -50,9 +50,7 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   const { phoneNo } = req.body;
   try {
     const verification = await twilioOtpService(phoneNo);
-    return res.status(200).json({
-      verification,
-    });
+    return res.status(200).json({ verification });
   } catch (err) {
     throw next(new AppError(err.details, err.status));
   }
@@ -72,6 +70,28 @@ exports.verifyOTP = catchAsync(async (req, res) => {
     res.status(200).json({ user });
   } catch (err) {
     console.log('verifyOTP func', err.status, err.message);
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
+
+exports.sendOTPForResetPassword = catchAsync(async (req, res) => {
+  try {
+    const { phoneNo } = req.body;
+    await twilioOtpService(phoneNo);
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (err) {
+    console.log('sendOTPForResetPassword func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+exports.updatePassword = catchAsync(async (req, res) => {
+  try {
+    const user = await User.updatePassword(req.body);
+    res.status(200).json({ message: "password updated successfully" });
+  } catch (err) {
+    console.log('updatePassword func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});
+

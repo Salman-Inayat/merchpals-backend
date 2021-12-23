@@ -149,6 +149,22 @@ userSchema.statics.updatePhoneVerification = async function (phoneNo) {
   }
 };
 
-// userSchema.plugin(uniqueValidator, { message: "{PATH} should be unique" });
+userSchema.statics.updatePassword = async function (data) {
+  try {
+    const password = await bcrypt.hash(data.password, 12);
+    const passwordChangedAt = Date.now();
+
+    const user = await this.findOneAndUpdate(
+      { phoneNo: data.phoneNo },
+      {
+        password,
+        passwordChangedAt
+      },
+    );
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 module.exports = mongoose.model('User', userSchema);
