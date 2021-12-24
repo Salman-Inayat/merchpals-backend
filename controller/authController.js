@@ -95,3 +95,12 @@ exports.updatePassword = catchAsync(async (req, res) => {
   }
 });
 
+exports.login = async(req, res) => {
+  try {
+    console.log({ body: req.body });
+  } catch (error) {
+    console.log('login errorr', error);
+    res.status(400).json({ message: error.message });
+  }
+}
+
