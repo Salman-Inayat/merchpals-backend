@@ -125,7 +125,7 @@ userSchema.statics.updatePassword = async function (data) {
 
 userSchema.statics.login = async function (data) {
   try {
-    const user = await this.findOne({ phoneNo: data.phoneNo });
+    const user = await this.findOne({ phoneNo: `+${+data.phoneNo}` });
     if (!user) {
       throw new Error('Phone number does not exist');
     }
@@ -134,7 +134,7 @@ userSchema.statics.login = async function (data) {
     if (!isPasswordMatched) {
       throw new Error('Incorrect password');
     }
-console.log({user});
+
     if(!user.phoneNoVerified){
       throw new Error("Phone number not verified!")
     }
