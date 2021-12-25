@@ -15,7 +15,7 @@ const vendorSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  mobileNo: {
+  phoneNo: {
     type: String,
     required: true,
     trim: true,
@@ -26,7 +26,6 @@ const vendorSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    validate: [validator.isEmail, "Please enter a valid email"],
   },
   displayName: {
     type: String,

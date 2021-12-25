@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const twilioClient = require('../config/twilio');
 const AppError = require('../utils/appError');
 const { catchAsync } = require('./errorController');
@@ -18,13 +19,26 @@ const twilioOtpService = async (phoneNo) => {
   }
 };
 
+const getToken = user => {
+  return jwt.sign(
+    { phoneNo: user.phoneNo, userId: user._id },
+    process.env.AUTH_SECRET,
+    { expiresIn: "10h" }
+  );
+}
+
 exports.userSignup = async (req, res) => {
   try {
     const user = await User.createUser(req.body.data);
+    let token;
+    if(user && user.phoneNo){
+      token = getToken(user);
+    }
+    console.log({token});
     await twilioOtpService(req.body.data.phoneNo);
 
     return res.status(200).json({
-      user,
+      token,
       message: 'SignUp Successful',
     });
   } catch (error) {
@@ -50,9 +64,7 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   const { phoneNo } = req.body;
   try {
     const verification = await twilioOtpService(phoneNo);
-    return res.status(200).json({
-      verification,
-    });
+    return res.status(200).json({ verification });
   } catch (err) {
     throw next(new AppError(err.details, err.status));
   }
@@ -72,6 +84,55 @@ exports.verifyOTP = catchAsync(async (req, res) => {
     res.status(200).json({ user });
   } catch (err) {
     console.log('verifyOTP func', err.status, err.message);
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
+
+exports.sendOTPForResetPassword = catchAsync(async (req, res) => {
+  try {
+    const { phoneNo } = req.body;
+    await twilioOtpService(phoneNo);
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (err) {
+    console.log('sendOTPForResetPassword func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+exports.updatePassword = catchAsync(async (req, res) => {
+  try {
+    const user = await User.updatePassword(req.body);
+    res.status(200).json({ message: "password updated successfully" });
+  } catch (err) {
+    console.log('updatePassword func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+exports.login = async(req, res) => {
+  try {
+    const user = await User.login(req.body);
+    let token;
+    if(user && user.phoneNo){
+      token = getToken(user);
+    }
+
+    res.status(200).json({
+      token,
+      message: 'Login Successful',
+    });
+  } catch (error) {
+    console.log('login errorr', error);
+    res.status(400).json({ message: error.message });
+  }
+}
+
+exports.loggedInUserInfo = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.userData._id }).select('-password')
+    res.status(200).json({ user });
+  } catch (error) {
+    console.log('loggedInUserInfo errorr', error);
+    res.status(400).json({ message: error.message });
+  }
+}
