@@ -5,8 +5,10 @@ const {
   verifyOTP, 
   sendOTPForResetPassword,
   updatePassword,
-  login
+  login,
+  loggedInUserInfo
 } = require("../controller/authController");
+const auth = require('../middleware/check_auth');
 
 const router = express.Router();
 
@@ -16,5 +18,6 @@ router.route("/verify-otp").post(verifyOTP)
 router.route("/send-otp-for-reset-password").post(sendOTPForResetPassword)
 router.route('/update-password').put(updatePassword)
 router.route('/login').post(login)
+router.route('/').get(auth, loggedInUserInfo)
 
 module.exports = router;

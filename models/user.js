@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const Vendor = require('./vendor');
 
 const userSchema = mongoose.Schema(
   {
@@ -17,7 +18,7 @@ const userSchema = mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phoneNo: { type: Number, required: [true, 'Phone No is required'] },
+    phoneNo: { type: String, required: [true, 'Phone No is required'] },
     phoneNoVerified: {
       type: Boolean,
       default: false,
@@ -26,14 +27,12 @@ const userSchema = mongoose.Schema(
       type: String,
       require: [true, 'Please provide a password'],
       minlength: 8,
-      select: false,
     },
     passwordChangedAt: Date,
     status: {
       type: String,
       default: 'pending', // status is pending until phoneNo is verified: phoneNoVerified: true
       enum: ['active', 'inactive', 'suspended', 'pending'],
-      select: false,
     },
     username: { type: String, required: false },
     role: {
@@ -52,62 +51,11 @@ userSchema.pre('save', async function (next) {
       throw new Error('First name should contain atleast 3 letters');
     }
 
-    if (this.isModified('password')) {
-      // Hash the password with cost of 12
-      this.password = await bcrypt.hash(this.password, 12);
-      this.passwordChangedAt = Date.now();
-    }
-
     next();
   } catch (error) {
     console.log('user presave error', error.message);
   }
 });
-
-// Instance method
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword,
-) {
-  const isSame = await bcrypt.compare(candidatePassword, userPassword);
-  return isSame;
-};
-
-// Instance method to check if the password has been changed after issuing the jwt token
-userSchema.methods.passwordChangeAfter = function (JWTTimestamp) {
-  if (this.passwordChangedAt) {
-    const changedTimeStamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10,
-    );
-    // False means that password does not changed
-    // if changed time stamp is greater than the time issued the token
-    return JWTTimestamp < changedTimeStamp;
-  }
-
-  // it means that password has never been changed
-  return false;
-};
-
-userSchema.methods.createPasswordResetToken = function () {
-  // Generate the random token of 32 characters
-  const resetToken = crypto.randomBytes(32).toString('hex');
-
-  // Create the hash of the token that has been generate and encrypt it with sha 256
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // Set the password reset to the 10 minutes in the future
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log(
-    `Reset Token: ${resetToken}, \nPassword Reset Token: ${this.passwordResetToken}`,
-  );
-  // this will be sent through
-  return resetToken;
-};
 
 userSchema.statics.createUser = async function (data) {
   const errors = {};
@@ -130,7 +78,15 @@ userSchema.statics.createUser = async function (data) {
     throw { name: 'object', message: JSON.stringify(errors) };
   }
 
+  data.password =  await bcrypt.hash(data.password, 12);
+
   const user = await this.create({ ...data });
+
+  await Vendor.create({
+    ...data,
+    userId: user._id,
+    displayName: `${user.firstName} ${user.lastName}`
+  })
   return user;
 };
 
@@ -166,5 +122,31 @@ userSchema.statics.updatePassword = async function (data) {
     throw new Error(error.message);
   }
 };
+
+userSchema.statics.login = async function (data) {
+  try {
+    const user = await this.findOne({ phoneNo: data.phoneNo });
+    if (!user) {
+      throw new Error('Phone number does not exist');
+    }
+
+    const isPasswordMatched = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordMatched) {
+      throw new Error('Incorrect password');
+    }
+console.log({user});
+    if(!user.phoneNoVerified){
+      throw new Error("Phone number not verified!")
+    }
+
+    if(user.status !== 'active'){
+      throw new Error("User is not active. Please contact admin to resolve the issue!")
+    }    
+
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const twilioClient = require('../config/twilio');
 const AppError = require('../utils/appError');
 const { catchAsync } = require('./errorController');
@@ -18,13 +19,26 @@ const twilioOtpService = async (phoneNo) => {
   }
 };
 
+const getToken = user => {
+  return jwt.sign(
+    { phoneNo: user.phoneNo, userId: user._id },
+    process.env.AUTH_SECRET,
+    { expiresIn: "10h" }
+  );
+}
+
 exports.userSignup = async (req, res) => {
   try {
     const user = await User.createUser(req.body.data);
+    let token;
+    if(user && user.phoneNo){
+      token = getToken(user);
+    }
+    console.log({token});
     await twilioOtpService(req.body.data.phoneNo);
 
     return res.status(200).json({
-      user,
+      token,
       message: 'SignUp Successful',
     });
   } catch (error) {
@@ -97,10 +111,28 @@ exports.updatePassword = catchAsync(async (req, res) => {
 
 exports.login = async(req, res) => {
   try {
-    console.log({ body: req.body });
+    const user = await User.login(req.body);
+    let token;
+    if(user && user.phoneNo){
+      token = getToken(user);
+    }
+
+    res.status(200).json({
+      token,
+      message: 'Login Successful',
+    });
   } catch (error) {
     console.log('login errorr', error);
     res.status(400).json({ message: error.message });
   }
 }
 
+exports.loggedInUserInfo = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.userData._id }).select('-password')
+    res.status(200).json({ user });
+  } catch (error) {
+    console.log('loggedInUserInfo errorr', error);
+    res.status(400).json({ message: error.message });
+  }
+}
