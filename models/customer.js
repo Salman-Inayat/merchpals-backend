@@ -4,30 +4,29 @@ const customerSchema = new mongoose.Schema({
   firstName: {
     type: String,
     trim: true,
-    required: [true, 'Please provide first name']
+    required: true
   },
   lastName: {
     type: String,
     trim: true,
-    required: [true, 'Please provide last name']    
+    required: true
   },
-  mobileNo: {
+  phoneNo: {
     type: [String],
-    required: [true, 'Please add a phone Number']
+    required: true
   },
   email: {
     type: [String],
-    required: [true, "Please provide your email"],
+    required: true,
     unique: true,
     lowercase: true,
     trim: true,
-    validate: [validator.isEmail, "Please enter a valid email"],
   },
   orderHistory: {
     type: mongoose.Types.ObjectId, 
-    ref: 'Order'
+    ref: 'order'
   },
 },
 { timestamps: true })
 
-module.exports = mongoose.model('Customer', customerSchema);
+module.exports = mongoose.model('customer', customerSchema);

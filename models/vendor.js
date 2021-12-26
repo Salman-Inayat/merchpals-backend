@@ -22,7 +22,7 @@ const vendorSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "Please provide your email"],
+    required: true,
     unique: true,
     lowercase: true,
     trim: true,
@@ -43,7 +43,26 @@ const vendorSchema = new mongoose.Schema({
     enum: ['active', 'blocked'],
     default: 'active'
   },
+  hasAcceptedTerms: {
+    type: Boolean,
+    default: false
+  },
+  socialHandles: {
+    tiktok: '',
+    instagram: '',
+    facebook: '',
+    twitter: '',
+  },
+  profitMargin: {
+    type: Number,
+    default: 0.75
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['stripe'],
+    default: 'stripe'
+  }
 }, 
 { timestamps: true });
 
-module.exports = mongoose.model('Vendor', vendorSchema);
+module.exports = mongoose.model('vendor', vendorSchema);

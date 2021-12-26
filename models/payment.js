@@ -8,18 +8,14 @@ const paymentSchema = new mongoose.Schema({
   },
   transactionId: {
     type: mongoose.Types.ObjectId,
-    ref: 'Transaction',
+    ref: 'transaction',
   },
   customerId: {
     type: mongoose.Types.ObjectId,
-    ref: 'Customer',
+    ref: 'customer',
   },
   stripeToken: {
     type: String
-  },
-  amount: {
-    type: Number,
-    required: true,
   },
   total: {
     type: Number,
@@ -32,4 +28,4 @@ const paymentSchema = new mongoose.Schema({
 },
 { timestamps: true })
 
-module.exports = mongoose.model('Payment', paymentSchema)
+module.exports = mongoose.model('payment', paymentSchema)

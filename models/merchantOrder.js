@@ -2,8 +2,22 @@ const mongoose = require('mongoose');
 
 const merchantOrderSchema = new mongoose.Schema({
   productId: {
-    type: [mongoose.Types.ObjectId],
-    required: [true, 'Products can not be empty!']
+    type: mongoose.Types.ObjectId,
+    ref: 'product',
+    required: true    
+  },
+  orderId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'order',
+    required: true
+  },
+  keyId: {
+    type: String,
+    required: true
+  },
+  variantId: {
+    type: String,
+    required: true
   },
   price: {
     type: Number,
@@ -21,11 +35,7 @@ const merchantOrderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  orderId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Order'
-  }
 },
 { timestamps: true });
 
-module.exports = mongoose.model('MerchantOrder', merchantOrderSchema)
+module.exports = mongoose.model('merchantOrder', merchantOrderSchema)

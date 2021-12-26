@@ -8,17 +8,17 @@ const designSchema = new mongoose.Schema({
   },
   vendorId: {
     type: mongoose.Types.ObjectId,
-    ref: 'Vendor',
+    ref: 'vendor',
     required: true,
   },
   productId: {
     type: mongoose.Types.ObjectId,
-    ref: 'Product',
+    ref: 'product',
     required: true,
   },
   storeId: {
     type: mongoose.Types.ObjectId,
-    ref: 'Store',
+    ref: 'store',
     required: true,
   },
   url: {
@@ -27,4 +27,4 @@ const designSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Design', designSchema);
+module.exports = mongoose.model('design', designSchema);

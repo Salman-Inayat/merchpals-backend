@@ -5,22 +5,23 @@ const transactionSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     required: true
   },
-  amount: { // Amount after deduction ? 
+  vendorId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'vendor',
+    required: true
+  },  
+  amount: { // Amount after deduction
     type: Number,
     required: true,
   },
   totalPayout: {
     type: Number,
   },
-  vendorId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Vendor',
-    required: true
-  },
+  //TODO: what are transaction statuses here. e.g. pending, delivered. failed
   status: {
     type: String,
     required: true,
   }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Transaction', transactionSchema)
+module.exports = mongoose.model('transaction', transactionSchema)

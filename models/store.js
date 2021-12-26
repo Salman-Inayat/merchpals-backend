@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const storeSchema = new mongoose.Schema({
+  vendorId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+  },
   coverAvatar: {
     type: String,
   },
@@ -17,7 +21,7 @@ const storeSchema = new mongoose.Schema({
   },
   products: {
     type: [mongoose.Types.ObjectId],
-    ref: 'Product',
+    ref: 'product',
   },
   status: {
     type: String,
@@ -26,4 +30,4 @@ const storeSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Store', storeSchema);
+module.exports = mongoose.model('store', storeSchema);

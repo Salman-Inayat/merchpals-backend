@@ -7,25 +7,27 @@ const userSchema = mongoose.Schema(
   {
     firstName: {
       type: String,
-      requied: [true, 'First Name is required'],
+      requied: true,
     },
-    // middleName: { type: String },
     lastName: { type: String },
     email: {
       type: String,
-      required: [true, 'Please provide your email'],
+      required: true,
       unique: true,
       lowercase: true,
       trim: true,
     },
-    phoneNo: { type: String, required: [true, 'Phone No is required'] },
+    phoneNo: { 
+      type: String, 
+      required: true 
+    },
     phoneNoVerified: {
       type: Boolean,
       default: false,
     },
     password: {
       type: String,
-      require: [true, 'Please provide a password'],
+      require: true,
       minlength: 8,
     },
     passwordChangedAt: Date,
@@ -34,7 +36,6 @@ const userSchema = mongoose.Schema(
       default: 'pending', // status is pending until phoneNo is verified: phoneNoVerified: true
       enum: ['active', 'inactive', 'suspended', 'pending'],
     },
-    username: { type: String, required: false },
     role: {
       type: String,
       enum: ['vendor'],
@@ -149,4 +150,4 @@ userSchema.statics.login = async function (data) {
   }
 }
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('user', userSchema);
