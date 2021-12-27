@@ -1,23 +1,31 @@
 const mongoose = require('mongoose');
-
+const ObjectId = mongoose.Schema.Types.ObjectId;
+/**
+ * 
+ * @field transactionId
+ * @field customerId
+ * @field stripeToken
+ * @field totalAmount
+ * 
+ */
 const paymentSchema = new mongoose.Schema({
+  transactionId: {
+    type: ObjectId,
+    ref: 'transaction',
+  },
+  customerId: {
+    type: ObjectId,
+    ref: 'customer',
+  },
   method: {
     type: String,
     enum: ['stripe', 'paypal'],
     default: 'stripe',
   },
-  transactionId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'transaction',
-  },
-  customerId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'customer',
-  },
   stripeToken: {
     type: String
   },
-  total: {
+  totalAmount: {
     type: Number,
     required: true,    
   },

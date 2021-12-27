@@ -1,12 +1,22 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
+/**
+ * 
+ * @field amount
+ * @description
+ * 
+ * @field totalPayout
+ * @description
+ * 
+ */
 const transactionSchema = new mongoose.Schema({
   paymentId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   vendorId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     ref: 'vendor',
     required: true
   },  

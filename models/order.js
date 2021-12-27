@@ -1,28 +1,37 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
+/**
+ * 
+ * @field size
+ * @field shippingCose
+ * @field tax
+ * @field totalAmount
+ * 
+ */
 const orderSchema = new mongoose.Schema({
   productId: {
-    type: [mongoose.Types.ObjectId],
+    type: [ObjectId],
     required: true
   },
   vendorId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   storeId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   customerId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   merchantOrderId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   paymentId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
   size: {
@@ -33,7 +42,7 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  taxAmount: {
+  tax: {
     type: Number,
     required: true
   },

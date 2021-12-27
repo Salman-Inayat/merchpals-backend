@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const storeSchema = new mongoose.Schema({
   vendorId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true,
   },
+  products: {
+    type: [ObjectId],
+    ref: 'product',
+  },  
   coverAvatar: {
     type: String,
   },
@@ -18,10 +23,6 @@ const storeSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-  },
-  products: {
-    type: [mongoose.Types.ObjectId],
-    ref: 'product',
   },
   status: {
     type: String,

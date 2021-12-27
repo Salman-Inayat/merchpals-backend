@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
+/**
+ * @field orderHistory 
+ * @description Array of ObjectIds of all the orders a customer has ever placed
+ * @reference order table -> _id
+ */
 const customerSchema = new mongoose.Schema({
+  orderHistory: {
+    type: [ObjectId], 
+    ref: 'order'
+  },
   firstName: {
     type: String,
     trim: true,
@@ -21,10 +31,6 @@ const customerSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-  },
-  orderHistory: {
-    type: mongoose.Types.ObjectId, 
-    ref: 'order'
   },
 },
 { timestamps: true })

@@ -1,25 +1,31 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
+/**
+ * @field url
+ * @description: Design Image's URL
+ */
 
 const designSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
   vendorId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     ref: 'vendor',
     required: true,
   },
   productId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     ref: 'product',
     required: true,
   },
   storeId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     ref: 'store',
     required: true,
+  },  
+  name: {
+    type: String,
+    required: true,
+    trim: true,
   },
   url: {
     type: String,

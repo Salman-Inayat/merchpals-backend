@@ -1,8 +1,22 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
+/**
+ * 
+ * @field balance
+ * @description Current Earnings of the vendor
+ * 
+ * @field hasAcceptedTerms
+ * @description Has vendor accepted platforms terms and conditions or not
+ * 
+ * @field socialHandles
+ * @description URLs of different social media accounts reflecting the vendor
+ * 
+ */
 
 const vendorSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true,
   },
   firstName: {
