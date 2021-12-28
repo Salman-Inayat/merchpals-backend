@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
 /**
  * @field productNumberedId
@@ -18,6 +19,10 @@ const mongoose = require('mongoose');
  * 
  */
 const productMapping = new mongoose.Schema({
+  productId: {
+    type: ObjectId,
+    ref: 'product'
+  },
   productNumberedId: {
     type: Number,
     required: true,
@@ -33,10 +38,12 @@ const productMapping = new mongoose.Schema({
   keyId: {
     type: String,
     required: true,
+    unique: true,
   },
   variantId: {
     type: String,
-    required: true,
+    // required: true,
+    // unique: true,
   }        
 });
 

@@ -7,7 +7,7 @@ const {
   updatePassword,
   login,
   loggedInUserInfo
-} = require("../controller/authController");
+} = require("../controller/auth");
 const auth = require('../middleware/auth');
 
 const router = express.Router();

@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const { 
+  productsSlug,
+  productsConfig
+} = require('../constants/productMappings');
+const ProductMapping = require('./productMapping');
+
 /**
  * 
  * @field createdBy
@@ -44,7 +50,11 @@ const productSchema = new mongoose.Schema({
   createdBy: {
     type: ObjectId,
     ref: 'vendor'
-  },  
+  },
+  productMappingIds: {
+    type: [ObjectId],
+    ref: 'productMapping'
+  },
   name: {
     type: String,
     required: true,
@@ -52,8 +62,8 @@ const productSchema = new mongoose.Schema({
   },
   productNumberedId: {
     type: Number,
-    enum: [],//TODO: need to update values here
     required: true,
+    unique: true,
   },
   isDefault: {
     type: Boolean,
@@ -66,8 +76,9 @@ const productSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    enum: [], //TODO: need to update values here
+    enum: productsSlug,
     required: true,
+    unique: true,
   },
   description: {
     type: String,
@@ -97,5 +108,88 @@ const productSchema = new mongoose.Schema({
    type: String 
   }
 }, { timestamps: true });
+
+productSchema.statics.getProductWithMappingsLabeled = async function (productId) {
+  const product = await this.findOne(productId);
+  const productConfig = productsConfig[product.slug];
+
+  const mappedVariants = product.variants.map(v => {
+    const configVariant = productConfig.variant[v]
+    if(!configVariant){
+      throw new Error(`Invalid variant value: ${v}`)
+    }
+    return configVariant;
+  })
+
+  const mappedColors = product.colors.map(v => {
+    const configColor = productConfig.color[v]
+    if(!configColor){
+      throw new Error(`Invalid color value: ${v}`)
+    }
+    return configColor;
+  })
+
+  product.variants = mappedVariants;
+  product.colors = mappedColors;
+
+  const productMappings = await ProductMapping.find({ productId: product._id})
+};
+
+productSchema.statics.createProductAndMappings = async function (data) {
+  const slug = productsSlug.find(p => p === data.slug.toLowerCase());
+
+  if (!slug) {
+    throw new Error('Slug is not valid')
+  }
+  
+  const productConfig = productsConfig[slug];
+  data.productNumberedId = productConfig.id;
+  data.slug = slug;
+
+  const mappedVariants = data.variants.map(v => {
+    const variantObj = productConfig.variant;
+    const configVariant = Object.keys(variantObj).find(pcv => variantObj[pcv] === v)
+    if(!configVariant){
+      throw new Error(`Invalid variant value: ${v}`)
+    }
+    return configVariant;
+  })
+
+  const mappedColors = data.colors.map(v => {
+    const colorObj = productConfig.color;
+    const configColor = Object.keys(colorObj).find(pcv => colorObj[pcv] === v)
+    if(!configColor){
+      throw new Error(`Invalid color value: ${v}`)
+    }
+    return configColor;
+  })
+
+  data.variants = mappedVariants;
+  data.colors = mappedColors.length > 0 ? mappedColors : ['0'];
+
+  const product = await this.create({...data});
+
+  let productVariantMapping = [];
+  for (const variant in product.variants) {
+    for (const color in product.colors) {
+      productVariantMapping.push({
+        productId: product._id,
+        productNumberedId: product.productNumberedId,
+        variant: variant,
+        color: color,
+        keyId: `${product.productNumberedId}-${variant}-${color}`,
+      });
+    }
+  }
+
+  const productMappings = await ProductMapping.insertMany(productVariantMapping)
+  product.productMappingIds = productMappings;
+  await product.save();
+
+  const productWithMappings = await this.findOne(product._id)
+    .populate('productMappingIds')
+
+  return productWithMappings;
+};
 
 module.exports = mongoose.model('product', productSchema);

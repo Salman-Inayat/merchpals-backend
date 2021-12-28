@@ -17,7 +17,7 @@ const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 
 // Error Handling Dependencies
-const { errorHandler } = require("./controller/errorController");
+const { errorHandler } = require("./controller/error");
 const appError = require("./utils/appError");
 
 // 1) GLOBAL MIDDLEWARES
