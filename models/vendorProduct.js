@@ -1,4 +1,4 @@
-const mongoose = required('mongoosse');
+const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 /**
@@ -26,14 +26,15 @@ const vendorProducts = new mongoose.Schema({
     required: true,
     ref: 'design'
   },
-  colors: {
-    type: [Strings],
-    default: []
+  storeId: {
+    type: ObjectId,
+    ref: 'store',
+    required: true,
+  }, 
+  productMappings: {
+    type: [ObjectId],
+    ref: 'productMapping',
   },
-  variants: {
-    type: [Strings],
-    default: [],
-  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('vendorProducts', vendorProducts);

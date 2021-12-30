@@ -10,7 +10,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
  * 
  */
 const orderSchema = new mongoose.Schema({
-  productId: {
+  products: {
     type: [ObjectId],
     required: true
   },

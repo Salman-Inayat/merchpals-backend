@@ -17,7 +17,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
  * 
  */
 const merchantOrderSchema = new mongoose.Schema({
-  productId: {
+  products: {
     type: [ObjectId],
     ref: 'product',
     required: true    

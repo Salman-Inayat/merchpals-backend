@@ -12,9 +12,9 @@ const designSchema = new mongoose.Schema({
     ref: 'vendor',
     required: true,
   },
-  productId: {
-    type: ObjectId,
-    ref: 'product',
+  productMappings: {
+    type: [ObjectId],
+    ref: 'productMapping',
     required: true,
   },
   storeId: {

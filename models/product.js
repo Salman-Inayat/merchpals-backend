@@ -51,7 +51,7 @@ const productSchema = new mongoose.Schema({
     type: ObjectId,
     ref: 'vendor'
   },
-  productMappingIds: {
+  productMappings: {
     type: [ObjectId],
     ref: 'productMapping'
   },
@@ -183,11 +183,12 @@ productSchema.statics.createProductAndMappings = async function (data) {
   }
 
   const productMappings = await ProductMapping.insertMany(productVariantMapping)
-  product.productMappingIds = productMappings;
+  console.log({productMappings});
+  product.productMappings = productMappings;
   await product.save();
 
   const productWithMappings = await this.findOne(product._id)
-    .populate('productMappingIds')
+    .populate('productMappings')
 
   return productWithMappings;
 };
