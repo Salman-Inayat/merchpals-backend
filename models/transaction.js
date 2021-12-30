@@ -1,26 +1,37 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
+/**
+ * 
+ * @field amount
+ * @description
+ * 
+ * @field totalPayout
+ * @description
+ * 
+ */
 const transactionSchema = new mongoose.Schema({
   paymentId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true
   },
-  amount: { // Amount after deduction ? 
+  vendorId: {
+    type: ObjectId,
+    ref: 'vendor',
+    required: true
+  },  
+  amount: { // Amount after deduction
     type: Number,
     required: true,
   },
   totalPayout: {
     type: Number,
   },
-  vendorId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Vendor',
-    required: true
-  },
+  //TODO: what are transaction statuses here. e.g. pending, delivered. failed
   status: {
     type: String,
     required: true,
   }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Transaction', transactionSchema)
+module.exports = mongoose.model('transaction', transactionSchema)

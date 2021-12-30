@@ -1,8 +1,22 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
+/**
+ * 
+ * @field balance
+ * @description Current Earnings of the vendor
+ * 
+ * @field hasAcceptedTerms
+ * @description Has vendor accepted platforms terms and conditions or not
+ * 
+ * @field socialHandles
+ * @description URLs of different social media accounts reflecting the vendor
+ * 
+ */
 
 const vendorSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Types.ObjectId,
+    type: ObjectId,
     required: true,
   },
   firstName: {
@@ -22,7 +36,7 @@ const vendorSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "Please provide your email"],
+    required: true,
     unique: true,
     lowercase: true,
     trim: true,
@@ -43,7 +57,26 @@ const vendorSchema = new mongoose.Schema({
     enum: ['active', 'blocked'],
     default: 'active'
   },
+  hasAcceptedTerms: {
+    type: Boolean,
+    default: false
+  },
+  socialHandles: {
+    tiktok: '',
+    instagram: '',
+    facebook: '',
+    twitter: '',
+  },
+  profitMargin: {
+    type: Number,
+    default: 0.75
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['stripe'],
+    default: 'stripe'
+  }
 }, 
 { timestamps: true });
 
-module.exports = mongoose.model('Vendor', vendorSchema);
+module.exports = mongoose.model('vendor', vendorSchema);

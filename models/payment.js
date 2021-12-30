@@ -1,27 +1,31 @@
 const mongoose = require('mongoose');
-
+const ObjectId = mongoose.Schema.Types.ObjectId;
+/**
+ * 
+ * @field transactionId
+ * @field customerId
+ * @field stripeToken
+ * @field totalAmount
+ * 
+ */
 const paymentSchema = new mongoose.Schema({
+  transactionId: {
+    type: ObjectId,
+    ref: 'transaction',
+  },
+  customerId: {
+    type: ObjectId,
+    ref: 'customer',
+  },
   method: {
     type: String,
     enum: ['stripe', 'paypal'],
     default: 'stripe',
   },
-  transactionId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Transaction',
-  },
-  customerId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Customer',
-  },
   stripeToken: {
     type: String
   },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  total: {
+  totalAmount: {
     type: Number,
     required: true,    
   },
@@ -32,4 +36,4 @@ const paymentSchema = new mongoose.Schema({
 },
 { timestamps: true })
 
-module.exports = mongoose.model('Payment', paymentSchema)
+module.exports = mongoose.model('payment', paymentSchema)

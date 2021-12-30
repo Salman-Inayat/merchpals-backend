@@ -7,8 +7,8 @@ const {
   updatePassword,
   login,
   loggedInUserInfo
-} = require("../controller/authController");
-const auth = require('../middleware/check_auth');
+} = require("../controller/auth");
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 

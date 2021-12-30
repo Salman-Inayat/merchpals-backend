@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const twilioClient = require('../config/twilio');
 const AppError = require('../utils/appError');
-const { catchAsync } = require('./errorController');
+const { catchAsync } = require('./error');
 const User = require('../models/user');
 
 const twilioOtpService = async (phoneNo) => {

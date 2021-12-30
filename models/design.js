@@ -1,25 +1,31 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
+/**
+ * @field url
+ * @description: Design Image's URL
+ */
 
 const designSchema = new mongoose.Schema({
+  vendorId: {
+    type: ObjectId,
+    ref: 'vendor',
+    required: true,
+  },
+  productMappings: {
+    type: [ObjectId],
+    ref: 'productMapping',
+    required: true,
+  },
+  storeId: {
+    type: ObjectId,
+    ref: 'store',
+    required: true,
+  },  
   name: {
     type: String,
     required: true,
     trim: true,
-  },
-  vendorId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Vendor',
-    required: true,
-  },
-  productId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Product',
-    required: true,
-  },
-  storeId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Store',
-    required: true,
   },
   url: {
     type: String,
@@ -27,4 +33,4 @@ const designSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Design', designSchema);
+module.exports = mongoose.model('design', designSchema);
