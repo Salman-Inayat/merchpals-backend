@@ -10,6 +10,17 @@ const addProducts = async (req, res) => {
   }
 };
 
+const fetchProducts =  async (req, res) => {
+  try {
+    const products = await Product.getLabeledInfo();
+    res.status(200).json({ products });
+  } catch (error) {
+    console.log('fetchProducts', error.message);
+    res.status(400).json({ message: error.message });
+  }
+}; 
+
 module.exports = {
-  addProducts
+  addProducts,
+  fetchProducts
 }

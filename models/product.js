@@ -5,6 +5,7 @@ const {
   productsConfig
 } = require('../constants/productMappings');
 const ProductMapping = require('./productMapping');
+const labelledProductMappings = require("../utils/colorMapping");
 
 /**
  * 
@@ -168,10 +169,10 @@ productSchema.statics.createProductAndMappings = async function (data) {
   data.colors = mappedColors.length > 0 ? mappedColors : ['0'];
 
   const product = await this.create({...data});
-
   let productVariantMapping = [];
-  for (const variant in product.variants) {
-    for (const color in product.colors) {
+
+  for (const variant of product.variants) {
+    for (const color of product.colors) {
       productVariantMapping.push({
         productId: product._id,
         productNumberedId: product.productNumberedId,
@@ -183,7 +184,6 @@ productSchema.statics.createProductAndMappings = async function (data) {
   }
 
   const productMappings = await ProductMapping.insertMany(productVariantMapping)
-  console.log({productMappings});
   product.productMappings = productMappings;
   await product.save();
 
@@ -192,5 +192,13 @@ productSchema.statics.createProductAndMappings = async function (data) {
 
   return productWithMappings;
 };
+
+productSchema.statics.getLabeledInfo = async function () {
+  const products = await this.find({}).lean()
+  
+  const formattedProducts = labelledProductMappings(products)
+
+  return formattedProducts;
+}
 
 module.exports = mongoose.model('product', productSchema);
