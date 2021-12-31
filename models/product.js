@@ -5,6 +5,7 @@ const {
   productsConfig
 } = require('../constants/productMappings');
 const ProductMapping = require('./productMapping');
+const labelledProductMappings = require("../utils/colorMapping");
 
 /**
  * 
@@ -191,5 +192,13 @@ productSchema.statics.createProductAndMappings = async function (data) {
 
   return productWithMappings;
 };
+
+productSchema.statics.getLabeledInfo = async function () {
+  const products = await this.find({}).lean()
+  
+  const formattedProducts = labelledProductMappings(products)
+
+  return formattedProducts;
+}
 
 module.exports = mongoose.model('product', productSchema);
