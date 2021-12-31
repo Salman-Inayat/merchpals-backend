@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Design = require("./design");
 const VendorProducts = require("./vendorProduct");
+const labelledProductMappings = require("../utils/variantMappings");
 
 const storeSchema = new mongoose.Schema({
   vendorId: {
@@ -89,19 +90,25 @@ storeSchema.statics.createStoreAndEssence = async function (data) {
 }
 
 storeSchema.statics.getLabeledInfo = async function (storeId) {
-  const store = await this.findOne({_id: storeId})
+  let store = await this.findOne({_id: storeId})
     .populate([
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
-      { path: 'designs', select: 'name url' }, 
+      { path: 'designs', select: 'name url' },
+      { path: 'products', select: 'name image slug' },
       { 
         path: 'productMappings', 
         select: 'productId keyId variantId productNumberedId color variant',
-        populate: {
-          path: 'productId',
-          select: 'name image slug'
-        }
       }
-    ]);
+    ])
+    .lean();
+
+    const formattedProducts = store.products.map(product => {
+      const relatedMapping = store.productMappings.filter(pm => pm.productId.equals(product._id))
+      return { ...product, productMappings: relatedMapping }
+    })
+    
+    store.products = labelledProductMappings(formattedProducts)
+    delete store.productMappings;
   return store;
 }
 module.exports = mongoose.model('store', storeSchema);
