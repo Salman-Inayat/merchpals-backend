@@ -194,7 +194,9 @@ productSchema.statics.createProductAndMappings = async function (data) {
 };
 
 productSchema.statics.getLabeledInfo = async function () {
-  const products = await this.find({}).lean()
+  const products = await this.find({})    
+    .populate('productMappings')
+    .lean()
   
   const formattedProducts = labelledProductMappings(products)
 
