@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Design = require("./design");
 const VendorProducts = require("./vendorProduct");
+const Vendor = require("./vendor");
 const labelledProductMappings = require("../utils/variantMappings");
 
 const storeSchema = new mongoose.Schema({
@@ -44,11 +45,13 @@ const storeSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-storeSchema.statics.createStoreAndEssence = async function (data) {
+storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   console.log({data});
+  console.log({user: userData});
+  const vendorId = await Vendor.findOne({userId: userData._id})
   let allProductsMappings = [];
   let formattedVendorProducts = [];
-
+console.log({vendorId});
   data.products.forEach((product) => {
     allProductsMappings.push(...product.productMappings);
   })
@@ -57,7 +60,7 @@ storeSchema.statics.createStoreAndEssence = async function (data) {
 
   const store = await this.create({
     name: data.name,
-    vendorId: data.vendorId,
+    vendorId: vendorId,
     logo: data.logo,
     coverAvatar: data.coverAvatar,
     productMappings: allProductsMappings,
@@ -65,7 +68,7 @@ storeSchema.statics.createStoreAndEssence = async function (data) {
   });
 
   const newDesign = await Design.create({
-    vendorId: data.vendorId, 
+    vendorId: vendorId, 
     productMappings: allProductsMappings,
     name: data.designs[0].name, 
     url: data.designs[0].url,
