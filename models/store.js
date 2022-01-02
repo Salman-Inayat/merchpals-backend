@@ -38,6 +38,11 @@ const storeSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  slug: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   status: {
     type: String,
     enum: ['active', 'blocked'],
@@ -46,8 +51,14 @@ const storeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 storeSchema.statics.createStoreAndEssence = async function (userData, data) {
-  console.log({data});
   console.log({user: userData});
+
+  const slugExists = await this.findOne({slug: decodeURI(data.slug)});
+
+  if (slugExists) {
+    throw new Error('Slug already taken')
+  }
+
   const vendorId = await Vendor.findOne({userId: userData._id})
   let allProductsMappings = [];
   let formattedVendorProducts = [];
@@ -62,6 +73,7 @@ console.log({vendorId});
     name: data.name,
     vendorId: vendorId,
     logo: data.logo,
+    slug: data.slug,
     coverAvatar: data.coverAvatar,
     productMappings: allProductsMappings,
     products: data.products.map(p => p.productId)
@@ -92,8 +104,9 @@ console.log({vendorId});
   return formattedStore;
 }
 
-storeSchema.statics.getLabeledInfo = async function (storeId) {
-  let store = await this.findOne({_id: storeId})
+storeSchema.statics.getLabeledInfo = async function (userId) {
+  let vendor = await Vendor.findOne({ userId })
+  let store = await this.findOne({vendorId: vendor})
     .populate([
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
       { path: 'designs', select: 'name url' },
@@ -114,4 +127,28 @@ storeSchema.statics.getLabeledInfo = async function (storeId) {
     delete store.productMappings;
   return store;
 }
+
+storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
+  let store = await this.findOne({ slug })
+    .populate([
+      { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
+      { path: 'designs', select: 'name url' },
+      { path: 'products', select: 'name image slug' },
+      { 
+        path: 'productMappings', 
+        select: 'productId keyId variantId productNumberedId color variant',
+      }
+    ])
+    .lean();
+
+    const formattedProducts = store.products.map(product => {
+      const relatedMapping = store.productMappings.filter(pm => pm.productId.equals(product._id))
+      return { ...product, productMappings: relatedMapping }
+    })
+    
+    store.products = labelledProductMappings(formattedProducts)
+    delete store.productMappings;
+  return store;
+}
+
 module.exports = mongoose.model('store', storeSchema);
