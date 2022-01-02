@@ -2,8 +2,10 @@ const Store = require('../models/Store');
 
 const addStore = async (req, res) => {
   try {
-    const store = await Store.createStoreAndEssence(req.userData, req.body);
-    res.status(200).json({ store, message: 'Store created successfully' });
+    // console.log('rreq', req.body);
+    // console.log('file', req.file);
+    // const store = await Store.createStoreAndEssence(req.userData, req.body);
+    res.status(200).json({ store: '', message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });
