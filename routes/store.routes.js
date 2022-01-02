@@ -3,7 +3,11 @@ const { addStore, storeInfo, validateSlug, getStoreBySlug } = require('../contro
 const auth = require('../middleware/auth');
 const { upload } = require('../middleware/multer')
 
-router.route('/').post(upload.single('logo'), addStore)
+router.route('/').post(auth, upload.fields([
+  {name: 'logo', maxCount: 1},
+  {name: 'coverAvatar', maxCount: 1},
+  {name: 'designs', maxCount: 1},
+]), addStore)
 router.route('/validate-slug/:slug').get(validateSlug)
 router.route('/').get(auth, storeInfo)
 router.route('/:slug').get(getStoreBySlug)

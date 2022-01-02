@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
         cb(null, PATH);
     },
     filename: (req, file, cb) => {
-        const fileName = 'test.jpg';
+        const fileName = req.body.slug;
         cb(null, fileName)
     }
 });

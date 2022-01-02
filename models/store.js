@@ -47,7 +47,13 @@ const storeSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'blocked'],
     default: 'active'
-  }
+  },
+  socialHandles: {
+    tiktok: '',
+    instagram: '',
+    facebook: '',
+    twitter: '',
+  },
 }, { timestamps: true });
 
 storeSchema.statics.createStoreAndEssence = async function (userData, data) {
@@ -73,6 +79,11 @@ console.log({vendorId});
     name: data.name,
     vendorId: vendorId,
     logo: data.logo,
+    socialHandles: {
+      facebook: data.facebook,
+      twitter: data.twitter,
+      instagram: data.instagram
+    },
     slug: data.slug,
     coverAvatar: data.coverAvatar,
     productMappings: allProductsMappings,
@@ -82,8 +93,8 @@ console.log({vendorId});
   const newDesign = await Design.create({
     vendorId: vendorId, 
     productMappings: allProductsMappings,
-    name: data.designs[0].name, 
-    url: data.designs[0].url,
+    name: `${+new Date()}`, 
+    url: data.designs,
     storeId: store
   });
 
