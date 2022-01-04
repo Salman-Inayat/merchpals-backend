@@ -51,8 +51,8 @@ const storeSchema = new mongoose.Schema({
   socialHandles: {
     tiktok: '',
     instagram: '',
-    facebook: '',
-    twitter: '',
+    youtube: '',
+    tiktok: '',
   },
 }, { timestamps: true });
 
@@ -80,9 +80,10 @@ console.log({vendorId});
     vendorId: vendorId,
     logo: data.logo,
     socialHandles: {
-      facebook: data.facebook,
-      twitter: data.twitter,
-      instagram: data.instagram
+      youtube: data.youtube,
+      twtich: data.twtich,
+      instagram: data.instagram,
+      tiktok: data.tiktok
     },
     slug: data.slug,
     coverAvatar: data.coverAvatar,

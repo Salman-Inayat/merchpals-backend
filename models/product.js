@@ -91,17 +91,17 @@ const productSchema = new mongoose.Schema({
   colors: {
     type: [String]
   },
+  // need to clear
+  // basePrice should be fixed
   basePrice: {
     type: Number,
     required: true
   },
-  costPrice: {
-    type: Number,
-    required: true,
-  },
+  // need to clear
   minPrice: {
     type: Number,
   },
+  // need to clear : 
   shippingCost: {
     type: Number
   },

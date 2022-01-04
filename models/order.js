@@ -38,14 +38,18 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // shippingCost can be zero (in case of US)
+  // fetched from API
   shippingCost: {
     type: Number,
     required: true
   },
+  // fetched from API
   tax: {
     type: Number,
     required: true
   },
+  // price (vendorproduct table) + shippingCost (order table) + tax (order table)
   totalAmount: {
     type: Number,
     required: true
