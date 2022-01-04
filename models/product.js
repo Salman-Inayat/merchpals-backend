@@ -5,6 +5,7 @@ const {
   productsConfig
 } = require('../constants/productMappings');
 const ProductMapping = require('./productMapping');
+const labelledProductMappings = require("../utils/colorMapping");
 
 /**
  * 
@@ -90,17 +91,17 @@ const productSchema = new mongoose.Schema({
   colors: {
     type: [String]
   },
+  // need to clear
+  // basePrice should be fixed
   basePrice: {
     type: Number,
     required: true
   },
-  costPrice: {
-    type: Number,
-    required: true,
-  },
+  // need to clear
   minPrice: {
     type: Number,
   },
+  // need to clear : 
   shippingCost: {
     type: Number
   },
@@ -168,10 +169,10 @@ productSchema.statics.createProductAndMappings = async function (data) {
   data.colors = mappedColors.length > 0 ? mappedColors : ['0'];
 
   const product = await this.create({...data});
-
   let productVariantMapping = [];
-  for (const variant in product.variants) {
-    for (const color in product.colors) {
+
+  for (const variant of product.variants) {
+    for (const color of product.colors) {
       productVariantMapping.push({
         productId: product._id,
         productNumberedId: product.productNumberedId,
@@ -183,7 +184,6 @@ productSchema.statics.createProductAndMappings = async function (data) {
   }
 
   const productMappings = await ProductMapping.insertMany(productVariantMapping)
-  console.log({productMappings});
   product.productMappings = productMappings;
   await product.save();
 
@@ -192,5 +192,15 @@ productSchema.statics.createProductAndMappings = async function (data) {
 
   return productWithMappings;
 };
+
+productSchema.statics.getLabeledInfo = async function () {
+  const products = await this.find({})    
+    .populate('productMappings')
+    .lean()
+  
+  const formattedProducts = labelledProductMappings(products)
+
+  return formattedProducts;
+}
 
 module.exports = mongoose.model('product', productSchema);

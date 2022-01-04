@@ -2,7 +2,15 @@ const Store = require('../models/Store');
 
 const addStore = async (req, res) => {
   try {
-    const store = await Store.createStoreAndEssence(req.body);
+    console.log('req', req.body);
+    console.log('file', req.files);
+    const data = {
+      name: req.body.name,
+      slug: req.body.slug,
+      designs: req.body.designs,
+      products: JSON.parse(req.body.products)
+    }
+    const store = await Store.createStoreAndEssence(req.userData, data);
     res.status(200).json({ store, message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
@@ -18,7 +26,31 @@ const addStore = async (req, res) => {
  */
 const storeInfo = async (req, res) => {
   try {
-    const store = await Store.getLabeledInfo(req.params.storeId);
+    const store = await Store.getLabeledInfo(req.userData._id);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('storeInfo', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const validateSlug = async (req, res) => {
+  try {
+    const store = await Store.findOne({slug: decodeURI(req.params.slug)});
+    console.log({store});
+    if (store) {
+      throw new Error('Slug already taken')
+    }
+    res.status(200).json({ message: "valid" });
+  } catch (error) {
+    console.log('validateSlug', error.message);
+    res.status(400).json({ message: error.message });    
+  }
+}
+
+const getStoreBySlug = async (req, res) => {
+  try {
+    const store = await Store.getLabeledInfoBySlug(req.params.slug);
     res.status(200).json({ store });
   } catch (error) {
     console.log('storeInfo', error.message);
@@ -28,5 +60,7 @@ const storeInfo = async (req, res) => {
 
 module.exports = {
   addStore,
-  storeInfo
+  storeInfo,
+  validateSlug,
+  getStoreBySlug
 }

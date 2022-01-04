@@ -25,6 +25,7 @@ const paymentSchema = new mongoose.Schema({
   stripeToken: {
     type: String
   },
+  // total amount paid via stripe
   totalAmount: {
     type: Number,
     required: true,    
@@ -32,6 +33,10 @@ const paymentSchema = new mongoose.Schema({
   ccLast4Digits:{
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    default: "pending"
   }
 },
 { timestamps: true })
