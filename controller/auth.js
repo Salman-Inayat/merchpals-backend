@@ -21,7 +21,7 @@ const twilioOtpService = async (phoneNo) => {
 
 const getToken = user => {
   return jwt.sign(
-    { phoneNo: user.phoneNo, userId: user._id },
+    { phoneNo: user.phoneNo, userId: user.userId, vendorId: user.vendorId },
     process.env.AUTH_SECRET,
     { expiresIn: "10h" }
   );
@@ -113,6 +113,7 @@ exports.login = async(req, res) => {
   try {
     const user = await User.login(req.body);
     let token;
+
     if(user && user.phoneNo){
       token = getToken(user);
     }

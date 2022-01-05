@@ -18,6 +18,7 @@ const vendorSchema = new mongoose.Schema({
   userId: {
     type: ObjectId,
     required: true,
+    ref: 'user'
   },
   firstName: {
     type: String,

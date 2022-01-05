@@ -42,7 +42,7 @@ const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
 
-        console.log(file)
+        // console.log(file)
         // if (file.mimetype == "application/pdf") {
             cb(null, true);
         // } else {
