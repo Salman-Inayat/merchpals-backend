@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const ProductMapping = require('./productMapping');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 /**
  * 
@@ -20,7 +21,12 @@ const merchantOrderSchema = new mongoose.Schema({
   products: {
     type: [ObjectId],
     ref: 'product',
-    required: true    
+    required: true
+  },
+  productMappings: {
+    type: [ObjectId],
+    ref: 'productMapping',
+    required: true
   },
   orderId: {
     type: ObjectId,
@@ -28,30 +34,47 @@ const merchantOrderSchema = new mongoose.Schema({
     required: true
   },
   keyId: {
-    type: String,
+    type: [String],
     required: true
   },
   variantId: {
-    type: String,
+    type: [String],
     required: true
   },
-  price: {
+  price: { // TODO: need to clearify this field
     type: Number,
     required: true,
   },
-  tax: {
+  tax: { // TODO: need to clearify this field
     type: Number,
     required: true,
   },
-  shippingCost: {
+  shippingCost: { // TODO: need to clearify this field
     type: Number,
     default: 0,
   },
-  totalAmount: {
+  totalAmount: { // TODO: need to clearify this field
     type: Number,
     required: true,
   },
 },
 { timestamps: true });
+
+merchantOrderSchema.statics.createOrder = async function (order, merchantOrderId) {
+  const productMappings = await ProductMapping.find({ _id: { $in: order.productMappings }}).select('keyId variantId').lean();
+  const merchantOrder = await this.create({
+    products: order.products,
+    productMappings: order.productMappings,
+    orderId: order._id,
+    keyId: productMappings.map(p => p.keyId),
+    variantId: productMappings.map(p => p.variantId),
+    price: order.totalAmount,
+    totalAmount: order.totalAmount,
+    tax: 0,
+    shippingCost: 0
+  })
+  
+  return merchantOrder
+}
 
 module.exports = mongoose.model('merchantOrder', merchantOrderSchema)

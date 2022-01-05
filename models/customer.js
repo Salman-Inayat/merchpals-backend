@@ -35,4 +35,37 @@ const customerSchema = new mongoose.Schema({
 },
 { timestamps: true })
 
+customerSchema.statics.createCustomer = async function (customerInfo, orderId) {
+  console.log({ customerInfo });
+  let customer = await this.findOne({
+    phoneNo: {$in: [customerInfo.phoneNo] }
+  })
+
+  if (!customer) {
+    customer = await this.findOne({
+      email: {$in: [customerInfo.email] }
+    })
+  }
+
+  if (!customer) {
+    customer = new this;
+    customer.firstName = customerInfo.firstName;
+    customer.lastName = customerInfo.lastName;
+  }
+
+  const hasPhone = customer.phoneNo.find(p => p === customerInfo.phoneNo);
+  if (!hasPhone) {
+    customer.phoneNo = [...new Set([...customer.phoneNo, customerInfo.phoneNo])]
+  }
+  
+  const hasEmail = customer.email.find(e => e === customerInfo.email);
+  if (!hasEmail) {
+    customer.email = [...new Set([...customer.email, customerInfo.email])]
+  }
+  
+  customer.orderHistory = [...customer.orderHistory, orderId]
+  await customer.save()
+  return customer;
+}
+
 module.exports = mongoose.model('customer', customerSchema);

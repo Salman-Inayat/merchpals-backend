@@ -4,6 +4,7 @@ const Design = require("./design");
 const VendorProducts = require("./vendorProduct");
 const Vendor = require("./vendor");
 const labelledProductMappings = require("../utils/variantMappings");
+const Product = require('./product');
 
 const storeSchema = new mongoose.Schema({
   vendorId: {
@@ -57,8 +58,6 @@ const storeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 storeSchema.statics.createStoreAndEssence = async function (userData, data) {
-  console.log({user: userData});
-
   const slugExists = await this.findOne({slug: decodeURI(data.slug)});
 
   if (slugExists) {
@@ -68,12 +67,10 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   const vendorId = await Vendor.findOne({userId: userData._id})
   let allProductsMappings = [];
   let formattedVendorProducts = [];
-console.log({vendorId});
+  // console.log({ data });
   data.products.forEach((product) => {
     allProductsMappings.push(...product.productMappings);
   })
-
-  console.log({ allProductsMappings });
 
   const store = await this.create({
     name: data.name,
@@ -101,13 +98,20 @@ console.log({vendorId});
 
   store.designs = [newDesign];
   await store.save();
+  
+  const productIds = data.products.map(p => p.productId);
+  const products = await Product.find({ _id: { $in: productIds } })
 
   data.products.forEach((product) => {
+    const dbProduct = products.find(p => p._id.equals(product.productId))
+    const price = dbProduct.basePrice + dbProduct.shippingCost;
+
     formattedVendorProducts.push({
-      productId: product.productId, designId: newDesign, storeId: store, productMappings: product.productMappings
+      productId: product.productId, designId: newDesign, storeId: store, productMappings: product.productMappings, price
     })
   })
-
+  
+  console.log({formattedVendorProducts});
   await VendorProducts.insertMany(formattedVendorProducts)
   
   const formattedStore = store

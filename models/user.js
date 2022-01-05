@@ -83,12 +83,17 @@ userSchema.statics.createUser = async function (data) {
 
   const user = await this.create({ ...data });
 
-  await Vendor.create({
+  const vendor = await Vendor.create({
     ...data,
     userId: user._id,
     displayName: `${user.firstName} ${user.lastName}`
   })
-  return user;
+
+  return {
+    vendorId: vendor._id,
+    userId: user._id,
+    phoneNo: vendor.phoneNo
+  };
 };
 
 userSchema.statics.updatePhoneVerification = async function (phoneNo) {
@@ -126,25 +131,30 @@ userSchema.statics.updatePassword = async function (data) {
 
 userSchema.statics.login = async function (data) {
   try {
-    const user = await this.findOne({ phoneNo: `+${+data.phoneNo}` });
-    if (!user) {
+    const vendor = await Vendor.findOne({ phoneNo: `+${+data.phoneNo}` }).populate('userId');
+    console.log({vendor});
+    if (!vendor) {
       throw new Error('Phone number does not exist');
     }
 
-    const isPasswordMatched = await bcrypt.compare(data.password, user.password);
+    const isPasswordMatched = await bcrypt.compare(data.password, vendor.userId.password);
     if (!isPasswordMatched) {
       throw new Error('Incorrect password');
     }
 
-    if(!user.phoneNoVerified){
+    if(!vendor.userId.phoneNoVerified){
       throw new Error("Phone number not verified!")
     }
 
-    if(user.status !== 'active'){
+    if(vendor.userId.status !== 'active'){
       throw new Error("User is not active. Please contact admin to resolve the issue!")
     }    
-
-    return user;
+    
+    return {
+      vendorId: vendor._id,
+      userId: vendor.userId._id,
+      phoneNo: vendor.phoneNo
+    }
   } catch (error) {
     throw new Error(error.message);
   }
