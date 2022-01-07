@@ -64,7 +64,7 @@ const orderSchema = new mongoose.Schema({
     required: true
   },
   billingAddress: {
-    houseNo: {
+    aptNo: {
       type: String,
       required: true
     },
@@ -74,6 +74,13 @@ const orderSchema = new mongoose.Schema({
     },
     zip: {
       type: String
+    },
+    city: {
+      type: String,
+    },
+    state: {
+      type: String,
+      required: true
     },
     country: {
       type: String,

@@ -3,6 +3,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const Design = require("./design");
 const VendorProducts = require("./vendorProduct");
 const Vendor = require("./vendor");
+const labelledSingleProduct = require("../utils/labelledSingleProduct");
 const labelledProductMappings = require("../utils/variantMappings");
 const Product = require('./product');
 
@@ -111,7 +112,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     })
   })
   
-  console.log({formattedVendorProducts});
+  // console.log({formattedVendorProducts});
   await VendorProducts.insertMany(formattedVendorProducts)
   
   const formattedStore = store
@@ -138,7 +139,7 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
       const relatedMapping = store.productMappings.filter(pm => pm.productId.equals(product._id))
       return { ...product, productMappings: relatedMapping }
     })
-    
+    // console.log({ formattedProducts });
     store.products = labelledProductMappings(formattedProducts)
     delete store.productMappings;
   return store;
@@ -167,4 +168,29 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
   return store;
 }
 
+storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) {
+  // console.log({storeSlug, productId});
+  const store = await this.findOne({ slug: storeSlug });
+  const productDetail = await VendorProducts.findOne({
+    storeId: store,
+    productId
+  })
+  .populate([
+    { path: 'designId', select: 'name url' },
+    { path: 'productId', select: 'name image slug' },
+    { 
+      path: 'productMappings', 
+      select: 'productId keyId variantId productNumberedId color variant',
+    }
+  ]).lean();
+  let formattedProduct = {
+    ...productDetail,
+    ...productDetail.productId,
+  }
+
+  delete formattedProduct.productId;
+  const formattedMappings = labelledSingleProduct(formattedProduct)
+
+  return formattedMappings;
+}
 module.exports = mongoose.model('store', storeSchema);
