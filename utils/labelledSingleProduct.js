@@ -1,9 +1,8 @@
 const { productsConfig } = require('../constants/productMappings');
 
 module.exports = function (product) {
-  console.log("prosodp", product);
+  // console.log("proso dp", product);
     const relatedConfig = productsConfig[product.slug];
-
     const labelledMappings = product.productMappings.map(pm => {
       return {
         ...pm,

@@ -61,26 +61,13 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
     customerId,
     orderId,
     amount,
-    ccLast4Digits: paymentInfo.cardNumber.substr(paymentInfo.cardNumber.length - 4)
+    ccLast4Digits: paymentInfo.last4
   })
 
-  // console.log({ paymentBeforeStripe: payment });
-  // console.log({stripeKey: process.env.STRIPE_SECRET_KEY});
-
-  const token = await stripe.tokens.create({
-    card: {
-      number: paymentInfo.cardNumber,
-      exp_month: paymentInfo.expiryMonth,
-      exp_year: paymentInfo.expiryYear,
-      cvc: paymentInfo.cvc,
-    },
-  });
-
-  // console.log({ token });
   const charge = await stripe.charges.create({
-    amount,
+    amount: amount*100,
     currency: 'usd',
-    source: token.id,
+    source: paymentInfo.token,
     description: `customer payment for order# ${orderId}`,
   });
   
@@ -88,11 +75,11 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
 
   if (charge.status === SUCCEEDED) {
     payment.status = SUCCEEDED;
-    payment.stripeTokenId = token.id;
+    payment.stripeTokenId = paymentInfo.token;
     payment.stripeChargeId = charge.id;
   } else {
     payment.status = charge.status;
-    payment.stripeTokenId = token.id;
+    payment.stripeTokenId = paymentInfo.token;
   }
 
   await payment.save()

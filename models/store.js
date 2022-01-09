@@ -190,7 +190,7 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
 
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct)
-
+console.log(formattedMappings);
   return formattedMappings;
 }
 module.exports = mongoose.model('store', storeSchema);
