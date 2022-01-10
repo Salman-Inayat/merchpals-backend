@@ -1,5 +1,7 @@
 const Product = require('../models/product');
 const Store = require('../models/store');
+const pairs = require('../constants/keyVariantPairs');
+const ProductMapping = require('../models/productMapping');
 
 const addProducts = async (req, res) => {
   try {
@@ -32,8 +34,24 @@ const productInfo = async (req, res) => {
   }
 }
 
+const varaintToKeyIds = async(req, res) => {
+  try {
+    const productsMappings = await ProductMapping.find({}).select('keyId variantId')
+    for(let item of productsMappings) {
+      const keyIdStr = item.keyId.split('-').join('')
+      await ProductMapping.findOneAndUpdate({_id: item._id}, {variantId: pairs[keyIdStr]})
+    }
+    
+    res.status(200).json({ imported: "successfully" })
+  } catch (error) {
+    console.log('varaintToKeyIds', error.message);
+    res.status(400).json({ message: error.message });
+  }  
+}
+
 module.exports = {
   addProducts,
   fetchProducts,
-  productInfo
+  productInfo,
+  varaintToKeyIds
 }
