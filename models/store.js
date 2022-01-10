@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Design = require("./design");
-const VendorProducts = require("./vendorProduct");
+const VendorProduct = require("./vendorProduct");
 const Vendor = require("./vendor");
 const labelledSingleProduct = require("../utils/labelledSingleProduct");
 const labelledProductMappings = require("../utils/variantMappings");
@@ -13,9 +13,9 @@ const storeSchema = new mongoose.Schema({
     ref: 'vendor',
     required: true,
   },
-  products: {
+  vendorProductIds: {
     type: [ObjectId],
-    ref: 'product',
+    ref: 'vendorProducts',
   },
   designs: {
     type: [ObjectId],
@@ -54,7 +54,7 @@ const storeSchema = new mongoose.Schema({
     tiktok: '',
     instagram: '',
     youtube: '',
-    tiktok: '',
+    twitch: '',
   },
 }, { timestamps: true });
 
@@ -64,42 +64,18 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   if (slugExists) {
     throw new Error('Slug already taken')
   }
+  
+  const storeId = mongoose.Types.ObjectId();
+  const designId = mongoose.Types.ObjectId();
 
   const vendorId = await Vendor.findOne({userId: userData._id})
   let allProductsMappings = [];
   let formattedVendorProducts = [];
-  // console.log({ data });
+
   data.products.forEach((product) => {
     allProductsMappings.push(...product.productMappings);
   })
 
-  const store = await this.create({
-    name: data.name,
-    vendorId: vendorId,
-    logo: data.logo,
-    socialHandles: {
-      youtube: data.youtube,
-      twtich: data.twtich,
-      instagram: data.instagram,
-      tiktok: data.tiktok
-    },
-    slug: data.slug,
-    coverAvatar: data.coverAvatar,
-    productMappings: allProductsMappings,
-    products: data.products.map(p => p.productId)
-  });
-
-  const newDesign = await Design.create({
-    vendorId: vendorId, 
-    productMappings: allProductsMappings,
-    name: `${+new Date()}`, 
-    url: data.designs,
-    storeId: store
-  });
-
-  store.designs = [newDesign];
-  await store.save();
-  
   const productIds = data.products.map(p => p.productId);
   const products = await Product.find({ _id: { $in: productIds } })
 
@@ -108,12 +84,42 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     const price = dbProduct.basePrice + dbProduct.shippingCost;
 
     formattedVendorProducts.push({
-      productId: product.productId, designId: newDesign, storeId: store, productMappings: product.productMappings, price
+      productId: product.productId,
+      designId,
+      storeId,
+      productMappings: product.productMappings,
+      price
     })
   })
   
-  // console.log({formattedVendorProducts});
-  await VendorProducts.insertMany(formattedVendorProducts)
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts)
+
+  const newDesign = await Design.create({
+    _id: designId,
+    vendorId, 
+    productMappings: allProductsMappings,
+    name: `${+new Date()}`, 
+    url: data.designs,
+    storeId 
+  });
+
+  const store = await this.create({
+    _id: storeId,
+    name: data.name,
+    vendorId,
+    designs: [designId],
+    logo: data.logo,
+    socialHandles: {
+      youtube: data.youtube,
+      twitch: data.twitch,
+      instagram: data.instagram,
+      tiktok: data.tiktok
+    },
+    slug: data.slug,
+    coverAvatar: data.coverAvatar,
+    productMappings: allProductsMappings,
+    vendorProductIds: vendorProducts.map(p => p._id)
+  });
   
   const formattedStore = store
     .populate(['vendorId', 'designs', 'productMappings']);
@@ -124,46 +130,40 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 storeSchema.statics.getLabeledInfo = async function (userId) {
   let vendor = await Vendor.findOne({ userId })
   let store = await this.findOne({vendorId: vendor})
-    .populate([
-      { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
-      { path: 'designs', select: 'name url' },
-      { path: 'products', select: 'name image slug' },
-      { 
-        path: 'productMappings', 
-        select: 'productId keyId variantId productNumberedId color variant',
-      }
-    ])
-    .lean();
+  .populate([
+    { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
+    { 
+      path: 'vendorProductIds', select: 'designId productId productMappings',
+      populate: [
+        { path: 'designId', select: 'name url' },
+        { path: 'productId', select: 'name image slug'},
+        { path: 'productMappings' }
+      ],
+    }
+  ])
+  .lean();
 
-    const formattedProducts = store.products.map(product => {
-      const relatedMapping = store.productMappings.filter(pm => pm.productId.equals(product._id))
-      return { ...product, productMappings: relatedMapping }
-    })
-    // console.log({ formattedProducts });
-    store.products = labelledProductMappings(formattedProducts)
-    delete store.productMappings;
+  store.vendorProductIds = labelledProductMappings(store.vendorProductIds)
+  delete store.productMappings;
   return store;
 }
 
 storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
   let store = await this.findOne({ slug })
-    .populate([
-      { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
-      { path: 'designs', select: 'name url' },
-      { path: 'products', select: 'name image slug' },
-      { 
-        path: 'productMappings', 
-        select: 'productId keyId variantId productNumberedId color variant',
-      }
-    ])
-    .lean();
-
-    const formattedProducts = store.products.map(product => {
-      const relatedMapping = store.productMappings.filter(pm => pm.productId.equals(product._id))
-      return { ...product, productMappings: relatedMapping }
-    })
+  .populate([
+    { path: 'vendorId', select: 'displayName email phoneNumber avatar' }, 
+    { 
+      path: 'vendorProductIds', select: 'designId productId productMappings',
+      populate: [
+        { path: 'designId', select: 'name url' },
+        { path: 'productId', select: 'name image slug'},
+        { path: 'productMappings' }
+      ],
+    }
+  ])
+  .lean();
     
-    store.products = labelledProductMappings(formattedProducts)
+    store.vendorProductIds = labelledProductMappings(store.vendorProductIds)
     delete store.productMappings;
   return store;
 }
@@ -171,7 +171,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
 storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) {
   // console.log({storeSlug, productId});
   const store = await this.findOne({ slug: storeSlug });
-  const productDetail = await VendorProducts.findOne({
+  const productDetail = await VendorProduct.findOne({
     storeId: store,
     productId
   })
