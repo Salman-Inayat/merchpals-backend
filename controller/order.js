@@ -11,14 +11,14 @@ const createOrder = async(req, res) => {
     const merchantOrderId = mongoose.Types.ObjectId();
     
     //console.log({orderId, merchantOrderId, paymentId});
-    // const customer = await Customer.createCustomer(req.body.customer, orderId);  
+    const customer = await Customer.createCustomer(req.body.customer, orderId);  
     // console.log({ customer });
-    // const order = await Order.createOrder(req.body.order, orderId, merchantOrderId, customer._id, paymentId);
+    const order = await Order.createOrder(req.body.order, orderId, merchantOrderId, customer._id, paymentId);
     // console.log({order});
-    // const payment = await Payment.createAndChargeCustomer(req.body.payment, order.totalAmount, customer._id, orderId, paymentId)
-    
-    const merchantOrder = await MerchantOrder.createOrder(order, req.body.printfulData, merchantOrderId);
-    res.status(200).json({ order, message: 'Order created successfully'})
+    const payment = await Payment.createAndChargeCustomer(req.body.payment, order.totalAmount, customer._id, orderId, paymentId)
+    // const order = await Order.findOne({_id: '61dafb0cf2bc07c5e171a457'})
+    const merchantOrder = await MerchantOrder.createOrder(order, req.body.order.storeUrl, req.body.printfulData, merchantOrderId);
+    res.status(200).json({ order, merchantOrder, message: 'Order created successfully'})
   } catch (error) {
     console.log('create order controller', error);
     res.status(400).json({ message: error.message });    

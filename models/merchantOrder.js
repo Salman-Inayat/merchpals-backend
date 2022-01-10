@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ProductMapping = require('./productMapping');
+const Store = require('./store');
 const { PrintfulClient } = require("printful-request");
 const printful = new PrintfulClient(process.env.PRINTFUL_API_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
@@ -66,39 +67,40 @@ const merchantOrderSchema = new mongoose.Schema({
 },
 { timestamps: true });
 
-merchantOrderSchema.statics.createOrder = async function (order, printfulData, merchantOrderId) {
+merchantOrderSchema.statics.createOrder = async function (order, storeUrl, printfulData, merchantOrderId) {
   const shippingResponse = await printful.post("shipping/rates", printfulData)
   const taxResponse = await printful.post("tax/rates", printfulData)
   
   const tax = taxResponse.result.rate;
   const shippingCost = shippingResponse.result[0].rate;
 
-  // const productMappings = await ProductMapping.find({ _id: { $in: order.productMappings }})
-  //   .select('keyId variantId')
-  //   .lean();
-  const designUrl = 'https://merchpals-mvp.s3.us-east-2.amazonaws.com/products/OGG6.png';
+  const productMappings = await ProductMapping.find({ _id: { $in: order.productMappings }})
+    .select('keyId variantId')
+    .lean();
+    const store = await Store.findOne({ slug: storeUrl }).populate({path: 'designs', select: 'url'})
+
+  const designUrl = store.designs[0].url
 
   const printfulOrder =  await printful.post("orders", {
     ...printfulData, 
     items: printfulData.items.map(item => ({ ...item, files: [{ url: designUrl }]}))
   });
   console.log({ tax,shippingCost, printfulOrder });
-  // const merchantOrder = await this.create({
-  //   _id: merchantOrderId,
-  //   products: order.products,
-  //   productMappings: order.productMappings,
-  //   orderId: order._id,
-  //   keyId: productMappings.map(p => p.keyId),
-  //   variantId: productMappings.map(p => p.keyId),
-  //   printfulOrderId: printfulOrder.result.id
-  //   price: order.totalAmount,
-  //   totalAmount: Number(order.totalAmount) + Number(tax) + Number(shippingCost),
-  //   tax,
-  //   shippingCost
-  // })
+  const merchantOrder = await this.create({
+    _id: merchantOrderId,
+    products: order.products,
+    productMappings: order.productMappings,
+    orderId: order._id,
+    keyId: productMappings.map(p => p.keyId),
+    variantId: productMappings.map(p => p.variantId),
+    printfulOrderId: printfulOrder.result.id,
+    price: order.totalAmount,
+    totalAmount: Number(order.totalAmount) + Number(tax) + Number(shippingCost),
+    tax,
+    shippingCost
+  })
   
-  // return merchantOrder
-  return;
+  return merchantOrder
 }
 
 module.exports = mongoose.model('merchantOrder', merchantOrderSchema)
