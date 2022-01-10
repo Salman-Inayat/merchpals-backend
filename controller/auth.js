@@ -12,10 +12,11 @@ const twilioOtpService = async (phoneNo) => {
         to: phoneNo,
         channel: 'sms',
       });
-
+    console.log({ twilioOtpService: response });
     return response;
   } catch (error) {
-    throw new Error();
+    console.log({ twilioOtpServiceError: error.message });
+    return error.message
   }
 };
 
@@ -35,8 +36,8 @@ exports.userSignup = async (req, res) => {
       token = getToken(user);
     }
     console.log({token});
-    await twilioOtpService(req.body.data.phoneNo);
-
+    const twillioResponse = await twilioOtpService(req.body.data.phoneNo);
+console.log({twillioResponse});
     return res.status(200).json({
       token,
       message: 'SignUp Successful',
