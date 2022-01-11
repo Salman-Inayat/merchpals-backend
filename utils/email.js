@@ -2,18 +2,19 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 const handlebars = require('handlebars');
 const fs = require('fs');
+const path = require('path');
 
-
-
-const readHTMLFile = (path, callback) => {
-  fs.readFile(path, { encoding: 'utf-8' }, function (err, html) {
-    if (err) {
-      throw err;
-      callback(err);
-    }
-    else {
-      callback(null, html);
-    }
+const readHTMLFile = (templateName, callback) => {
+  fs.readFile(path.resolve(__dirname, './emailTemplates/' + templateName + '.html'), 
+    { encoding: 'utf-8' }, 
+    function (err, html) {
+      if (err) {
+        throw err;
+        callback(err);
+      }
+      else {
+        callback(null, html);
+      }
   });
 };
 
@@ -38,7 +39,7 @@ const sendEmail = async options => {
     to: options.email,
     subject: options.subject,
   }
-
+  console.log({ mailOptions });
 
   if (options.template) {
     readHTMLFile(options.template, async (err, html) => {
