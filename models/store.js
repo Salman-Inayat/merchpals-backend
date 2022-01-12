@@ -187,7 +187,7 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
     ...productDetail,
     ...productDetail.productId,
   }
-
+console.log({ productDetail });
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct)
 console.log(formattedMappings);
