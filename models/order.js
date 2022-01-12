@@ -3,12 +3,12 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const Store = require('./store');
 
 /**
- * 
+ *
  * @field size
  * @field shippingCose
  * @field tax
  * @field totalAmount
- * 
+ *
  */
 const orderSchema = new mongoose.Schema({
   products: {
@@ -84,7 +84,7 @@ const orderSchema = new mongoose.Schema({
     },
     country: {
       type: String,
-      required: true      
+      required: true
     }
   },
 }, { timestamps: true });
@@ -111,7 +111,7 @@ orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderI
   order.vendorId = store.vendorId;
   order.products = productIds;
   order.productMappings = selectedVariants;
-  order.totalAmount = data.amount;
+  order.totalAmount = Number(data.amount.toFixed(2));
   order.billingAddress = data.billingAddress;
   await order.save();
   return order;
