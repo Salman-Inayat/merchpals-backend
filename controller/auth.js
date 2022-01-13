@@ -12,16 +12,17 @@ const twilioOtpService = async (phoneNo) => {
         to: phoneNo,
         channel: 'sms',
       });
-
+    console.log({ twilioOtpService: response });
     return response;
   } catch (error) {
-    throw new Error();
+    console.log({ twilioOtpServiceError: error.message });
+    return error.message
   }
 };
 
 const getToken = user => {
   return jwt.sign(
-    { phoneNo: user.phoneNo, userId: user._id },
+    { phoneNo: user.phoneNo, userId: user.userId, vendorId: user.vendorId },
     process.env.AUTH_SECRET,
     { expiresIn: "10h" }
   );
@@ -35,8 +36,8 @@ exports.userSignup = async (req, res) => {
       token = getToken(user);
     }
     console.log({token});
-    await twilioOtpService(req.body.data.phoneNo);
-
+    const twillioResponse = await twilioOtpService(req.body.data.phoneNo);
+console.log({twillioResponse});
     return res.status(200).json({
       token,
       message: 'SignUp Successful',
@@ -113,6 +114,7 @@ exports.login = async(req, res) => {
   try {
     const user = await User.login(req.body);
     let token;
+
     if(user && user.phoneNo){
       token = getToken(user);
     }
