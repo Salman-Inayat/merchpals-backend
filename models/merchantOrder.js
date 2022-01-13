@@ -3,8 +3,6 @@ const ProductMapping = require('./productMapping');
 const Store = require('./store');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const {
-  printfulTax,
-  printfulShipping,
   printfulOrder
 } = require('../services/printful');
 
@@ -53,23 +51,7 @@ const merchantOrderSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
-    price: {
-      // TODO: need to clearify this field
-      type: Number,
-      required: true,
-    },
-    tax: {
-      // TODO: need to clearify this field
-      type: Number,
-      required: true,
-    },
-    shippingCost: {
-      // TODO: need to clearify this field
-      type: Number,
-      default: 0,
-    },
     totalAmount: {
-      // TODO: need to clearify this field
       type: Number,
       required: true,
     },
@@ -83,14 +65,6 @@ merchantOrderSchema.statics.createOrder = async function (
   printfulData,
   merchantOrderId,
 ) {
-  let shippingCost = 0;
-  if (order.billingAddress.country.toLowerCase() !== 'us') {
-    const shippingResponse = await printfulShipping(printfulData);
-    shippingCost = shippingResponse.rate;
-  }
-
-  const taxResponse = await printfulTax(printfulData);
-  const tax = taxResponse.rate;
 
   const productMappings = await ProductMapping.find({
     _id: { $in: order.productMappings },
@@ -120,10 +94,7 @@ merchantOrderSchema.statics.createOrder = async function (
     keyId: productMappings.map(p => p.keyId),
     variantId: productMappings.map(p => p.variantId),
     printfulOrderId: printfulOrderResponse.id,
-    price: order.totalAmount,
-    totalAmount: Number(order.totalAmount) + Number(tax) + Number(shippingCost),
-    tax,
-    shippingCost,
+    totalAmount: Number(order.price) // TODO: clearify this amount
   });
 
   return merchantOrder;

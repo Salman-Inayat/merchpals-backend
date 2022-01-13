@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
 /**
- * 
+ *
  * @field transactionId
  * @field customerId
  * @field stripeToken
  * @field totalAmount
- * 
+ *
  */
 
 const SUCCEEDED = "succeeded";
@@ -41,7 +41,7 @@ const paymentSchema = new mongoose.Schema({
   // total amount paid via stripe
   amount: {
     type: Number,
-    required: true,    
+    required: true,
   },
   ccLast4Digits:{
     type: Number,
@@ -64,13 +64,16 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
     ccLast4Digits: paymentInfo.last4
   })
 
+  // amount is multiplied by 100 because stripe accepts amounts in integers
+  // and values are in cents instead of dollars
+
   const charge = await stripe.charges.create({
     amount: amount*100,
     currency: 'usd',
     source: paymentInfo.token,
     description: `customer payment for order# ${orderId}`,
   });
-  
+
   // console.log({stripeResponse: charge});
 
   if (charge.status === SUCCEEDED) {
@@ -83,7 +86,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
   }
 
   await payment.save()
-  
+
   return payment;
 }
 module.exports = mongoose.model('payment', paymentSchema)

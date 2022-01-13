@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Store = require('./store');
-
+const {
+  printfulTax,
+  printfulShipping,
+} = require('../services/printful');
 /**
  *
  * @field size
@@ -41,24 +44,20 @@ const orderSchema = new mongoose.Schema({
     type: ObjectId,
     required: true
   },
-  // size: {
-  //   type: String,
-  //   required: true
-  // },
-  // shippingCost can be zero (in case of US)
-  // fetched from API
+  price: {
+    type: Number,
+    required: true,
+  },
   shippingCost: {
     type: Number,
     required: true,
     default: 0
   },
-  // fetched from API
   tax: {
     type: Number,
     required: true,
     default: 0
   },
-  // price (vendorproduct table) + shippingCost (order table) + tax (order table)
   totalAmount: {
     type: Number,
     required: true
@@ -89,8 +88,17 @@ const orderSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderId, customerId, paymentId) {
+orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderId, customerId, paymentId, printfulData) {
   // console.log({data});
+  let shippingCost = 0;
+  if (data.billingAddress.country.toLowerCase() !== 'us') {
+    const shippingResponse = await printfulShipping(printfulData);
+    shippingCost = shippingResponse.rate;
+  }
+
+  const taxResponse = await printfulTax(printfulData);
+  const taxRate = taxResponse.rate;
+
   const productIds = data.products.map(p => p.productId);
   // console.log({ productIds });
   // const products = await VendorProduct.find({  productId: { $in: productIds }, storeId: data.storeId })
@@ -102,6 +110,9 @@ orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderI
     selectedVariants.push(...product.productMappings);
   })
 
+  const subTotal = Number(data.amount.toFixed(2));
+  const tax = Number((subTotal * taxRate).toFixed(2));
+
   let order = new this
   order._id = orderId
   order.merchantOrderId = merchantOrderId,
@@ -111,8 +122,12 @@ orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderI
   order.vendorId = store.vendorId;
   order.products = productIds;
   order.productMappings = selectedVariants;
-  order.totalAmount = Number(data.amount.toFixed(2));
+  order.price = subTotal;
+  order.tax = tax;
+  order.shippingCost = shippingCost;
+  order.totalAmount = subTotal + tax + Number(shippingCost);
   order.billingAddress = data.billingAddress;
+
   await order.save();
   return order;
 }

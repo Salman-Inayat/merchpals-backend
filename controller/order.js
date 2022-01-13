@@ -13,7 +13,7 @@ const createOrder = async(req, res) => {
 
     const customer = await Customer.createCustomer(req.body.customer, orderId);
     // console.log({ customer });
-    const order = await Order.createOrder(req.body.order, orderId, merchantOrderId, customer._id, paymentId);
+    const order = await Order.createOrder(req.body.order, orderId, merchantOrderId, customer._id, paymentId, req.body.printfulData);
     // console.log({order});
     const payment = await Payment.createAndChargeCustomer(req.body.payment, order.totalAmount, customer._id, orderId, paymentId)
     const merchantOrder = await MerchantOrder.createOrder(order, req.body.order.storeUrl, req.body.printfulData, merchantOrderId);
