@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 const ProductMapping = require('./productMapping');
 const Store = require('./store');
-const { PrintfulClient } = require('printful-request');
-const printful = new PrintfulClient(process.env.PRINTFUL_API_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const {
+  printfulTax,
+  printfulShipping,
+  printfulOrder
+} = require('../services/printful');
+
 /**
  *
  * @field keyId
@@ -79,32 +83,35 @@ merchantOrderSchema.statics.createOrder = async function (
   printfulData,
   merchantOrderId,
 ) {
-  const shippingResponse = await printful.post('shipping/rates', printfulData);
-  const taxResponse = await printful.post('tax/rates', printfulData);
+  let shippingCost = 0;
+  if (order.billingAddress.country.toLowerCase() !== 'us') {
+    const shippingResponse = await printfulShipping(printfulData);
+    shippingCost = shippingResponse.rate;
+  }
 
-  const tax = taxResponse.result.rate;
-  const shippingCost = shippingResponse.result[0].rate;
+  const taxResponse = await printfulTax(printfulData);
+  const tax = taxResponse.rate;
 
   const productMappings = await ProductMapping.find({
     _id: { $in: order.productMappings },
   })
     .select('keyId variantId')
     .lean();
+
   const store = await Store.findOne({ slug: storeUrl }).populate({
     path: 'designs',
     select: 'url',
   });
 
   const designUrl = store.designs[0].url;
-
-  const printfulOrder = await printful.post('orders', {
+  const printfulOrderResponse = await printfulOrder({
     ...printfulData,
     items: printfulData.items.map(item => ({
       ...item,
       files: [{ url: designUrl }],
     })),
-  });
-  console.log({ printfulOrder });
+  })
+
   const merchantOrder = await this.create({
     _id: merchantOrderId,
     products: order.products,
@@ -112,7 +119,7 @@ merchantOrderSchema.statics.createOrder = async function (
     orderId: order._id,
     keyId: productMappings.map(p => p.keyId),
     variantId: productMappings.map(p => p.variantId),
-    printfulOrderId: printfulOrder.result.id,
+    printfulOrderId: printfulOrderResponse.id,
     price: order.totalAmount,
     totalAmount: Number(order.totalAmount) + Number(tax) + Number(shippingCost),
     tax,

@@ -11,7 +11,7 @@ const createOrder = async(req, res) => {
     const paymentId = mongoose.Types.ObjectId();
     const merchantOrderId = mongoose.Types.ObjectId();
 
-    const customer = await Customer.createCustomer(req.body.customer, orderId);  
+    const customer = await Customer.createCustomer(req.body.customer, orderId);
     // console.log({ customer });
     const order = await Order.createOrder(req.body.order, orderId, merchantOrderId, customer._id, paymentId);
     // console.log({order});
@@ -19,15 +19,15 @@ const createOrder = async(req, res) => {
     const merchantOrder = await MerchantOrder.createOrder(order, req.body.order.storeUrl, req.body.printfulData, merchantOrderId);
 
     await sendEmail({
-      email: customer.email,
+      email: req.body.customer.email,
       subject: 'order sent',
       template: 'createOrder'
     });
-    
+
     res.status(200).json({ order, merchantOrder, message: 'Order created successfully'})
   } catch (error) {
     console.log('create order controller', error);
-    res.status(400).json({ message: error.message });    
+    res.status(400).json({ message: error.message });
   }
 }
 
