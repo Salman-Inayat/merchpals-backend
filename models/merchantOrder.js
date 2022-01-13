@@ -86,6 +86,10 @@ merchantOrderSchema.statics.createOrder = async function (
     })),
   })
 
+  if (printfulOrderResponse.code === 400) {
+    throw new Error(printfulOrderResponse.message)
+  }
+
   const merchantOrder = await this.create({
     _id: merchantOrderId,
     products: order.products,

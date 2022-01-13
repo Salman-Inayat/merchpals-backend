@@ -93,10 +93,16 @@ orderSchema.statics.createOrder = async function ( data, orderId, merchantOrderI
   let shippingCost = 0;
   if (data.billingAddress.country.toLowerCase() !== 'us') {
     const shippingResponse = await printfulShipping(printfulData);
+    if (shippingResponse.code === 400) {
+      throw new Error(shippingResponse.message)
+    }
     shippingCost = shippingResponse.rate;
   }
 
   const taxResponse = await printfulTax(printfulData);
+  if (taxResponse.code === 400) {
+    throw new Error(taxResponse.message)
+  }
   const taxRate = taxResponse.rate;
 
   const productIds = data.products.map(p => p.productId);
