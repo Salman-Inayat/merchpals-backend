@@ -35,6 +35,16 @@ const vendorProducts = new mongoose.Schema({
     type: [ObjectId],
     ref: 'productMapping',
   },
+  // price = baseprice + shipping
+  // visible on frontend to both customer and vendor
+  price: {
+    type: Number,
+    required: true
+  },
+  archived: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('vendorProducts', vendorProducts);
