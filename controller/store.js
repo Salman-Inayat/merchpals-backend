@@ -1,18 +1,22 @@
-const Store = require('../models/Store');
+const Store = require('../models/store');
 
 const addStore = async (req, res) => {
   try {
     // console.log('req', req.body);
-    // console.log('file', req.files);
+    // console.log('logo', req.files.logo[0].location);
+    // console.log('coverAvatar', req.files.coverAvatar[0].location);
+    // console.log('designURL', req.designURL);
     const data = {
       name: req.body.name,
       slug: req.body.slug,
-      designs: req.body.designs,
+      designs: req.designURL,
+      logo: req.files.logo[0].location,
+      coverAvatar: req.files.coverAvatar[0].location,
       products: JSON.parse(req.body.products)
     }
 
     const store = await Store.createStoreAndEssence(req.userData, data);
-    res.status(200).json({ store, message: 'Store created successfully' });
+    res.status(200).json({ store: '', message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });

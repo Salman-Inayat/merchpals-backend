@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
 /**
- * 
+ *
  * @field transactionId
  * @field customerId
  * @field stripeToken
  * @field totalAmount
- * 
+ *
  */
 
 const SUCCEEDED = "succeeded";
@@ -41,7 +41,7 @@ const paymentSchema = new mongoose.Schema({
   // total amount paid via stripe
   amount: {
     type: Number,
-    required: true,    
+    required: true,
   },
   ccLast4Digits:{
     type: Number,
@@ -61,42 +61,32 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
     customerId,
     orderId,
     amount,
-    ccLast4Digits: paymentInfo.cardNumber.substr(paymentInfo.cardNumber.length - 4)
+    ccLast4Digits: paymentInfo.last4
   })
 
-  // console.log({ paymentBeforeStripe: payment });
-  // console.log({stripeKey: process.env.STRIPE_SECRET_KEY});
+  // amount is multiplied by 100 because stripe accepts amounts in integers
+  // and values are in cents instead of dollars
 
-  const token = await stripe.tokens.create({
-    card: {
-      number: paymentInfo.cardNumber,
-      exp_month: paymentInfo.expiryMonth,
-      exp_year: paymentInfo.expiryYear,
-      cvc: paymentInfo.cvc,
-    },
-  });
-
-  // console.log({ token });
   const charge = await stripe.charges.create({
-    amount,
+    amount: amount*100,
     currency: 'usd',
-    source: token.id,
+    source: paymentInfo.token,
     description: `customer payment for order# ${orderId}`,
   });
-  
+
   // console.log({stripeResponse: charge});
 
   if (charge.status === SUCCEEDED) {
     payment.status = SUCCEEDED;
-    payment.stripeTokenId = token.id;
+    payment.stripeTokenId = paymentInfo.token;
     payment.stripeChargeId = charge.id;
   } else {
     payment.status = charge.status;
-    payment.stripeTokenId = token.id;
+    payment.stripeTokenId = paymentInfo.token;
   }
 
   await payment.save()
-  
+
   return payment;
 }
 module.exports = mongoose.model('payment', paymentSchema)
