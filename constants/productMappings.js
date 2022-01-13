@@ -19,18 +19,14 @@ const tShirtColors = {
   '1': 'black',
   '2': 'white',
   '3': 'navy',
-  '4': 'grey',
 };
 
 const hoodieVariant = tShirtVariant;
 
 const hoodieColors = {
-  '8': 'black', 
-  '9': 'white', 
-  '10': 'navy', 
-  '11': 'sport grey', 
-  '12': 'light blue', 
-  '13': 'pink'
+  '8': 'black',
+  '9': 'white',
+  '10': 'navy',
 };
 
 const longsleeveVariant = tShirtVariant;
@@ -87,7 +83,7 @@ const productsConfig = {
     id: '6',
     variant: caseVariant,
     color: caseColor
-  },  
+  },
   [MUG]: {
     id: '7',
     variant: mugVariant,
@@ -105,7 +101,7 @@ const productsConfig = {
   },
 }
 
-module.exports = { 
+module.exports = {
   productsSlug,
   productsConfig
 }
