@@ -269,23 +269,24 @@ storeSchema.statics.getDesigns = async function (vendorId) {
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name url canvasJson')
-  
+  const design = await Design.findOne({ _id: designId }, 'name url canvasJson');
+
   return design;
 };
 
 storeSchema.statics.getSingleDesignProducts = async function (designId) {
   const design = await Design.findOne({ _id: designId })
-  .populate({
-    path: 'vendorProductIds',
-    select: 'designId productId productMappings',
-    populate: [
-      { path: 'designId', select: 'name url' },
-      { path: 'productId', select: 'name image slug' },
-      { path: 'productMappings' },
-    ],
-  }).lean()
-  
+    .populate({
+      path: 'vendorProductIds',
+      select: 'designId productId productMappings',
+      populate: [
+        { path: 'designId', select: 'name url' },
+        { path: 'productId', select: 'name image slug' },
+        { path: 'productMappings' },
+      ],
+    })
+    .lean();
+
   design.vendorProductIds = labelledProductMappings(design.vendorProductIds);
   return design;
 };

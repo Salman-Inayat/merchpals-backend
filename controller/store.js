@@ -1,4 +1,5 @@
 const Store = require('../models/store');
+const Designs = require('../models/design');
 
 const addStore = async (req, res) => {
   try {
@@ -101,7 +102,20 @@ const singleDesignProducts = async (req, res) => {
     console.log('singleDesignProducts', error.message);
     res.status(400).json({ message: error.message });
   }
-}
+};
+
+const updateDesign = async (req, res) => {
+  try {
+    const design = await Designs.updateDesign(
+      req.params.designId,
+      req.body.design,
+    );
+    res.status(200).json({ design });
+  } catch (error) {
+    console.log('updateDesign', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports = {
   addStore,
@@ -111,5 +125,6 @@ module.exports = {
   designs,
   addDesign,
   singleDesign,
-  singleDesignProducts
+  singleDesignProducts,
+  updateDesign,
 };

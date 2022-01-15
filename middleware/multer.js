@@ -39,6 +39,7 @@ const detectMimeType = b64 => {
 
 const uploadBase64 = async (req, res, next) => {
   const design = JSON.parse(req.body.design);
+
   // design = {
   //   base64Image: '',
   //   name: '',
