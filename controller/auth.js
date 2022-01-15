@@ -73,13 +73,13 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
 
 exports.verifyOTP = catchAsync(async (req, res) => {
   try {
-    // const otp = await twilioClient.verify
-    //   .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
-    //   .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
-    //
-    // if (!otp.valid) {
-    //   throw new Error('Invalid OTP!');
-    // }
+    const otp = await twilioClient.verify
+      .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
+      .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
+    
+    if (!otp.valid) {
+      throw new Error('Invalid OTP!');
+    }
 
     const user = await User.updatePhoneVerification(req.body.phoneNo);
     res.status(200).json({ user });

@@ -92,6 +92,17 @@ const singleDesign = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+const singleDesignProducts = async (req, res) => {
+  try {
+    const design = await Store.getSingleDesignProducts(req.params.designId);
+    res.status(200).json({ design });
+  } catch (error) {
+    console.log('singleDesignProducts', error.message);
+    res.status(400).json({ message: error.message });
+  }
+}
+
 module.exports = {
   addStore,
   storeInfo,
@@ -100,4 +111,5 @@ module.exports = {
   designs,
   addDesign,
   singleDesign,
+  singleDesignProducts
 };
