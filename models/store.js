@@ -90,7 +90,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   data.products.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
-    const price = dbProduct.minPrice;
+    const price = dbProduct.price;
 
     formattedVendorProducts.push({
       productId: product.productId,
@@ -226,7 +226,7 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 
   data.products.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
-    const price = dbProduct.minPrice;
+    const price = dbProduct.price;
 
     allProductsMappings.push(...product.productMappings);
     formattedVendorProducts.push({
@@ -269,25 +269,86 @@ storeSchema.statics.getDesigns = async function (vendorId) {
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name url canvasJson')
-  
+  const design = await Design.findOne({ _id: designId }, 'name url canvasJson');
+
   return design;
 };
 
 storeSchema.statics.getSingleDesignProducts = async function (designId) {
   const design = await Design.findOne({ _id: designId })
-  .populate({
-    path: 'vendorProductIds',
-    select: 'designId productId productMappings',
-    populate: [
-      { path: 'designId', select: 'name url' },
-      { path: 'productId', select: 'name image slug' },
-      { path: 'productMappings' },
-    ],
-  }).lean()
-  
+    .populate({
+      path: 'vendorProductIds',
+      select: 'designId productId productMappings price',
+      populate: [
+        { path: 'designId', select: 'name url' },
+        { path: 'productId', select: 'name image slug' },
+        { path: 'productMappings' },
+      ],
+    })
+    .lean();
+
   design.vendorProductIds = labelledProductMappings(design.vendorProductIds);
   return design;
 };
 
+storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
+  console.log({ data });
+  console.log({ designId, vendorId, data });
+  const store = await this.findOne({ vendorId });
+  const previousVendorProducts = await VendorProduct.find({
+    designId,
+    storeId: store,
+  });
+  console.log({ previousVendorProducts });
+  store.vendorProductIds = store.vendorProductIds.filter(
+    vpId => !previousVendorProducts.some(p => p._id.equals(vpId)),
+  );
+
+  await VendorProduct.find({
+    _id: { $in: previousVendorProducts },
+  });
+
+  let allProductsMappings = [];
+  let formattedVendorProducts = [];
+
+  const productIds = data.updatedProducts.map(p => p.productId);
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  data.updatedProducts.forEach(product => {
+    let price = 0;
+    const updatedProduct = data.vendorUpdatedPrices[product.productId];
+    if (updatedProduct) {
+      price = updatedProduct.price;
+    } else {
+      const dbProduct = products.find(p => p._id.equals(product.productId));
+      price = dbProduct.minPrice;
+    }
+
+    allProductsMappings.push(...product.productMappings);
+    formattedVendorProducts.push({
+      productId: product.productId,
+      designId,
+      storeId: store._id,
+      productMappings: product.productMappings,
+      price,
+    });
+  });
+
+  const vendorProducts = await VendorProduct.insertMany(
+    formattedVendorProducts,
+  );
+
+  const updatedDesign = await Design.updateOne(
+    { _id: designId },
+    {
+      vendorProductIds: vendorProducts,
+    },
+  );
+
+  store.vendorProductIds = [...store.vendorProductIds, ...vendorProducts];
+
+  await store.save();
+
+  return updatedDesign;
+};
 module.exports = mongoose.model('store', storeSchema);
