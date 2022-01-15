@@ -108,9 +108,9 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
-    productMappings: allProductsMappings,
-    name: `${+new Date()}`,
-    url: data.designs,
+    vendorProductIds: vendorProducts,
+    name: data.design.name,
+    url: data.design.imageUrl,
     storeId,
   });
 
@@ -213,4 +213,81 @@ storeSchema.statics.getStoreProductInfo = async function (
   console.log(formattedMappings);
   return formattedMappings;
 };
+
+storeSchema.statics.createDesign = async function (data, vendorId) {
+  let allProductsMappings = [];
+  let formattedVendorProducts = [];
+
+  const designId = mongoose.Types.ObjectId();
+  const store = await this.findOne({ vendorId });
+
+  const productIds = data.products.map(p => p.productId);
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  data.products.forEach(product => {
+    const dbProduct = products.find(p => p._id.equals(product.productId));
+    const price = dbProduct.minPrice;
+
+    allProductsMappings.push(...product.productMappings);
+    formattedVendorProducts.push({
+      productId: product.productId,
+      designId,
+      storeId: store._id,
+      productMappings: product.productMappings,
+      price,
+    });
+  });
+
+  const vendorProducts = await VendorProduct.insertMany(
+    formattedVendorProducts,
+  );
+
+  const newDesign = await Design.create({
+    _id: designId,
+    vendorId,
+    vendorProductIds: vendorProducts,
+    name: data.design.name,
+    url: data.design.imageUrl,
+    canvasJson: data.design.canvasJson,
+    storeId: store,
+  });
+
+  store.vendorProductIds = [...store.vendorProductIds, ...vendorProducts];
+  store.designs = [...store.designs, newDesign];
+
+  await store.save();
+
+  return newDesign;
+};
+
+storeSchema.statics.getDesigns = async function (vendorId) {
+  const store = await this.findOne({ vendorId }).populate({
+    path: 'designs',
+    select: 'name url',
+  });
+  return store.designs;
+};
+
+storeSchema.statics.getSingleDesign = async function (designId) {
+  const design = await Design.findOne({ _id: designId }, 'name url canvasJson')
+  
+  return design;
+};
+
+storeSchema.statics.getSingleDesignProducts = async function (designId) {
+  const design = await Design.findOne({ _id: designId })
+  .populate({
+    path: 'vendorProductIds',
+    select: 'designId productId productMappings',
+    populate: [
+      { path: 'designId', select: 'name url' },
+      { path: 'productId', select: 'name image slug' },
+      { path: 'productMappings' },
+    ],
+  }).lean()
+  
+  design.vendorProductIds = labelledProductMappings(design.vendorProductIds);
+  return design;
+};
+
 module.exports = mongoose.model('store', storeSchema);
