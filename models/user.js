@@ -17,9 +17,9 @@ const userSchema = mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phoneNo: { 
-      type: String, 
-      required: true 
+    phoneNo: {
+      type: String,
+      required: true,
     },
     phoneNoVerified: {
       type: Boolean,
@@ -79,20 +79,20 @@ userSchema.statics.createUser = async function (data) {
     throw { name: 'object', message: JSON.stringify(errors) };
   }
 
-  data.password =  await bcrypt.hash(data.password, 12);
+  data.password = await bcrypt.hash(data.password, 12);
 
   const user = await this.create({ ...data });
 
   const vendor = await Vendor.create({
     ...data,
     userId: user._id,
-    displayName: `${user.firstName} ${user.lastName}`
-  })
+    displayName: `${user.firstName} ${user.lastName}`,
+  });
 
   return {
     vendorId: vendor._id,
     userId: user._id,
-    phoneNo: vendor.phoneNo
+    phoneNo: vendor.phoneNo,
   };
 };
 
@@ -120,7 +120,7 @@ userSchema.statics.updatePassword = async function (data) {
       { phoneNo: data.phoneNo },
       {
         password,
-        passwordChangedAt
+        passwordChangedAt,
       },
     );
     return user;
@@ -131,33 +131,40 @@ userSchema.statics.updatePassword = async function (data) {
 
 userSchema.statics.login = async function (data) {
   try {
-    const vendor = await Vendor.findOne({ phoneNo: `+${+data.phoneNo}` }).populate('userId');
-    console.log({vendor});
+    const vendor = await Vendor.findOne({
+      phoneNo: `+${+data.phoneNo}`,
+    }).populate('userId');
+    console.log({ vendor });
     if (!vendor) {
       throw new Error('Phone number does not exist');
     }
 
-    const isPasswordMatched = await bcrypt.compare(data.password, vendor.userId.password);
+    const isPasswordMatched = await bcrypt.compare(
+      data.password,
+      vendor.userId.password,
+    );
     if (!isPasswordMatched) {
       throw new Error('Incorrect password');
     }
 
-    if(!vendor.userId.phoneNoVerified){
-      throw new Error("Phone number not verified!")
+    if (!vendor.userId.phoneNoVerified) {
+      throw new Error('Phone number not verified!');
     }
 
-    if(vendor.userId.status !== 'active'){
-      throw new Error("User is not active. Please contact admin to resolve the issue!")
-    }    
-    
+    if (vendor.userId.status !== 'active') {
+      throw new Error(
+        'User is not active. Please contact admin to resolve the issue!',
+      );
+    }
+
     return {
       vendorId: vendor._id,
       userId: vendor.userId._id,
-      phoneNo: vendor.phoneNo
-    }
+      phoneNo: vendor.phoneNo,
+    };
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 module.exports = mongoose.model('user', userSchema);
