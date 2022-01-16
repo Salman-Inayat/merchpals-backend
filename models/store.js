@@ -90,7 +90,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   data.products.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
-    const price = dbProduct.price;
+    const price = dbProduct.minPrice;
 
     formattedVendorProducts.push({
       productId: product.productId,
@@ -188,11 +188,10 @@ storeSchema.statics.getStoreProductInfo = async function (
   storeSlug,
   productId,
 ) {
-  // console.log({storeSlug, productId});
+  console.log({ storeSlug, productId });
   const store = await this.findOne({ slug: storeSlug });
   const productDetail = await VendorProduct.findOne({
-    storeId: store,
-    productId,
+    _id: productId, // need to be vendor productID
   })
     .populate([
       { path: 'designId', select: 'name url' },
@@ -226,7 +225,7 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 
   data.products.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
-    const price = dbProduct.price;
+    const price = dbProduct.minPrice;
 
     allProductsMappings.push(...product.productMappings);
     formattedVendorProducts.push({
