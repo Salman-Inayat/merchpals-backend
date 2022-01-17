@@ -16,7 +16,7 @@ const addStore = async (req, res) => {
     };
     console.log({ data });
     const store = await Store.createStoreAndEssence(req.userData, data);
-    res.status(200).json({ store: '', message: 'Store created successfully' });
+    res.status(200).json({ store, message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });
@@ -101,17 +101,21 @@ const singleDesignProducts = async (req, res) => {
     console.log('singleDesignProducts', error.message);
     res.status(400).json({ message: error.message });
   }
-}
+};
 
 const updateDesignProducts = async (req, res) => {
   try {
-    const design = await Store.updateDesign(req.params.designId, req.userData.vendorId, req.body);
-    res.status(200).json({ design });  
+    const design = await Store.updateDesign(
+      req.params.designId,
+      req.userData.vendorId,
+      req.body,
+    );
+    res.status(200).json({ design });
   } catch (error) {
     console.log('updateDesignProducts', error.message);
-    res.status(400).json({ message: error.message });    
+    res.status(400).json({ message: error.message });
   }
-}
+};
 module.exports = {
   addStore,
   storeInfo,
@@ -121,5 +125,5 @@ module.exports = {
   addDesign,
   singleDesign,
   singleDesignProducts,
-  updateDesignProducts
+  updateDesignProducts,
 };
