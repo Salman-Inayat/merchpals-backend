@@ -167,4 +167,32 @@ userSchema.statics.login = async function (data) {
   }
 };
 
+userSchema.statics.matchPassword = async function (id, req_password) {
+  const password = await this.findOne({ _id: id }).select('password');
+
+  // const hashedPassword = await bcrypt.hash(req_password, 12);
+
+  const isPasswordMatched = await bcrypt.compare(
+    req_password,
+    password.password,
+  );
+
+  return isPasswordMatched;
+};
+
+userSchema.statics.updateName = async function (id, data) {
+  try {
+    const user = await this.findOneAndUpdate(
+      { _id: id },
+      {
+        firstName: data.firstName,
+        lastName: data.lastName,
+      },
+    );
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = mongoose.model('user', userSchema);
