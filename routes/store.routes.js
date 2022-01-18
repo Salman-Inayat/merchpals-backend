@@ -12,6 +12,7 @@ const {
   updateStoreName,
   updateStoreAvatar,
   updateStoreLogo,
+  updateDesignProducts,
 } = require('../controller/store');
 const auth = require('../middleware/auth');
 const { upload, uploadBase64 } = require('../middleware/multer');
@@ -31,6 +32,7 @@ router.route('/designs').get(auth, designs);
 router.route('/design/:designId').get(auth, singleDesign);
 router.route('/design/:designId/').put(auth, uploadBase64, updateDesign);
 router.route('/design/products/:designId').get(singleDesignProducts);
+router.route('/design/products/:designId').put(auth, updateDesignProducts);
 router.route('/add-design').post(auth, uploadBase64, addDesign);
 router.route('/').get(auth, storeInfo);
 router.route('/:slug').get(getStoreBySlug);

@@ -188,11 +188,10 @@ storeSchema.statics.getStoreProductInfo = async function (
   storeSlug,
   productId,
 ) {
-  // console.log({storeSlug, productId});
+  console.log({ storeSlug, productId });
   const store = await this.findOne({ slug: storeSlug });
   const productDetail = await VendorProduct.findOne({
-    storeId: store,
-    productId,
+    _id: productId, // need to be vendor productID
   })
     .populate([
       { path: 'designId', select: 'name url' },
@@ -278,7 +277,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
   const design = await Design.findOne({ _id: designId })
     .populate({
       path: 'vendorProductIds',
-      select: 'designId productId productMappings',
+      select: 'designId productId productMappings price',
       populate: [
         { path: 'designId', select: 'name url' },
         { path: 'productId', select: 'name image slug' },
@@ -312,4 +311,64 @@ storeSchema.statics.updateStoreCover = async function (store) {
   return storeResult;
 };
 
+storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
+  console.log({ data });
+  console.log({ designId, vendorId, data });
+  const store = await this.findOne({ vendorId });
+  const previousVendorProducts = await VendorProduct.find({
+    designId,
+    storeId: store,
+  });
+  console.log({ previousVendorProducts });
+  store.vendorProductIds = store.vendorProductIds.filter(
+    vpId => !previousVendorProducts.some(p => p._id.equals(vpId)),
+  );
+
+  await VendorProduct.find({
+    _id: { $in: previousVendorProducts },
+  });
+
+  let allProductsMappings = [];
+  let formattedVendorProducts = [];
+
+  const productIds = data.updatedProducts.map(p => p.productId);
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  data.updatedProducts.forEach(product => {
+    let price = 0;
+    const updatedProduct = data.vendorUpdatedPrices[product.productId];
+    if (updatedProduct) {
+      price = updatedProduct.price;
+    } else {
+      const dbProduct = products.find(p => p._id.equals(product.productId));
+      price = dbProduct.minPrice;
+    }
+
+    allProductsMappings.push(...product.productMappings);
+    formattedVendorProducts.push({
+      productId: product.productId,
+      designId,
+      storeId: store._id,
+      productMappings: product.productMappings,
+      price,
+    });
+  });
+
+  const vendorProducts = await VendorProduct.insertMany(
+    formattedVendorProducts,
+  );
+
+  const updatedDesign = await Design.updateOne(
+    { _id: designId },
+    {
+      vendorProductIds: vendorProducts,
+    },
+  );
+
+  store.vendorProductIds = [...store.vendorProductIds, ...vendorProducts];
+
+  await store.save();
+
+  return updatedDesign;
+};
 module.exports = mongoose.model('store', storeSchema);
