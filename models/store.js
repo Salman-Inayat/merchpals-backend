@@ -291,4 +291,25 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
   return design;
 };
 
+storeSchema.statics.updateStoreName = async function (store) {
+  const storeResult = await this.findOne({ _id: store.storeId });
+  storeResult.name = store.storeName;
+  await storeResult.save();
+  return storeResult;
+};
+
+storeSchema.statics.updateStoreLogo = async function (store) {
+  const storeResult = await this.findOne({ _id: store.storeId });
+  storeResult.logo = store.logo;
+  await storeResult.save();
+  return storeResult;
+};
+
+storeSchema.statics.updateStoreCover = async function (store) {
+  const storeResult = await this.findOne({ _id: store.storeId });
+  storeResult.cover = store.cover;
+  await storeResult.save();
+  return storeResult;
+};
+
 module.exports = mongoose.model('store', storeSchema);

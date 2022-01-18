@@ -118,6 +118,36 @@ const updateDesign = async (req, res) => {
   }
 };
 
+const updateStoreName = async (req, res) => {
+  try {
+    const store = await Store.updateStoreName(req.body.store);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('updateStoreName', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateStoreAvatar = async (req, res) => {
+  try {
+    const store = await Store.updateStoreAvatar(req.body.store);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('updateStoreAvatar', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateStoreLogo = async (req, res) => {
+  try {
+    const store = await Store.updateStoreAvatar(req.body.store);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('updateStoreAvatar', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addStore,
   storeInfo,
@@ -128,4 +158,7 @@ module.exports = {
   singleDesign,
   singleDesignProducts,
   updateDesign,
+  updateStoreName,
+  updateStoreAvatar,
+  updateStoreLogo,
 };
