@@ -118,36 +118,6 @@ const updateDesign = async (req, res) => {
   }
 };
 
-const updateStoreName = async (req, res) => {
-  try {
-    const store = await Store.updateStoreName(req.body.store);
-    res.status(200).json({ store });
-  } catch (error) {
-    console.log('updateStoreName', error.message);
-    res.status(400).json({ message: error.message });
-  }
-};
-
-const updateStoreAvatar = async (req, res) => {
-  try {
-    const store = await Store.updateStoreAvatar(req.body.store);
-    res.status(200).json({ store });
-  } catch (error) {
-    console.log('updateStoreAvatar', error.message);
-    res.status(400).json({ message: error.message });
-  }
-};
-
-const updateStoreLogo = async (req, res) => {
-  try {
-    const store = await Store.updateStoreAvatar(req.body.store);
-    res.status(200).json({ store });
-  } catch (error) {
-    console.log('updateStoreAvatar', error.message);
-    res.status(400).json({ message: error.message });
-  }
-};
-
 const updateDesignProducts = async (req, res) => {
   try {
     const design = await Store.updateDesign(
@@ -161,6 +131,17 @@ const updateDesignProducts = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+const updateStoreData = async (req, res) => {
+  try {
+    const store = await Store.updateStoreData(req.body.store);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('updateStoreData', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addStore,
   storeInfo,
@@ -171,8 +152,6 @@ module.exports = {
   singleDesign,
   singleDesignProducts,
   updateDesign,
-  updateStoreName,
-  updateStoreAvatar,
-  updateStoreLogo,
   updateDesignProducts,
+  updateStoreData,
 };
