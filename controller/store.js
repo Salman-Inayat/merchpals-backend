@@ -1,4 +1,5 @@
 const Store = require('../models/store');
+const Designs = require('../models/design');
 
 const addStore = async (req, res) => {
   try {
@@ -32,6 +33,7 @@ const addStore = async (req, res) => {
 const storeInfo = async (req, res) => {
   try {
     const store = await Store.getLabeledInfo(req.userData._id);
+    console.log({ store });
     res.status(200).json({ store });
   } catch (error) {
     console.log('storeInfo', error.message);
@@ -101,17 +103,45 @@ const singleDesignProducts = async (req, res) => {
     console.log('singleDesignProducts', error.message);
     res.status(400).json({ message: error.message });
   }
-}
+};
+
+const updateDesign = async (req, res) => {
+  try {
+    const design = await Designs.updateDesign(
+      req.params.designId,
+      req.body.design,
+    );
+    res.status(200).json({ design });
+  } catch (error) {
+    console.log('updateDesign', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
 
 const updateDesignProducts = async (req, res) => {
   try {
-    const design = await Store.updateDesign(req.params.designId, req.userData.vendorId, req.body);
-    res.status(200).json({ design });  
+    const design = await Store.updateDesign(
+      req.params.designId,
+      req.userData.vendorId,
+      req.body,
+    );
+    res.status(200).json({ design });
   } catch (error) {
     console.log('updateDesignProducts', error.message);
-    res.status(400).json({ message: error.message });    
+    res.status(400).json({ message: error.message });
   }
-}
+};
+
+const updateStoreData = async (req, res) => {
+  try {
+    const store = await Store.updateStoreData(req.body.store);
+    res.status(200).json({ store });
+  } catch (error) {
+    console.log('updateStoreData', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addStore,
   storeInfo,
@@ -121,5 +151,7 @@ module.exports = {
   addDesign,
   singleDesign,
   singleDesignProducts,
-  updateDesignProducts
+  updateDesign,
+  updateDesignProducts,
+  updateStoreData,
 };

@@ -105,12 +105,15 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     formattedVendorProducts,
   );
 
+  console.log('CanvasJson: ', data.design.canvasJson);
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.name,
     url: data.design.imageUrl,
+    canvasJson: data.design.canvasJson,
     storeId,
   });
 
@@ -290,6 +293,15 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
   return design;
 };
 
+storeSchema.statics.updateStoreData = async function (store) {
+  const storeResult = await this.findOne({ _id: store.storeId });
+  storeResult.name = store.storeData.name;
+  storeResult.logo = store.storeData.logo;
+  storeResult.coverAvatar = store.storeData.coverAvatar;
+  await storeResult.save();
+  return storeResult;
+};
+
 storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
   console.log({ data });
   console.log({ designId, vendorId, data });
@@ -350,4 +362,5 @@ storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
 
   return updatedDesign;
 };
+
 module.exports = mongoose.model('store', storeSchema);
