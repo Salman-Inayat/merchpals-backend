@@ -105,12 +105,15 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     formattedVendorProducts,
   );
 
+  console.log('CanvasJson: ', data.design.canvasJson);
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.name,
     url: data.design.imageUrl,
+    canvasJson: data.design.canvasJson,
     storeId,
   });
 
