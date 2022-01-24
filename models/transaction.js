@@ -78,7 +78,7 @@ transactionSchema.statics.updatePayout = async function (
 
 transactionSchema.statics.transactionHistory = async function (vendorId) {
   const vendor = await Vendor.findOne({ _id: vendorId }).lean();
-  const transactions = await this.find({ vendorId });
+  const transactions = await this.find({ vendorId }).sort({ createdAt: -1 });
   return { ...vendor, transactions };
 };
 

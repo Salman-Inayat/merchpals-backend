@@ -69,8 +69,13 @@ const payout = async (req, res) => {
       transaction,
       transfer,
     );
+
+    const vendorHistory = await Transaction.transactionHistory(
+      req.userData.vendorId,
+    );
+
     res.status(200).json({
-      updatedTransaction,
+      vendorHistory,
       message: 'Payment successfully transferred!',
     });
   } catch (error) {
