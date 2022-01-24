@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const VendorStripInfo = require('../models/vendorStripInfo');
+const Transaction = require('../models/transaction');
 
 const createAccount = async (req, res) => {
   try {
@@ -21,8 +22,8 @@ const createAccount = async (req, res) => {
     });
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${process.env.STRIPE_CONNECT_REDIRECT_URL}/reauth`,
-      return_url: `${process.env.STRIPE_CONNECT_REDIRECT_URL}/return`,
+      refresh_url: `${process.env.STRIPE_CONNECT_REDIRECT_URL}`,
+      return_url: `${process.env.STRIPE_CONNECT_REDIRECT_URL}`,
       type: 'account_onboarding',
     });
 
@@ -38,17 +39,55 @@ const createAccount = async (req, res) => {
 
 const getAccountInfo = async (req, res) => {
   try {
-    const vendorStripe = await VendorStripInfo.find({
+    let account;
+    const vendorStripe = await VendorStripInfo.findOne({
       vendorId: req.userData.vendorId,
     });
-    const account = await stripe.accounts.retrieve(
-      vendorStripe.stripeAccountId,
-    );
-    res.status(200).json({
-      account,
-    });
+
+    console.log({ vendorStripe });
+    if (vendorStripe) {
+      account = await stripe.accounts.retrieve(vendorStripe.stripeAccountId);
+    }
+
+    res.status(200).json({ account });
   } catch (error) {
     console.log('getAccountInfo', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const payout = async (req, res) => {
+  try {
+    const transaction = await Transaction.initiatePayout(req.userData.vendorId);
+    const transfer = await stripe.transfers.create({
+      amount: transaction.totalPayout * 100,
+      currency: 'usd',
+      destination: transaction.stripeAccountId,
+    });
+    // console.log({ transfer });
+    const updatedTransaction = await Transaction.updatePayout(
+      transaction,
+      transfer,
+    );
+    res.status(200).json({
+      updatedTransaction,
+      message: 'Payment successfully transferred!',
+    });
+  } catch (error) {
+    console.log('payout', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getTransactionHistory = async (req, res) => {
+  try {
+    const vendorHistory = await Transaction.transactionHistory(
+      req.userData.vendorId,
+    );
+
+    res.status(200).json({ vendorHistory });
+  } catch (error) {
+    console.log('payout', error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -56,4 +95,6 @@ const getAccountInfo = async (req, res) => {
 module.exports = {
   createAccount,
   getAccountInfo,
+  payout,
+  getTransactionHistory,
 };
