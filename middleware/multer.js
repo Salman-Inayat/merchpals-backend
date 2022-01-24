@@ -83,6 +83,102 @@ const uploadBase64 = async (req, res, next) => {
     }
 
     next();
+  } else if (req.body.storeInfo) {
+    var s3Bucket = new aws.S3();
+    const logo = req.body.storeInfo.logo;
+    const coverAvatar = req.body.storeInfo.coverAvatar;
+
+    if (coverAvatar.startsWith('data:image')) {
+      coverAvatarBuf = Buffer.from(
+        coverAvatar.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      );
+
+      var coverAvatarData = {
+        Bucket: BUCKET_NAME,
+        Key: `stores/${req.userData._id}/${makeid(10)}`,
+        Body: coverAvatarBuf,
+        ContentEncoding: 'base64',
+        ContentType: 'image/jpeg',
+      };
+
+      try {
+        const coverAvatarLocation = await s3Bucket
+          .upload(coverAvatarData)
+          .promise();
+
+        delete req.body.storeInfo.coverAvatar;
+
+        req.body.storeInfo = {
+          coverAvatar: coverAvatarLocation.Location,
+          ...req.body.storeInfo,
+        };
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (logo.startsWith('data:image')) {
+      logoBuf = Buffer.from(
+        logo.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      );
+
+      var logoData = {
+        Bucket: BUCKET_NAME,
+        Key: `stores/${req.userData._id}/${makeid(10)}`,
+        Body: logoBuf,
+        ContentEncoding: 'base64',
+        ContentType: 'image/jpeg',
+      };
+
+      try {
+        const logoLocation = await s3Bucket.upload(logoData).promise();
+
+        delete req.body.storeInfo.logo;
+
+        req.body.storeInfo = {
+          logo: logoLocation.Location,
+          ...req.body.storeInfo,
+        };
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    const design = JSON.parse(req.body.storeInfo.design);
+
+    // design = {
+    //   base64Image: '',
+    //   name: '',
+    //   canvasJson
+    // }
+    buf = Buffer.from(
+      design.base64Image.replace(/^data:image\/\w+;base64,/, ''),
+      'base64',
+    );
+    var s3Bucket = new aws.S3();
+
+    var designData = {
+      Bucket: BUCKET_NAME,
+      Key: `designs/${req.userData._id}/${design.name}`,
+      Body: buf,
+      ContentEncoding: 'base64',
+      ContentType: detectMimeType(design.base64Image),
+    };
+
+    try {
+      const designlLocation = await s3Bucket.upload(designData).promise();
+      delete design.base64Image;
+      req.body.storeInfo.design = {
+        imageUrl: designlLocation.Location,
+        ...design,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+
+    next();
   } else {
     const store = req.body.store;
     var s3Bucket = new aws.S3();

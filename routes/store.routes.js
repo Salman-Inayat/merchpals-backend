@@ -17,10 +17,10 @@ const { upload, uploadBase64 } = require('../middleware/multer');
 
 router.route('/').post(
   auth,
-  upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'coverAvatar', maxCount: 1 },
-  ]),
+  // upload.fields([
+  //   { name: 'logo', maxCount: 1 },
+  //   { name: 'coverAvatar', maxCount: 1 },
+  // ]),
   uploadBase64,
   addStore,
 );

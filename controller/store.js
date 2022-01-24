@@ -7,16 +7,19 @@ const addStore = async (req, res) => {
     // console.log('logo', req.files.logo[0].location);
     // console.log('coverAvatar', req.files.coverAvatar[0].location);
     // console.log('designURL', req.designURL);
+
     const data = {
-      name: req.body.name,
-      slug: req.body.slug,
-      design: req.body.design,
-      logo: req.files.logo[0].location,
-      coverAvatar: req.files.coverAvatar[0].location,
-      products: JSON.parse(req.body.products),
+      name: req.body.storeInfo.name,
+      slug: req.body.storeInfo.slug,
+      design: req.body.storeInfo.design,
+      logo: req.body.storeInfo.logo,
+      coverAvatar: req.body.storeInfo.coverAvatar,
+      products: JSON.parse(req.body.storeInfo.products),
     };
-    console.log({ data });
+
     const store = await Store.createStoreAndEssence(req.userData, data);
+
+    // console.log(req.body);
     res.status(200).json({ store: '', message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
