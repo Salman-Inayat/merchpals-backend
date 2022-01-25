@@ -4,10 +4,10 @@ const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
-
+const schedule = require('node-schedule');
 // Route Imports
 const appRoutesV1 = require('./routes');
-
+const moveBalanceFromEsrowToVendorWallet = require('./jobs/moveBalanceFromEsrowToVendorWallet');
 // Development Plugins Import i.e [Logging]
 const morgan = require('morgan');
 
@@ -94,5 +94,18 @@ app.all('*', (req, res, next) => {
 
 // Handle errors of application
 app.use(errorHandler);
+
+// Folowing rules triggers moveBalanceFromEsrowToVendorWallet at the start of every day
+const rule = new schedule.RecurrenceRule();
+rule.hour = 0;
+rule.tz = 'Etc/UTC';
+
+// const startTime = new Date(Date.now() + 5000);
+// const endTime = new Date(startTime.getTime() + 5000);
+// const job = schedule.scheduleJob(
+//   { start: startTime, end: endTime, rule: '*/1 * * * * *' },
+//   moveBalanceFromEsrowToVendorWallet,
+// );
+const job = schedule.scheduleJob(rule, moveBalanceFromEsrowToVendorWallet);
 
 module.exports = app;

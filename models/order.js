@@ -142,7 +142,7 @@ orderSchema.statics.createOrder = async function (
   order.price = subTotal;
   order.tax = tax;
   order.shippingCost = shippingCost;
-  order.totalAmount = subTotal + tax + Number(shippingCost);
+  order.totalAmount = Number((subTotal + tax + Number(shippingCost)).toFixed(2));
   order.billingAddress = data.billingAddress;
 
   await order.save();

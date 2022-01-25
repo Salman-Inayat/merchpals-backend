@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { SUCCEEDED, FAILED, PENDING } = require('../constants/statuses');
+const { VENDOR_PROFIT_MARGIN, MERCHPALS_PROFIT_MARGIN } = require('../constants/margins');
+const Escrow = require('./escrow');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_CUSTOMER_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const moment = require('moment');
+
 /**
  *
  * @field transactionId
@@ -9,10 +14,6 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
  * @field totalAmount
  *
  */
-
-const SUCCEEDED = "succeeded";
-const PENDING = "pending";
-const FAILED = "failed";
 
 const paymentSchema = new mongoose.Schema({
   transactionId: {
@@ -55,12 +56,12 @@ const paymentSchema = new mongoose.Schema({
 },
 { timestamps: true })
 
-paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amount, customerId, orderId, paymentId){
+paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, order, customerId, profit){
   let payment = await this.create({
-    _id: paymentId,
+    _id: order.paymentId,
     customerId,
-    orderId,
-    amount,
+    orderId: order._id,
+    amount: order.totalAmount,
     ccLast4Digits: paymentInfo.last4
   })
 
@@ -68,10 +69,10 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
   // and values are in cents instead of dollars
 
   const charge = await stripe.charges.create({
-    amount: amount*100,
+    amount: Number((order.totalAmount*100).toFixed(2)),
     currency: 'usd',
     source: paymentInfo.token,
-    description: `customer payment for order# ${orderId}`,
+    description: `customer payment for order# ${order._id}`,
   });
 
   // console.log({stripeResponse: charge});
@@ -80,6 +81,16 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, amo
     payment.status = SUCCEEDED;
     payment.stripeTokenId = paymentInfo.token;
     payment.stripeChargeId = charge.id;
+
+    const ascrow = await Escrow.create({
+      vendorId: order.vendorId,
+      orderId: order._id,
+      totalProfit: profit,
+      vendorProfit: Number(profit * VENDOR_PROFIT_MARGIN.toFixed(2)),
+      merchpalsProfit: Number(profit * MERCHPALS_PROFIT_MARGIN.toFixed(2)),
+      releaseDate: moment().add(7, 'days'),
+      status: PENDING
+    })
   } else {
     payment.status = charge.status;
     payment.stripeTokenId = paymentInfo.token;
