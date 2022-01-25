@@ -105,8 +105,6 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     formattedVendorProducts,
   );
 
-  console.log('CanvasJson: ', data.design.canvasJson);
-
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
