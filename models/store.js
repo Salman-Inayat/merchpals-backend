@@ -154,7 +154,7 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
         select: 'designId productId productMappings',
         populate: [
           { path: 'designId', select: 'name url' },
-          { path: 'productId', select: 'name image slug' },
+          { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
       },
@@ -175,7 +175,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
         select: 'designId productId productMappings',
         populate: [
           { path: 'designId', select: 'name url' },
-          { path: 'productId', select: 'name image slug' },
+          { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
       },
@@ -198,7 +198,7 @@ storeSchema.statics.getStoreProductInfo = async function (
   })
     .populate([
       { path: 'designId', select: 'name url' },
-      { path: 'productId', select: 'name image slug' },
+      { path: 'productId', select: 'name image slug basePrice' },
       {
         path: 'productMappings',
         select: 'productId keyId variantId productNumberedId color variant',
@@ -283,7 +283,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
       select: 'designId productId productMappings price',
       populate: [
         { path: 'designId', select: 'name url' },
-        { path: 'productId', select: 'name image slug' },
+        { path: 'productId', select: 'name image slug basePrice' },
         { path: 'productMappings' },
       ],
     })
