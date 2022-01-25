@@ -1,6 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const VendorStripInfo = require('../models/vendorStripInfo');
 const Transaction = require('../models/transaction');
+const Escrow = require('../models/escrow');
+const Vendor = require('../models/vendor');
 
 const createAccount = async (req, res) => {
   try {
@@ -97,9 +99,67 @@ const getTransactionHistory = async (req, res) => {
   }
 };
 
+const getAccountDashboardLink = async (req, res) => {
+  try {
+    console.log('Running');
+    const vendorStripe = await VendorStripInfo.findOne({
+      vendorId: req.userData.vendorId,
+    });
+
+    const link = await stripe.accounts.createLoginLink(
+      vendorStripe.stripeAccountId,
+    );
+
+    res.status(200).json({ link });
+  } catch (error) {
+    console.log('express acoount dashboard: ', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getPendingBalance = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({
+      userId: req.userData._id,
+    });
+
+    const balanceData = await Escrow.calculatePendingEscrowsForVendor(
+      vendor._id,
+    );
+    console.log(balanceData);
+
+    res.status(200).json({
+      balanceData,
+      message: 'Pending balance fetched successfully',
+    });
+  } catch (error) {
+    console.log('get pending balance controller', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getEscrowTransactions = async (req, res) => {
+  try {
+    console.log('Running getEscrosTransactions');
+    const vendor = await Vendor.findOne({
+      userId: req.userData._id,
+    });
+
+    const transactions = await Escrow.getEscrowTransactions(vendor._id);
+
+    res.status(200).json({ transactions });
+  } catch (error) {
+    console.log('get pending balance controller', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createAccount,
   getAccountInfo,
   payout,
   getTransactionHistory,
+  getAccountDashboardLink,
+  getPendingBalance,
+  getEscrowTransactions,
 };
