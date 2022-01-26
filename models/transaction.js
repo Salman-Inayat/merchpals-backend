@@ -52,28 +52,49 @@ transactionSchema.statics.initiatePayout = async function (vendorId) {
     totalPayout: vendor.balance,
   });
 
-  // console.log({ transaction });
-
   return transaction;
 };
 
-transactionSchema.statics.updatePayout = async function (
+// transactionSchema.statics.updatePayout = async function (
+//   transaction,
+//   stripeTransfer,
+// ) {
+//   const updatedTransaction = await this.findById(transaction._id);
+//   if (stripeTransfer.id !== '') {
+//     updatedTransaction.status = SUCCEEDED;
+//     const vendor = await Vendor.findOne({ _id: transaction.vendorId });
+//     vendor.balance = 0;
+//     await vendor.save();
+//   } else {
+//     updatedTransaction.status = FAILED;
+//   }
+
+//   await updatedTransaction.save();
+
+//   return updatedTransaction;
+// };
+
+transactionSchema.statics.handleFailedPayout = async function (transaction) {
+  const updatedTransaction = await this.findById(transaction._id);
+  updatedTransaction.status = FAILED;
+  await updatedTransaction.save();
+
+  return updatedTransaction;
+};
+
+transactionSchema.statics.handleSuccessfulPayout = async function (
   transaction,
-  stripeTransfer,
 ) {
-  if (stripeTransfer.id) {
-    transaction.status = SUCCEEDED;
+  const updatedTransaction = await this.findById(transaction._id);
+  updatedTransaction.status = SUCCEEDED;
 
-    const vendor = await Vendor.findOne({ _id: transaction.vendorId });
-    vendor.balance = 0;
-    await vendor.save();
-  } else {
-    transaction.status = FAILED;
-  }
+  const vendor = await Vendor.findOne({ _id: transaction.vendorId });
+  vendor.balance = 0;
+  await vendor.save();
 
-  await transaction.save();
+  await updatedTransaction.save();
 
-  return transaction;
+  return updatedTransaction;
 };
 
 transactionSchema.statics.transactionHistory = async function (vendorId) {

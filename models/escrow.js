@@ -30,7 +30,6 @@ const escrowSchema = new mongoose.Schema(
 escrowSchema.statics.getEscrowTransactions = async function (vendorId) {
   try {
     const escrows = await this.find({ vendorId: vendorId });
-    console.log(escrows);
     return escrows;
   } catch (error) {
     console.log('getEscrowTransactions', error.message);

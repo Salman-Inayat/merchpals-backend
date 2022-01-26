@@ -58,30 +58,57 @@ const getAccountInfo = async (req, res) => {
   }
 };
 
+// const payout = async (req, res) => {
+//   try {
+//     const transaction = await Transaction.initiatePayout(req.userData.vendorId);
+//     const transfer = await stripe.transfers.create({
+//       amount: transaction.totalPayout * 100,
+//       currency: 'usd',
+//       destination: transaction.stripeAccountId,
+//     });
+
+//     await Transaction.updatePayout(transaction, transfer);
+
+//     const vendorHistory = await Transaction.transactionHistory(
+//       req.userData.vendorId,
+//     );
+
+//     res.status(200).json({
+//       vendorHistory,
+//       message: 'Payment successfully transferred!',
+//     });
+//   } catch (error) {
+//     console.log('payout', error.message);
+//     res.status(400).json({ message: error.message });
+//   }
+// };
+
 const payout = async (req, res) => {
   try {
     const transaction = await Transaction.initiatePayout(req.userData.vendorId);
-    const transfer = await stripe.transfers.create({
-      amount: transaction.totalPayout * 100,
-      currency: 'usd',
-      destination: transaction.stripeAccountId,
-    });
-    // console.log({ transfer });
-    const updatedTransaction = await Transaction.updatePayout(
-      transaction,
-      transfer,
-    );
+    try {
+      const transfer = await stripe.transfers.create({
+        amount: transaction.totalPayout * 100,
+        currency: 'usd',
+        destination: transaction.stripeAccountId,
+      });
 
-    const vendorHistory = await Transaction.transactionHistory(
-      req.userData.vendorId,
-    );
+      await Transaction.handleSuccessfulPayout(transaction);
 
-    res.status(200).json({
-      vendorHistory,
-      message: 'Payment successfully transferred!',
-    });
+      const vendorHistory = await Transaction.transactionHistory(
+        req.userData.vendorId,
+      );
+
+      res.status(200).json({
+        vendorHistory,
+        message: 'Payment successfully transferred!',
+      });
+    } catch (error) {
+      await Transaction.handleFailedPayout(transaction);
+      console.log('payout', error.message);
+      res.status(400).json({ message: error.message });
+    }
   } catch (error) {
-    console.log('payout', error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -126,7 +153,6 @@ const getPendingBalance = async (req, res) => {
     const balanceData = await Escrow.calculatePendingEscrowsForVendor(
       vendor._id,
     );
-    console.log(balanceData);
 
     res.status(200).json({
       balanceData,
@@ -140,7 +166,6 @@ const getPendingBalance = async (req, res) => {
 
 const getEscrowTransactions = async (req, res) => {
   try {
-    console.log('Running getEscrosTransactions');
     const vendor = await Vendor.findOne({
       userId: req.userData._id,
     });
