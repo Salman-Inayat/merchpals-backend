@@ -76,7 +76,7 @@ exports.verifyOTP = catchAsync(async (req, res) => {
     const otp = await twilioClient.verify
       .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
       .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
-    
+
     if (!otp.valid) {
       throw new Error('Invalid OTP!');
     }

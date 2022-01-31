@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Vendor = require('../models/vendor');
 const User = require('../models/user');
+const Escrow = require('../models/escrow');
 
 const getVendorInfo = async (req, res) => {
   try {

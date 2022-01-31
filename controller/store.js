@@ -18,9 +18,7 @@ const addStore = async (req, res) => {
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);
-
-    // console.log(req.body);
-    res.status(200).json({ store: '', message: 'Store created successfully' });
+    res.status(200).json({ store, message: 'Store created successfully' });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });
