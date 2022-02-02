@@ -31,8 +31,6 @@ const createOrder = async (req, res) => {
     );
     const merchantOrder = await MerchantOrder.createOrder(
       order,
-      req.body.order.storeUrl,
-      req.body.printfulData,
       merchantOrderId,
     );
 

@@ -24,16 +24,6 @@ const {
  */
 const merchantOrderSchema = new mongoose.Schema(
   {
-    products: {
-      type: [ObjectId],
-      ref: 'product',
-      required: true,
-    },
-    productMappings: {
-      type: [ObjectId],
-      ref: 'productMapping',
-      required: true,
-    },
     orderId: {
       type: ObjectId,
       ref: 'order',
@@ -41,14 +31,6 @@ const merchantOrderSchema = new mongoose.Schema(
     },
     printfulOrderId: {
       type: Number,
-      required: true,
-    },
-    keyId: {
-      type: [String],
-      required: true,
-    },
-    variantId: {
-      type: [String],
       required: true,
     },
     totalAmount: {
@@ -61,30 +43,25 @@ const merchantOrderSchema = new mongoose.Schema(
 
 merchantOrderSchema.statics.createOrder = async function (
   order,
-  storeUrl,
-  printfulData,
   merchantOrderId,
 ) {
+  console.log({ order });
+  const printfulDataFormatted = {
+    recipient: {
+      address1: `${order.billingAddress.aptNo} ${order.billingAddress.street}`,
+      city: order.billingAddress.city,
+      country_code: order.billingAddress.country,
+      state_code: order.billingAddress.state,
+      zip: order.billingAddress.zip,
+    },
+    items: order.products.map(product => ({
+      variant_id: product.productMapping.variantId,
+      quantity: product.quantity,
+      files: [{ url: product.vendorProduct.designId.url }]
+    }))
+}
 
-  const productMappings = await ProductMapping.find({
-    _id: { $in: order.productMappings },
-  })
-    .select('keyId variantId')
-    .lean();
-
-  const store = await Store.findOne({ slug: storeUrl }).populate({
-    path: 'designs',
-    select: 'url',
-  });
-
-  const designUrl = store.designs[0].url;
-  const printfulOrderResponse = await printfulOrder({
-    ...printfulData,
-    items: printfulData.items.map(item => ({
-      ...item,
-      files: [{ url: designUrl }],
-    })),
-  })
+  const printfulOrderResponse = await printfulOrder(printfulDataFormatted)
 
   if (printfulOrderResponse.code === 400) {
     throw new Error(printfulOrderResponse.message)
@@ -92,16 +69,13 @@ merchantOrderSchema.statics.createOrder = async function (
 
   const merchantOrder = await this.create({
     _id: merchantOrderId,
-    products: order.products,
-    productMappings: order.productMappings,
     orderId: order._id,
-    keyId: productMappings.map(p => p.keyId),
-    variantId: productMappings.map(p => p.variantId),
     printfulOrderId: printfulOrderResponse.id,
     totalAmount: Number(order.price) // TODO: clearify this amount
   });
 
-  return merchantOrder;
+  // return merchantOrder;
+  return true;
 };
 
 module.exports = mongoose.model('merchantOrder', merchantOrderSchema);
