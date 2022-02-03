@@ -203,14 +203,17 @@ storeSchema.statics.getStoreProductInfo = async function (
       },
     ])
     .lean();
+    
   let formattedProduct = {
+    vendorProductId: productDetail._id,
     ...productDetail,
     ...productDetail.productId,
+    productId: productDetail.productId._id
   };
-  console.log({ productDetail });
+  
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct);
-  console.log(formattedMappings);
+  
   return formattedMappings;
 };
 

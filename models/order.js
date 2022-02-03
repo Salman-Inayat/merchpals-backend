@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+const VendorProduct = require('./vendorProduct');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Store = require('./store');
 const { printfulTax, printfulShipping } = require('../services/printful');
+const { mapColor } = require('../utils/colorAndVariantMappingForOrder');
 /**
  *
  * @field size
@@ -13,14 +15,24 @@ const { printfulTax, printfulShipping } = require('../services/printful');
 const orderSchema = new mongoose.Schema(
   {
     products: {
-      type: [ObjectId],
-      ref: 'product',
-      required: true,
-    },
-    productMappings: {
-      type: [ObjectId],
-      ref: 'productMapping',
-      required: true,
+      type: [
+        {
+          vendorProduct: {
+            type: ObjectId,
+            ref: 'vendorProducts',
+            required: true,
+          },
+          productMapping: {
+            type: ObjectId,
+            ref: 'productMapping',
+            required: true,
+          },
+          quantity: {
+            type: Number,
+            required: true
+          }
+        }
+      ],
     },
     vendorId: {
       type: ObjectId,
@@ -98,7 +110,6 @@ orderSchema.statics.createOrder = async function (
   paymentId,
   printfulData,
 ) {
-  // console.log({data});
   let shippingCost = 0;
   if (data.billingAddress.country.toLowerCase() !== 'us') {
     const shippingResponse = await printfulShipping(printfulData);
@@ -113,32 +124,21 @@ orderSchema.statics.createOrder = async function (
     throw new Error(taxResponse.message);
   }
   const taxRate = taxResponse.rate;
-
-  const productIds = data.products.map(p => p.productId);
-  // console.log({ productIds });
-  // const products = await VendorProduct.find({  productId: { $in: productIds }, storeId: data.storeId })
-  // console.log({ products });
   const store = await Store.findOne({ slug: data.storeUrl }).select(
     '_id vendorId',
   );
-  // console.log({store});
-  let selectedVariants = [];
-  data.products.forEach(product => {
-    selectedVariants.push(...product.productMappings);
-  });
 
   const subTotal = Number(data.amount.toFixed(2));
   const tax = Number((subTotal * taxRate).toFixed(2));
 
   let order = new this();
   order._id = orderId;
-  (order.merchantOrderId = merchantOrderId),
-    (order.customerId = customerId),
-    (order.paymentId = paymentId),
-    (order.storeId = store._id);
+  order.merchantOrderId = merchantOrderId;
+  order.customerId = customerId;
+  order.paymentId = paymentId;
+  order.storeId = store._id;
   order.vendorId = store.vendorId;
-  order.products = productIds;
-  order.productMappings = selectedVariants;
+  order.products = data.products;
   order.price = subTotal;
   order.tax = tax;
   order.shippingCost = shippingCost;
@@ -146,7 +146,16 @@ orderSchema.statics.createOrder = async function (
   order.billingAddress = data.billingAddress;
 
   await order.save();
-  return order;
+  const fullOrder = await this.findOne({ _id: order._id }).populate({path: 'products', populate: [
+    {
+      path: 'vendorProduct', 
+      select: 'designId price',
+      populate: { path: 'designId', select: 'url' } 
+    }, 
+    { path: 'productMapping' }
+  ]})
+  
+  return fullOrder;
 };
 
 orderSchema.statics.getOrders = async function (vendorId) {
@@ -156,11 +165,22 @@ orderSchema.statics.getOrders = async function (vendorId) {
         path: 'customerId',
         select: 'firstName lastName email phoneNumber avatar',
       },
-      { path: 'products', select: 'name image basePrice minPrice' },
       {
-        path: 'storeId',
-        select: 'vendorProductIds',
-        populate: { path: 'vendorProductIds', select: 'price' },
+        path: 'products',
+        populate: [
+          {
+          path: 'vendorProduct',
+          select: 'designId productId price',
+          populate: [
+            { path: 'designId', select: 'name url' },
+            { path: 'productId', select: 'name image minPrice basePrice slug' },
+          ],
+        },
+        {
+          path: 'productMapping',
+          select: 'color'
+        }
+      ]
       },
     ])
     .lean();
@@ -175,13 +195,27 @@ orderSchema.statics.getOrderById = async function (orderId) {
         path: 'customerId',
         select: 'firstName lastName email phoneNumber avatar',
       },
-      { path: 'products', select: 'name image basePrice minPrice' },
-      { path: 'storeId', select: 'name' },
-      { path: 'paymentId', select: 'paymentMethod' },
+      {
+        path: 'products',
+        populate: [
+          {
+          path: 'vendorProduct',
+          select: 'designId productId price',
+          populate: [
+            { path: 'designId', select: 'name url' },
+            { path: 'productId', select: 'name image minPrice basePrice slug' },
+          ],
+        },
+        {
+          path: 'productMapping',
+        }
+      ]
+      },
     ])
     .lean();
-
-  return order;
+  
+  const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)))
+  return mappedOrder;
 };
 
 module.exports = mongoose.model('order', orderSchema);
