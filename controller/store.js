@@ -7,7 +7,7 @@ const addStore = async (req, res) => {
     // console.log('logo', req.files.logo[0].location);
     // console.log('coverAvatar', req.files.coverAvatar[0].location);
     // console.log('designURL', req.designURL);
-
+    console.log('controller store', req.body.storeInfo.themeColor);
     const data = {
       name: req.body.storeInfo.name,
       slug: req.body.storeInfo.slug,
@@ -15,6 +15,7 @@ const addStore = async (req, res) => {
       logo: req.body.storeInfo.logo,
       coverAvatar: req.body.storeInfo.coverAvatar,
       products: JSON.parse(req.body.storeInfo.products),
+      themeColor: req.body.storeInfo.themeColor,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);

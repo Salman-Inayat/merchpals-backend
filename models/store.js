@@ -51,6 +51,11 @@ const storeSchema = new mongoose.Schema(
       enum: ['active', 'blocked'],
       default: 'active',
     },
+    themeColor: {
+      type: String,
+      required: false,
+      default: 'WHITE',
+    },
     socialHandles: {
       tiktok: '',
       instagram: '',
@@ -114,7 +119,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     canvasJson: data.design.canvasJson,
     storeId,
   });
-
+  console.log('model store', data.themeColor);
   const store = await this.create({
     _id: storeId,
     name: data.name,
@@ -131,6 +136,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     coverAvatar: data.coverAvatar,
     productMappings: allProductsMappings,
     vendorProductIds: vendorProducts.map(p => p._id),
+    themeColor: data.themeColor,
   });
 
   const formattedStore = store.populate([
@@ -299,6 +305,7 @@ storeSchema.statics.updateStoreData = async function (store) {
   storeResult.name = store.storeData.name;
   storeResult.logo = store.storeData.logo;
   storeResult.coverAvatar = store.storeData.coverAvatar;
+  storeResult.themeColor = store.storeData.themeColor;
   await storeResult.save();
   return storeResult;
 };
