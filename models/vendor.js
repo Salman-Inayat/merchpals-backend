@@ -94,4 +94,21 @@ vendorSchema.statics.getVendorInfo = async function (req) {
   return vendor;
 };
 
+vendorSchema.statics.updatePhoneNo = async function (oldPhoneNo, newPhoneNo) {
+  try {
+    console.log('oldPhoneNo', oldPhoneNo);
+    console.log('newPhoneNo', newPhoneNo);
+    const user = await this.findOneAndUpdate(
+      { phoneNo: oldPhoneNo },
+      {
+        phoneNo: newPhoneNo,
+        phoneNoVerified: false,
+      },
+    );
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = mongoose.model('vendor', vendorSchema);

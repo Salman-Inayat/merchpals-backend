@@ -3,6 +3,7 @@ const twilioClient = require('../config/twilio');
 const AppError = require('../utils/appError');
 const { catchAsync } = require('./error');
 const User = require('../models/user');
+const Vendor = require('../models/vendor');
 
 const twilioOtpService = async phoneNo => {
   try {
@@ -140,3 +141,22 @@ exports.loggedInUserInfo = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.sendOTPWithNewPhoneNo = catchAsync(async (req, res) => {
+  try {
+    const { oldPhoneNo, newPhoneNo } = req.body;
+
+    const oldPhoneExists = await User.findOne({ phoneNo: newPhoneNo });
+    if (oldPhoneExists) {
+      throw new Error('Phone number already exists');
+    }
+
+    await twilioOtpService(newPhoneNo);
+    await User.updatePhoneNo(oldPhoneNo, newPhoneNo);
+    await Vendor.updatePhoneNo(oldPhoneNo, newPhoneNo);
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (err) {
+    console.log('sendOTPWithNewPhoneNo func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});
