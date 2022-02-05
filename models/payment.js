@@ -20,7 +20,7 @@ const paymentSchema = new mongoose.Schema(
     },
     customerId: {
       type: ObjectId,
-      ref: 'customer',
+      ref: 'customerRecord',
     },
     orderId: {
       type: ObjectId,

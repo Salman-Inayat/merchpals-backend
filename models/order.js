@@ -45,16 +45,9 @@ const orderSchema = new mongoose.Schema(
       ref: 'store',
     },
     customer: {
-      cId: {
-        type: ObjectId,
-        required: true,
-        ref: 'customer',
-      },
-      record: {
-        type: ObjectId,
-        required: true,
-        ref: 'customer.record',
-      },
+      type: ObjectId,
+      required: true,
+      ref: 'customerRecord',
     },
     merchantOrderId: {
       type: ObjectId,
@@ -121,7 +114,6 @@ const orderSchema = new mongoose.Schema(
 orderSchema.statics.createOrder = async function (
   orderId,
   merchantOrderId,
-  customerId,
   recordId,
   paymentId,
   printfulData,
@@ -138,8 +130,7 @@ orderSchema.statics.createOrder = async function (
   let order = new this();
   order._id = orderId;
   order.merchantOrderId = merchantOrderId;
-  order.customer.cId = customerId;
-  order.customer.record = recordId;
+  order.customer = recordId;
   order.paymentId = paymentId;
   order.storeId = store._id;
   order.vendorId = store.vendorId;
@@ -171,8 +162,7 @@ orderSchema.statics.getOrders = async function (vendorId) {
   let orders = await this.find({ vendorId })
     .populate([
       {
-        path: 'customer.cId',
-        select: 'firstName lastName email phoneNumber avatar',
+        path: 'customer',
       },
       {
         path: 'products',
@@ -201,29 +191,28 @@ orderSchema.statics.getOrderById = async function (orderId) {
   let order = await this.findOne({ _id: orderId })
     .populate([
       {
-        path: 'customerId',
-        select: 'firstName lastName email phoneNumber avatar',
+        path: 'customer',
       },
       {
         path: 'products',
         populate: [
           {
-          path: 'vendorProduct',
-          select: 'designId productId price',
-          populate: [
-            { path: 'designId', select: 'name url' },
-            { path: 'productId', select: 'name image minPrice basePrice slug' },
-          ],
-        },
-        {
-          path: 'productMapping',
-        }
-      ]
+            path: 'vendorProduct',
+            select: 'designId productId price',
+            populate: [
+              { path: 'designId', select: 'name url' },
+              { path: 'productId', select: 'name image minPrice basePrice slug' },
+            ],
+          },
+          {
+            path: 'productMapping',
+          },
+        ],
       },
     ])
     .lean();
-  
-  const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)))
+
+  const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)));
   return mappedOrder;
 };
 
