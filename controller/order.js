@@ -10,29 +10,29 @@ const createOrder = async (req, res) => {
   const orderId = mongoose.Types.ObjectId();
   const paymentId = mongoose.Types.ObjectId();
   const merchantOrderId = mongoose.Types.ObjectId();
+  const recordId = mongoose.Types.ObjectId();
 
   try {
-    const customer = await Customer.createCustomer(req.body.customer, orderId);
+    const customer = await Customer.createCustomer(req.body.customer, orderId, recordId);
     const order = await Order.createOrder(
       orderId,
       merchantOrderId,
       customer._id,
+      recordId,
       paymentId,
       req.body.printfulData,
       req.body.storeUrl,
     );
 
-    const payment = await Payment.createAndChargeCustomer(
-      req.body.payment,
-      order,
-      customer._id,
-      req.body.printfulData,
-    );
+    const payment = await Payment.createAndChargeCustomer(req.body.payment, order, customer._id);
     const merchantOrder = await MerchantOrder.createOrder(
       order,
       merchantOrderId,
       req.body.printfulData,
     );
+
+    order.printfulOrderMetadata = merchantOrder;
+    await order.save();
 
     await sendEmail({
       email: req.body.customer.email,

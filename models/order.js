@@ -44,10 +44,17 @@ const orderSchema = new mongoose.Schema(
       required: true,
       ref: 'store',
     },
-    customerId: {
-      type: ObjectId,
-      required: true,
-      ref: 'customer',
+    customer: {
+      cId: {
+        type: ObjectId,
+        required: true,
+        ref: 'customer',
+      },
+      record: {
+        type: ObjectId,
+        required: true,
+        ref: 'customer.record',
+      },
     },
     merchantOrderId: {
       type: ObjectId,
@@ -79,6 +86,9 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: SUCCEEDED,
       enum: [SUCCEEDED, DELETED],
+    },
+    printfulOrderMetadata: {
+      type: Object,
     },
     billingAddress: {
       aptNo: {
@@ -112,6 +122,7 @@ orderSchema.statics.createOrder = async function (
   orderId,
   merchantOrderId,
   customerId,
+  recordId,
   paymentId,
   printfulData,
   slug,
@@ -123,18 +134,20 @@ orderSchema.statics.createOrder = async function (
   }
 
   const store = await Store.findOne({ slug }).select('_id vendorId');
-
+  console.log(pricingResponse.shippingAmount);
   let order = new this();
   order._id = orderId;
   order.merchantOrderId = merchantOrderId;
-  order.customerId = customerId;
+  order.customer.cId = customerId;
+  order.customer.record = recordId;
   order.paymentId = paymentId;
   order.storeId = store._id;
   order.vendorId = store.vendorId;
   order.products = printfulData.items;
   order.price = pricingResponse.orderActualAmount;
   order.tax = pricingResponse.taxRate;
-  order.shippingCost = pricingResponse.shippingRate;
+  order.shippingCost =
+    pricingResponse.shippingAmount === 'FREE' ? 0 : pricingResponse.shippingAmount;
   order.totalAmount = pricingResponse.amountWithTaxAndShipping;
   order.billingAddress = printfulData.recipient;
 
@@ -158,25 +171,25 @@ orderSchema.statics.getOrders = async function (vendorId) {
   let orders = await this.find({ vendorId })
     .populate([
       {
-        path: 'customerId',
+        path: 'customer.cId',
         select: 'firstName lastName email phoneNumber avatar',
       },
       {
         path: 'products',
         populate: [
           {
-          path: 'vendorProduct',
-          select: 'designId productId price',
-          populate: [
-            { path: 'designId', select: 'name url' },
-            { path: 'productId', select: 'name image minPrice basePrice slug' },
-          ],
-        },
-        {
-          path: 'productMapping',
-          select: 'color'
-        }
-      ]
+            path: 'vendorProduct',
+            select: 'designId productId price',
+            populate: [
+              { path: 'designId', select: 'name url' },
+              { path: 'productId', select: 'name image minPrice basePrice slug' },
+            ],
+          },
+          {
+            path: 'productMapping',
+            select: 'color',
+          },
+        ],
       },
     ])
     .lean();

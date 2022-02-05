@@ -4,14 +4,17 @@ const { calculateAmount } = require('./calculateAmount');
 
 const printfulTax = async data => {
   try {
-    if (data.recipient.country_code === 'BR') {
+    const country = data.recipient.country_code;
+    const regionResponse = await axios.get(`https://restcountries.com/v3.1/alpha/${country}`);
+
+    if (regionResponse.data[0].region === 'Europe') {
       return {
         rate: 0.2,
         shipping_taxable: true,
       };
     }
 
-    if (data.recipient.country_code === 'CA') {
+    if (country === 'CA') {
       return {
         rate: 0.15,
         shipping_taxable: true,
@@ -37,7 +40,7 @@ const printfulShipping = async data => {
   try {
     if (data.recipient.country_code === 'US') {
       return {
-        rate: 0,
+        rate: 'FREE',
         shipping_taxable: false,
       };
     }
@@ -95,14 +98,12 @@ const priceCalculation = async data => {
     const shippingResponse = await printfulShipping(data);
     orderActualAmount = await calculateAmount(data.items);
     taxAmount = Number((orderActualAmount * Number(taxResponse.rate)).toFixed(2));
-    shippingAmount = Number((orderActualAmount * Number(shippingResponse.rate)).toFixed(2));
     amountWithTaxAndShipping = Number((orderActualAmount + shippingAmount + taxAmount).toFixed(2));
 
     return {
-      taxRate: Number(taxResponse.rate),
-      shippingRate: Number(shippingResponse.rate),
+      taxRate: taxResponse.rate,
+      shippingAmount: shippingResponse.rate,
       taxAmount,
-      shippingAmount,
       orderActualAmount,
       amountWithTaxAndShipping,
     };

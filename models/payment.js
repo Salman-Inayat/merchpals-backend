@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 const { SUCCEEDED, FAILED, PENDING } = require('../constants/statuses');
-const { VENDOR_PROFIT_MARGIN, MERCHPALS_PROFIT_MARGIN } = require('../constants/margins');
-const Escrow = require('./escrow');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_CUSTOMER_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const moment = require('moment');
-const { calculateProfit } = require('../services/calculateAmount');
 
 /**
  *
@@ -59,12 +55,7 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-paymentSchema.statics.createAndChargeCustomer = async function (
-  paymentInfo,
-  order,
-  customerId,
-  printfulData,
-) {
+paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, order, customerId) {
   let payment = await this.create({
     _id: order.paymentId,
     customerId,
@@ -89,18 +80,6 @@ paymentSchema.statics.createAndChargeCustomer = async function (
     payment.status = SUCCEEDED;
     payment.stripeTokenId = paymentInfo.token;
     payment.stripeChargeId = charge.id;
-
-    const profit = await calculateProfit(printfulData.items);
-    console.log({ profit });
-    const ascrow = await Escrow.create({
-      vendorId: order.vendorId,
-      orderId: order._id,
-      totalProfit: profit,
-      vendorProfit: Number(profit * VENDOR_PROFIT_MARGIN.toFixed(2)),
-      merchpalsProfit: Number(profit * MERCHPALS_PROFIT_MARGIN.toFixed(2)),
-      releaseDate: moment().add(7, 'days'),
-      status: PENDING,
-    });
   } else {
     payment.status = charge.status;
     payment.stripeTokenId = paymentInfo.token;

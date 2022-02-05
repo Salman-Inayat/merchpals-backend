@@ -34,18 +34,19 @@ const calculateAmount = async arrayOfProducts => {
   return Number(amount.toFixed(2));
 };
 
-const calculateProfit = async arrayOfProducts => {
-  const vendorProductIds = arrayOfProducts.map(a => a.vendorProduct);
-  const vendorProducts = await VendorProduct.find({ _id: { $in: vendorProductIds } })
-    .select('price productId')
-    .populate({ path: 'productId', select: 'basePrice' });
-  console.log({ vendorProducts: vendorProducts[0] });
-  const profit = arrayOfProducts
-    .map(p => {
-      const product = vendorProducts.find(vp => vp._id.equals(p.vendorProduct));
-      return (product.price - product.productId.basePrice) * p.quantity;
-    })
-    .reduce((sum, curr) => sum + curr, 0);
+const calculateProfit = async (order, merchantCost) => {
+  // const vendorProductIds = arrayOfProducts.map(a => a.vendorProduct);
+  // const vendorProducts = await VendorProduct.find({ _id: { $in: vendorProductIds } })
+  //   .select('price productId')
+  //   .populate({ path: 'productId', select: 'basePrice' });
+  // console.log({ vendorProducts: vendorProducts[0] });
+  // const profit = arrayOfProducts
+  //   .map(p => {
+  //     const product = vendorProducts.find(vp => vp._id.equals(p.vendorProduct));
+  //     return (product.price - product.productId.basePrice) * p.quantity;
+  //   })
+  //   .reduce((sum, curr) => sum + curr, 0);
+  const profit = order.price - (0.029 * order.price + 30) - merchantCost.total;
 
   return Number(profit.toFixed(2));
 };
