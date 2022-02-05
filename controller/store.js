@@ -35,7 +35,7 @@ const addStore = async (req, res) => {
 const storeInfo = async (req, res) => {
   try {
     const store = await Store.getLabeledInfo(req.userData._id);
-    console.log({ store });
+
     res.status(200).json({ store });
   } catch (error) {
     console.log('storeInfo', error.message);
@@ -46,7 +46,7 @@ const storeInfo = async (req, res) => {
 const validateSlug = async (req, res) => {
   try {
     const store = await Store.findOne({ slug: decodeURI(req.params.slug) });
-    console.log({ store });
+
     if (store) {
       throw new Error('Slug already taken');
     }

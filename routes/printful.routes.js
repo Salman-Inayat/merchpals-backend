@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { calculateTax, calculateShipping } = require('../controller/printful');
+const { calculatePrice } = require('../controller/printful');
 
-router.route('/calculate-tax').post(calculateTax)
-router.route('/calculate-shipping').post(calculateShipping)
+router.route('/calculate-price').post(calculatePrice);
 
 module.exports = router;

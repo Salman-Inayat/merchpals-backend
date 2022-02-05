@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 const { SUCCEEDED, FAILED, PENDING } = require('../constants/statuses');
-const { VENDOR_PROFIT_MARGIN, MERCHPALS_PROFIT_MARGIN } = require('../constants/margins');
-const Escrow = require('./escrow');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_CUSTOMER_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const moment = require('moment');
 
 /**
  *
@@ -15,61 +12,63 @@ const moment = require('moment');
  *
  */
 
-const paymentSchema = new mongoose.Schema({
-  transactionId: {
-    type: ObjectId,
-    ref: 'transaction',
+const paymentSchema = new mongoose.Schema(
+  {
+    transactionId: {
+      type: ObjectId,
+      ref: 'transaction',
+    },
+    customerId: {
+      type: ObjectId,
+      ref: 'customerRecord',
+    },
+    orderId: {
+      type: ObjectId,
+      ref: 'order',
+    },
+    method: {
+      type: String,
+      enum: ['stripe', 'paypal'],
+      default: 'stripe',
+    },
+    stripeTokenId: {
+      type: String,
+    },
+    stripeChargeId: {
+      type: String,
+    },
+    // total amount paid via stripe
+    amount: {
+      type: Number,
+      required: true,
+    },
+    ccLast4Digits: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: [PENDING, SUCCEEDED, FAILED],
+      default: PENDING,
+    },
   },
-  customerId: {
-    type: ObjectId,
-    ref: 'customer',
-  },
-  orderId: {
-    type: ObjectId,
-    ref: 'order',
-  },
-  method: {
-    type: String,
-    enum: ['stripe', 'paypal'],
-    default: 'stripe',
-  },
-  stripeTokenId: {
-    type: String
-  },
-  stripeChargeId: {
-    type: String
-  },
-  // total amount paid via stripe
-  amount: {
-    type: Number,
-    required: true,
-  },
-  ccLast4Digits:{
-    type: Number,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: [PENDING, SUCCEEDED, FAILED],
-    default: PENDING
-  }
-},
-{ timestamps: true })
+  { timestamps: true },
+);
 
-paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, order, customerId, profit){
+paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, order, customerId) {
   let payment = await this.create({
     _id: order.paymentId,
     customerId,
     orderId: order._id,
     amount: order.totalAmount,
-    ccLast4Digits: paymentInfo.last4
-  })
+    ccLast4Digits: paymentInfo.last4,
+  });
 
   // amount is multiplied by 100 because stripe accepts amounts in integers
   // and values are in cents instead of dollars
 
   const charge = await stripe.charges.create({
-    amount: Number((order.totalAmount*100).toFixed(2)),
+    amount: Number((order.totalAmount * 100).toFixed(2)),
     currency: 'usd',
     source: paymentInfo.token,
     description: `customer payment for order# ${order._id}`,
@@ -81,23 +80,13 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, ord
     payment.status = SUCCEEDED;
     payment.stripeTokenId = paymentInfo.token;
     payment.stripeChargeId = charge.id;
-
-    const ascrow = await Escrow.create({
-      vendorId: order.vendorId,
-      orderId: order._id,
-      totalProfit: profit,
-      vendorProfit: Number(profit * VENDOR_PROFIT_MARGIN.toFixed(2)),
-      merchpalsProfit: Number(profit * MERCHPALS_PROFIT_MARGIN.toFixed(2)),
-      releaseDate: moment().add(7, 'days'),
-      status: PENDING
-    })
   } else {
     payment.status = charge.status;
     payment.stripeTokenId = paymentInfo.token;
   }
 
-  await payment.save()
+  await payment.save();
 
   return payment;
-}
+};
 module.exports = mongoose.model('payment', paymentSchema)

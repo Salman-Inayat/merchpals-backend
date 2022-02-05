@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 const VendorProduct = require('./vendorProduct');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const Store = require('./store');
-const { printfulTax, printfulShipping } = require('../services/printful');
+const { priceCalculation } = require('../services/printful');
 const { mapColor } = require('../utils/colorAndVariantMappingForOrder');
+const { DELETED, SUCCEEDED } = require('../constants/statuses');
 /**
  *
  * @field size
@@ -29,9 +30,9 @@ const orderSchema = new mongoose.Schema(
           },
           quantity: {
             type: Number,
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       ],
     },
     vendorId: {
@@ -43,10 +44,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
       ref: 'store',
     },
-    customerId: {
+    customer: {
       type: ObjectId,
       required: true,
-      ref: 'customer',
+      ref: 'customerRecord',
     },
     merchantOrderId: {
       type: ObjectId,
@@ -73,6 +74,14 @@ const orderSchema = new mongoose.Schema(
     totalAmount: {
       type: Number,
       required: true,
+    },
+    status: {
+      type: String,
+      default: SUCCEEDED,
+      enum: [SUCCEEDED, DELETED],
+    },
+    printfulOrderMetadata: {
+      type: Object,
     },
     billingAddress: {
       aptNo: {
@@ -103,58 +112,49 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.statics.createOrder = async function (
-  data,
   orderId,
   merchantOrderId,
-  customerId,
+  recordId,
   paymentId,
   printfulData,
+  slug,
 ) {
-  let shippingCost = 0;
-  if (data.billingAddress.country.toLowerCase() !== 'us') {
-    const shippingResponse = await printfulShipping(printfulData);
-    if (shippingResponse.code === 400) {
-      throw new Error(shippingResponse.message);
-    }
-    shippingCost = shippingResponse.rate;
+  const pricingResponse = await priceCalculation(printfulData);
+
+  if (pricingResponse.code === 400) {
+    throw new Error(pricingResponse.message);
   }
 
-  const taxResponse = await printfulTax(printfulData);
-  if (taxResponse.code === 400) {
-    throw new Error(taxResponse.message);
-  }
-  const taxRate = taxResponse.rate;
-  const store = await Store.findOne({ slug: data.storeUrl }).select(
-    '_id vendorId',
-  );
-
-  const subTotal = Number(data.amount.toFixed(2));
-  const tax = Number((subTotal * taxRate).toFixed(2));
-
+  const store = await Store.findOne({ slug }).select('_id vendorId');
+  console.log(pricingResponse.shippingAmount);
   let order = new this();
   order._id = orderId;
   order.merchantOrderId = merchantOrderId;
-  order.customerId = customerId;
+  order.customer = recordId;
   order.paymentId = paymentId;
   order.storeId = store._id;
   order.vendorId = store.vendorId;
-  order.products = data.products;
-  order.price = subTotal;
-  order.tax = tax;
-  order.shippingCost = shippingCost;
-  order.totalAmount = Number((subTotal + tax + Number(shippingCost)).toFixed(2));
-  order.billingAddress = data.billingAddress;
+  order.products = printfulData.items;
+  order.price = pricingResponse.orderActualAmount;
+  order.tax = pricingResponse.taxRate;
+  order.shippingCost =
+    pricingResponse.shippingAmount === 'FREE' ? 0 : pricingResponse.shippingAmount;
+  order.totalAmount = pricingResponse.amountWithTaxAndShipping;
+  order.billingAddress = printfulData.recipient;
 
   await order.save();
-  const fullOrder = await this.findOne({ _id: order._id }).populate({path: 'products', populate: [
-    {
-      path: 'vendorProduct', 
-      select: 'designId price',
-      populate: { path: 'designId', select: 'url' } 
-    }, 
-    { path: 'productMapping' }
-  ]})
-  
+  const fullOrder = await this.findOne({ _id: order._id }).populate({
+    path: 'products',
+    populate: [
+      {
+        path: 'vendorProduct',
+        select: 'designId price',
+        populate: { path: 'designId', select: 'url' },
+      },
+      { path: 'productMapping' },
+    ],
+  });
+
   return fullOrder;
 };
 
@@ -162,25 +162,24 @@ orderSchema.statics.getOrders = async function (vendorId) {
   let orders = await this.find({ vendorId })
     .populate([
       {
-        path: 'customerId',
-        select: 'firstName lastName email phoneNumber avatar',
+        path: 'customer',
       },
       {
         path: 'products',
         populate: [
           {
-          path: 'vendorProduct',
-          select: 'designId productId price',
-          populate: [
-            { path: 'designId', select: 'name url' },
-            { path: 'productId', select: 'name image minPrice basePrice slug' },
-          ],
-        },
-        {
-          path: 'productMapping',
-          select: 'color'
-        }
-      ]
+            path: 'vendorProduct',
+            select: 'designId productId price',
+            populate: [
+              { path: 'designId', select: 'name url' },
+              { path: 'productId', select: 'name image minPrice basePrice slug' },
+            ],
+          },
+          {
+            path: 'productMapping',
+            select: 'color',
+          },
+        ],
       },
     ])
     .lean();
@@ -192,29 +191,28 @@ orderSchema.statics.getOrderById = async function (orderId) {
   let order = await this.findOne({ _id: orderId })
     .populate([
       {
-        path: 'customerId',
-        select: 'firstName lastName email phoneNumber avatar',
+        path: 'customer',
       },
       {
         path: 'products',
         populate: [
           {
-          path: 'vendorProduct',
-          select: 'designId productId price',
-          populate: [
-            { path: 'designId', select: 'name url' },
-            { path: 'productId', select: 'name image minPrice basePrice slug' },
-          ],
-        },
-        {
-          path: 'productMapping',
-        }
-      ]
+            path: 'vendorProduct',
+            select: 'designId productId price',
+            populate: [
+              { path: 'designId', select: 'name url' },
+              { path: 'productId', select: 'name image minPrice basePrice slug' },
+            ],
+          },
+          {
+            path: 'productMapping',
+          },
+        ],
       },
     ])
     .lean();
-  
-  const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)))
+
+  const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)));
   return mappedOrder;
 };
 

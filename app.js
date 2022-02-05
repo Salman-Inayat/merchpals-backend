@@ -27,15 +27,15 @@ const appError = require('./utils/appError');
 app.use(helmet());
 
 // Limit the number of requests from a certain ip
-const limter = rateLimit({
-  // 100 requests from same ip in 1 hour
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too Many requests from this IP, please try again in an hour!',
-});
+// const limter = rateLimit({
+//   // 100 requests from same ip in 1 hour
+//   max: 100,
+//   windowMs: 60 * 60 * 1000,
+//   message: 'Too Many requests from this IP, please try again in an hour!',
+// });
 
-// Limit the no of request per ip
-app.use('/api', limter);
+// // Limit the no of request per ip
+// app.use('/api', limter);
 
 // Data Sanatization agains noSQL query injection
 app.use(mongoSanitize());
