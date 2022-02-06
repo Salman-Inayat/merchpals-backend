@@ -21,18 +21,18 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const productMapping = new mongoose.Schema({
   productId: {
     type: ObjectId,
-    ref: 'product'
+    ref: 'product',
   },
   productNumberedId: {
     type: Number,
     required: true,
   },
   variant: {
-    type: String,
+    type: { value: { type: Number, required: true }, label: { type: String, required: true } },
     required: true,
   },
   color: {
-    type: String,
+    type: { value: { type: Number, required: true }, label: { type: String, required: true } },
     required: true,
   },
   keyId: {
@@ -42,9 +42,9 @@ const productMapping = new mongoose.Schema({
   },
   variantId: {
     type: String,
-    // required: true,
-    // unique: true,
-  }        
+    required: true,
+    unique: true,
+  },
 });
 
 module.exports = mongoose.model('productMapping', productMapping)

@@ -49,10 +49,6 @@ const orderSchema = new mongoose.Schema(
       required: true,
       ref: 'customerRecord',
     },
-    merchantOrderId: {
-      type: ObjectId,
-      required: true,
-    },
     paymentId: {
       type: ObjectId,
       required: true,
@@ -86,7 +82,6 @@ const orderSchema = new mongoose.Schema(
     billingAddress: {
       aptNo: {
         type: String,
-        required: true,
       },
       street: {
         type: String,
@@ -113,7 +108,6 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.statics.createOrder = async function (
   orderId,
-  merchantOrderId,
   recordId,
   paymentId,
   printfulData,
@@ -129,7 +123,6 @@ orderSchema.statics.createOrder = async function (
   console.log(pricingResponse.shippingAmount);
   let order = new this();
   order._id = orderId;
-  order.merchantOrderId = merchantOrderId;
   order.customer = recordId;
   order.paymentId = paymentId;
   order.storeId = store._id;
