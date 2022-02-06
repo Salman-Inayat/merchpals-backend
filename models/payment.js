@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const { SUCCEEDED, FAILED, PENDING } = require('../constants/statuses');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_CUSTOMER_KEY);
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const { printfulOrder } = require('../services/printful');
+const { calculateProfit } = require('../services/calculateAmount');
+const { VENDOR_PROFIT_MARGIN, MERCHPALS_PROFIT_MARGIN } = require('../constants/margins');
+const Escrow = require('./escrow');
+const moment = require('moment');
 
 /**
  *
@@ -55,7 +60,12 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, order, customerId) {
+paymentSchema.statics.createAndChargeCustomer = async function (
+  paymentInfo,
+  order,
+  customerId,
+  printfulData,
+) {
   let payment = await this.create({
     _id: order.paymentId,
     customerId,
@@ -86,6 +96,42 @@ paymentSchema.statics.createAndChargeCustomer = async function (paymentInfo, ord
   }
 
   await payment.save();
+
+  const printfulDataFormatted = {
+    recipient: {
+      address1: `${printfulData.recipient.aptNo} ${printfulData.recipient.street}`,
+      city: printfulData.recipient.city,
+      country_code: printfulData.recipient.country,
+      state_code: printfulData.recipient.state,
+      zip: printfulData.recipient.zip,
+      tax_number: printfulData.recipient.tax_number,
+    },
+    items: order.products.map(product => ({
+      variant_id: product.productMapping.variantId,
+      quantity: product.quantity,
+      files: [{ url: product.vendorProduct.designId.url }],
+    })),
+  };
+
+  const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
+
+  if (printfulOrderResponse.code === 400) {
+    throw new Error(printfulOrderResponse.message);
+  }
+  order.printfulOrderMetadata = printfulOrderResponse;
+  await order.save();
+
+  const profit = await calculateProfit(order, printfulOrderResponse.costs);
+  // console.log({ profit });
+  const ascrow = await Escrow.create({
+    vendorId: order.vendorId,
+    orderId: order._id,
+    totalProfit: profit,
+    vendorProfit: Number(profit * VENDOR_PROFIT_MARGIN.toFixed(2)),
+    merchpalsProfit: Number(profit * MERCHPALS_PROFIT_MARGIN.toFixed(2)),
+    releaseDate: moment().add(7, 'days'),
+    status: PENDING,
+  });
 
   return payment;
 };
