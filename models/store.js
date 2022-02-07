@@ -106,9 +106,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
@@ -139,11 +137,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     themeColor: data.themeColor,
   });
 
-  const formattedStore = store.populate([
-    'vendorId',
-    'designs',
-    'productMappings',
-  ]);
+  const formattedStore = store.populate(['vendorId', 'designs', 'productMappings']);
 
   return formattedStore;
 };
@@ -191,10 +185,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
   return store;
 };
 
-storeSchema.statics.getStoreProductInfo = async function (
-  storeSlug,
-  productId,
-) {
+storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) {
   console.log({ storeSlug, productId });
   const store = await this.findOne({ slug: storeSlug });
   const productDetail = await VendorProduct.findOne({
@@ -209,17 +200,17 @@ storeSchema.statics.getStoreProductInfo = async function (
       },
     ])
     .lean();
-    
+
   let formattedProduct = {
     vendorProductId: productDetail._id,
     ...productDetail,
     ...productDetail.productId,
-    productId: productDetail.productId._id
+    productId: productDetail.productId._id,
   };
-  
+
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct);
-  
+
   return formattedMappings;
 };
 
@@ -247,9 +238,7 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
@@ -302,10 +291,10 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
 
 storeSchema.statics.updateStoreData = async function (store) {
   const storeResult = await this.findOne({ _id: store.storeId });
-  storeResult.name = store.storeData.name;
-  storeResult.logo = store.storeData.logo;
-  storeResult.coverAvatar = store.storeData.coverAvatar;
-  storeResult.themeColor = store.storeData.themeColor;
+  storeResult.name = store.name;
+  storeResult.logo = store.logo;
+  storeResult.coverAvatar = store.coverAvatar;
+  storeResult.themeColor = store.themeColor;
   await storeResult.save();
   return storeResult;
 };
@@ -353,9 +342,7 @@ storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const updatedDesign = await Design.updateOne(
     { _id: designId },
