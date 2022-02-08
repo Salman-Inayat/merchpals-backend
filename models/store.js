@@ -112,9 +112,10 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.name,
-    url: data.design.imageUrl,
-    canvasJson: data.design.canvasJson,
+    name: data.design.designName,
+    // url: data.design.imageUrl,
+    designImages: data.design.designImages,
+    designJson: data.design.designJson,
     storeId,
   });
   console.log('model store', data.themeColor);

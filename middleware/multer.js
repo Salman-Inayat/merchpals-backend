@@ -48,184 +48,66 @@ const detectMimeType = b64 => {
 };
 
 const uploadBase64 = async (req, res, next) => {
-  console.log('uploadBase64 running', req.body);
   const design = JSON.parse(req.body.design);
+  const designImages = design.designImages;
 
-  // design = {
-  //   base64Image: '',
-  //   name: '',
-  //   canvasJson
-  // }
-  buf = Buffer.from(design.base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
   var s3Bucket = new aws.S3();
 
-  var data = {
-    Bucket: BUCKET_NAME,
-    Key: `designs/${req.userData._id}/${design.name}`,
-    Body: buf,
-    ContentEncoding: 'base64',
-    ContentType: detectMimeType(design.base64Image),
-  };
-
-  try {
-    const { Location } = await s3Bucket.upload(data).promise();
-    delete design.base64Image;
-    req.body.design = {
-      imageUrl: Location,
-      ...design,
+  for (let i = 0; i < designImages.length; i++) {
+    const base64Data = designImages[i].data.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const mimeType = detectMimeType(base64Data);
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: `designs/${req.userData._id}/${designImages[i].name}`,
+      Body: buffer,
+      ContentEncoding: 'base64',
+      ContentType: mimeType,
     };
-  } catch (error) {
-    console.log(error);
+    try {
+      const { Location } = await s3Bucket.upload(params).promise();
+
+      delete designImages[i].data;
+      designImages[i] = {
+        ...designImages[i],
+        imageUrl: Location,
+      };
+      // update the image in designImage array
+
+      // designImages[image] = image;
+    } catch (error) {
+      console.log('uploadBase64', error.message);
+    }
   }
 
-  next();
+  req.body.design = {
+    ...design,
+    designImages,
+  };
 
-  // else if (req.body.storeInfo) {
-  //   var s3Bucket = new aws.S3();
-  //   const logo = req.body.storeInfo.logo;
-  //   const coverAvatar = req.body.storeInfo.coverAvatar;
+  // buf = Buffer.from(design.base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+  // var s3Bucket = new aws.S3();
 
-  //   console.log('logo', logo);
-  //   console.log('coverAvatar', coverAvatar);
+  // var data = {
+  //   Bucket: BUCKET_NAME,
+  //   Key: `designs/${req.userData._id}/${design.name}`,
+  //   Body: buf,
+  //   ContentEncoding: 'base64',
+  //   ContentType: detectMimeType(design.base64Image),
+  // };
 
-  //   if (coverAvatar.startsWith('data:image')) {
-  //     coverAvatarBuf = Buffer.from(coverAvatar.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-
-  //     var coverAvatarData = {
-  //       Bucket: BUCKET_NAME,
-  //       Key: `stores/${req.userData._id}/${makeid(10)}`,
-  //       Body: coverAvatarBuf,
-  //       ContentEncoding: 'base64',
-  //       ContentType: 'image/jpeg',
-  //     };
-
-  //     try {
-  //       const coverAvatarLocation = await s3Bucket.upload(coverAvatarData).promise();
-
-  //       delete req.body.storeInfo.coverAvatar;
-
-  //       req.body.storeInfo = {
-  //         coverAvatar: coverAvatarLocation.Location,
-  //         ...req.body.storeInfo,
-  //       };
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-
-  //   if (logo.startsWith('data:image')) {
-  //     logoBuf = Buffer.from(logo.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-
-  //     var logoData = {
-  //       Bucket: BUCKET_NAME,
-  //       Key: `stores/${req.userData._id}/${makeid(10)}`,
-  //       Body: logoBuf,
-  //       ContentEncoding: 'base64',
-  //       ContentType: 'image/jpeg',
-  //     };
-
-  //     try {
-  //       const logoLocation = await s3Bucket.upload(logoData).promise();
-
-  //       delete req.body.storeInfo.logo;
-
-  //       req.body.storeInfo = {
-  //         logo: logoLocation.Location,
-  //         ...req.body.storeInfo,
-  //       };
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-
-  //   const design = JSON.parse(req.body.storeInfo.design);
-
-  //   // design = {
-  //   //   base64Image: '',
-  //   //   name: '',
-  //   //   canvasJson
-  //   // }
-  //   buf = Buffer.from(design.base64Image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-  //   var s3Bucket = new aws.S3();
-
-  //   var designData = {
-  //     Bucket: BUCKET_NAME,
-  //     Key: `designs/${req.userData._id}/${design.name}`,
-  //     Body: buf,
-  //     ContentEncoding: 'base64',
-  //     ContentType: detectMimeType(design.base64Image),
+  // try {
+  //   const { Location } = await s3Bucket.upload(data).promise();
+  //   delete design.base64Image;
+  //   req.body.design = {
+  //     imageUrl: Location,
+  //     ...design,
   //   };
-
-  //   try {
-  //     const designlLocation = await s3Bucket.upload(designData).promise();
-  //     delete design.base64Image;
-  //     req.body.storeInfo.design = {
-  //       imageUrl: designlLocation.Location,
-  //       ...design,
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  //   next();
-  // } else {
-  //   const store = req.body.store;
-  //   var s3Bucket = new aws.S3();
-
-  //   if (store.storeData.coverAvatar.startsWith('data:image')) {
-  //     coverAvatarBuf = Buffer.from(
-  //       store.storeData.coverAvatar.replace(/^data:image\/\w+;base64,/, ''),
-  //       'base64',
-  //     );
-
-  //     var coverAvatarData = {
-  //       Bucket: BUCKET_NAME,
-  //       Key: `stores/${req.userData._id}/${makeid(10)}`,
-  //       Body: coverAvatarBuf,
-  //       ContentEncoding: 'base64',
-  //       ContentType: 'image/jpeg',
-  //     };
-
-  //     try {
-  //       const coverAvatarLocation = await s3Bucket.upload(coverAvatarData).promise();
-
-  //       delete store.storeData.coverAvatar;
-
-  //       req.body.store.storeData = {
-  //         coverAvatar: coverAvatarLocation.Location,
-  //         ...store.storeData,
-  //       };
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-
-  //   if (store.storeData.logo.startsWith('data:image')) {
-  //     logoBuf = Buffer.from(store.storeData.logo.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-
-  //     var logoData = {
-  //       Bucket: BUCKET_NAME,
-  //       Key: `stores/${req.userData._id}/${makeid(10)}`,
-  //       Body: logoBuf,
-  //       ContentEncoding: 'base64',
-  //       ContentType: 'image/jpeg',
-  //     };
-
-  //     try {
-  //       const logoLocation = await s3Bucket.upload(logoData).promise();
-
-  //       delete store.storeData.logo;
-
-  //       req.body.store.storeData = {
-  //         logo: logoLocation.Location,
-  //         ...store.storeData,
-  //       };
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  //   next();
+  // } catch (error) {
+  //   console.log(error);
   // }
+
+  next();
 };
 
 module.exports = {

@@ -25,7 +25,8 @@ const createOrder = async (req, res) => {
     await sendEmail({
       email: req.body.customer.email,
       subject: 'order sent',
-      template: 'createOrder',
+      template: 'orderCreate',
+      replacements: { order: '1002323' },
     });
 
     res.status(200).json({ order, message: 'Order created successfully' });

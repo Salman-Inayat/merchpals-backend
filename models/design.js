@@ -28,11 +28,15 @@ const designSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    url: {
-      type: String,
+    // url: {
+    //   type: String,
+    //   required: true,
+    // },
+    designImages: {
+      type: [Object],
       required: true,
     },
-    canvasJson: {
+    designJson: {
       type: String,
       required: true,
     },

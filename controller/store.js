@@ -7,7 +7,6 @@ const addStore = async (req, res) => {
     // console.log('logo', req.files.logo[0].location);
     // console.log('coverAvatar', req.files.coverAvatar[0].location);
     // console.log('designURL', req.designURL);
-    console.log('controller store', req.body.themeColor);
     const data = {
       name: req.body.name,
       slug: req.body.slug,
