@@ -109,7 +109,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (
     items: order.products.map(product => ({
       variant_id: product.productMapping.variantId,
       quantity: product.quantity,
-      files: [{ url: product.vendorProduct.designId.url }],
+      files: [{ url: product.vendorProduct.designId.designImages[2].imageUrl }],
     })),
   };
 
@@ -135,4 +135,4 @@ paymentSchema.statics.createAndChargeCustomer = async function (
 
   return payment;
 };
-module.exports = mongoose.model('payment', paymentSchema)
+module.exports = mongoose.model('payment', paymentSchema);
