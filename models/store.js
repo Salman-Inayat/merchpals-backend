@@ -150,7 +150,7 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
           { path: 'designId', select: 'name designImages' },
           { path: 'productId', select: 'name image slug basePrice' },
@@ -171,7 +171,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
           { path: 'designId', select: 'name designImages' },
           { path: 'productId', select: 'name image slug basePrice' },
@@ -180,6 +180,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
       },
     ])
     .lean();
+  console.log('vendore', store);
 
   store.vendorProductIds = labelledProductMappings(store.vendorProductIds);
   delete store.productMappings;
@@ -194,7 +195,7 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
   })
     .populate([
       { path: 'designId', select: 'name designImages' },
-      { path: 'productId', select: 'name image slug basePrice' },
+      { path: 'productId', select: 'name image slug basePrice details shippingText' },
       {
         path: 'productMappings',
         select: 'productId keyId variantId productNumberedId color variant',
@@ -207,11 +208,12 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
     ...productDetail,
     ...productDetail.productId,
     productId: productDetail.productId._id,
+    details: productDetail.productId.details,
+    shippingText: productDetail.productId.shippingText,
   };
 
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct);
-
   return formattedMappings;
 };
 

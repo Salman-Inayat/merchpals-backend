@@ -17,6 +17,8 @@ module.exports = function (products) {
       name: product.productId.name,
       image: product.productId.image,
       slug: product.productId.slug,
+      details: product.productId.details,
+      shippingText: product.productId.shippingText,
       productMappings: labelledMappings,
     };
 
@@ -24,5 +26,4 @@ module.exports = function (products) {
 
     return formattedproduct;
   });
-
 };
