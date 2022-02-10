@@ -262,13 +262,13 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 storeSchema.statics.getDesigns = async function (vendorId) {
   const store = await this.findOne({ vendorId }).populate({
     path: 'designs',
-    select: 'name url',
+    select: 'name designImages',
   });
   return store.designs;
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name url canvasJson');
+  const design = await Design.findOne({ _id: designId }, 'name  designJson');
 
   return design;
 };

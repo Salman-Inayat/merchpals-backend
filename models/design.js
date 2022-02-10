@@ -46,11 +46,9 @@ const designSchema = new mongoose.Schema(
 
 designSchema.statics.updateDesign = async function (designId, data) {
   const updatedFields = {
-    url: data.imageUrl,
-    canvasJson: data.canvasJson,
+    designJson: data.designJson,
+    designImages: data.designImages,
   };
-
-  console.log('URL', data.imageUrl);
 
   const design = await this.findByIdAndUpdate(
     designId,

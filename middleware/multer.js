@@ -59,7 +59,7 @@ const uploadBase64 = async (req, res, next) => {
     const mimeType = detectMimeType(base64Data);
     const params = {
       Bucket: BUCKET_NAME,
-      Key: `designs/${req.userData._id}/${designImages[i].name}`,
+      Key: `designs/${req.userData._id}/${designImages[i].name}-${makeid(10)}`,
       Body: buffer,
       ContentEncoding: 'base64',
       ContentType: mimeType,
