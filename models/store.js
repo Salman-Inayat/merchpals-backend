@@ -106,9 +106,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
@@ -139,11 +137,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     themeColor: data.themeColor,
   });
 
-  const formattedStore = store.populate([
-    'vendorId',
-    'designs',
-    'productMappings',
-  ]);
+  const formattedStore = store.populate(['vendorId', 'designs', 'productMappings']);
 
   return formattedStore;
 };
@@ -155,10 +149,10 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
           { path: 'designId', select: 'name url' },
-          { path: 'productId', select: 'name image slug basePrice' },
+          { path: 'productId', select: 'name image slug basePrice ' },
           { path: 'productMappings' },
         ],
       },
@@ -176,7 +170,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
           { path: 'designId', select: 'name url' },
           { path: 'productId', select: 'name image slug basePrice' },
@@ -185,16 +179,14 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
       },
     ])
     .lean();
+  console.log('vendore', store);
 
   store.vendorProductIds = labelledProductMappings(store.vendorProductIds);
   delete store.productMappings;
   return store;
 };
 
-storeSchema.statics.getStoreProductInfo = async function (
-  storeSlug,
-  productId,
-) {
+storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) {
   console.log({ storeSlug, productId });
   const store = await this.findOne({ slug: storeSlug });
   const productDetail = await VendorProduct.findOne({
@@ -202,24 +194,26 @@ storeSchema.statics.getStoreProductInfo = async function (
   })
     .populate([
       { path: 'designId', select: 'name url' },
-      { path: 'productId', select: 'name image slug basePrice' },
+      { path: 'productId', select: 'name image slug basePrice details shippingText' },
       {
         path: 'productMappings',
         select: 'productId keyId variantId productNumberedId color variant',
       },
     ])
     .lean();
-    
+
   let formattedProduct = {
     vendorProductId: productDetail._id,
     ...productDetail,
     ...productDetail.productId,
-    productId: productDetail.productId._id
+    productId: productDetail.productId._id,
+    details: productDetail.productId.details,
+    shippingText: productDetail.productId.shippingText,
   };
-  
+
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct);
-  
+  console.log('formated mappings', formattedMappings);
   return formattedMappings;
 };
 
@@ -247,9 +241,7 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
@@ -353,9 +345,7 @@ storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const updatedDesign = await Design.updateOne(
     { _id: designId },
