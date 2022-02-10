@@ -18,8 +18,6 @@ module.exports = function (products) {
       image: product.productId.image,
       slug: product.productId.slug,
       details: product.productId.details,
-      shippingText: product.productId.shippingText,
-      productMappings: labelledMappings,
     };
 
     delete formattedproduct._id;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const CustomerRecord = require('./subModels/customerRecord');
+const CustomerRecord = require('./customerRecord');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 /**
@@ -59,6 +59,5 @@ customerSchema.statics.createCustomer = async function (customerInfo, orderId, r
 
   return customer;
 };
-
 
 module.exports = mongoose.model('customer', customerSchema);
