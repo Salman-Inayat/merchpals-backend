@@ -47,7 +47,7 @@ const orderSchema = new mongoose.Schema(
     customer: {
       type: ObjectId,
       required: true,
-      ref: 'customerRec ord',
+      ref: 'customerRecord',
     },
     paymentId: {
       type: ObjectId,

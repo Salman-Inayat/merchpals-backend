@@ -74,10 +74,12 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
 
 exports.verifyOTP = catchAsync(async (req, res) => {
   try {
+    console.log(req.body.phoneNo);
     const otp = await twilioClient.verify
       .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
       .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
 
+    console.log(otp);
     if (!otp.valid) {
       throw new Error('Invalid OTP!');
     }
@@ -86,6 +88,7 @@ exports.verifyOTP = catchAsync(async (req, res) => {
     res.status(200).json({ user });
   } catch (err) {
     console.log('verifyOTP func', err.status, err.message);
+    console.log(err);
     res.status(400).json({ message: err.message });
   }
 });
@@ -132,9 +135,7 @@ exports.login = async (req, res) => {
 
 exports.loggedInUserInfo = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.userData._id }).select(
-      '-password',
-    );
+    const user = await User.findOne({ _id: req.userData._id }).select('-password');
     res.status(200).json({ user });
   } catch (error) {
     console.log('loggedInUserInfo errorr', error);

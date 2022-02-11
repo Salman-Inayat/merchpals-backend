@@ -14,10 +14,11 @@ const SendOrderEmail = async (orderId, req) => {
     totalProducts = data.price,
     totalAmount = data.totalAmount;
 
+  console.log(data);
   data.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
+      // designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
       productQuantity: productitem.quantity,
       productColor: productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
