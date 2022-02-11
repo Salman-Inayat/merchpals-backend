@@ -18,7 +18,7 @@ const SendOrderEmail = async (orderId, req) => {
   data.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      // designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
+      designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
       productQuantity: productitem.quantity,
       productColor: productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
@@ -43,6 +43,8 @@ const SendOrderEmail = async (orderId, req) => {
     tickImg: req.get('origin') + '/assets/img/tick.png',
     faqUrl: req.get('origin') + '/faq',
   };
+
+  console.log('replacements', replacements);
   return replacements;
 };
 
