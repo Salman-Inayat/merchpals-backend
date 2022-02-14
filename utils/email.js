@@ -40,7 +40,7 @@ const sendEmail = async options => {
 
   // 2) Define the email options
   const mailOptions = {
-    from: 'Merchpals <support@merchpals.com>',
+    from: 'Merchpals <no-reply@merchpals.com>',
     to: options.email,
     subject: options.subject,
     // text: options.text,

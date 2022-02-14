@@ -6,7 +6,7 @@ const Vendor = require('./vendor');
 const labelledSingleProduct = require('../utils/labelledSingleProduct');
 const labelledProductMappings = require('../utils/variantMappings');
 const Product = require('./product');
-
+const { systemRoutes } = require('../constants/systemRoutes');
 const storeSchema = new mongoose.Schema(
   {
     vendorId: {
@@ -300,6 +300,21 @@ storeSchema.statics.updateStoreData = async function (store) {
   storeResult.themeColor = store.themeColor;
   await storeResult.save();
   return storeResult;
+};
+storeSchema.statics.ValidateStoreSlug = async function (storeName) {
+  const slug = storeName
+    .replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+    .toLowerCase()
+    .split(' ')
+    .join('-');
+  const routeInclude = systemRoutes.includes(slug);
+  console.log('router include or not', routeInclude);
+  if (routeInclude) {
+    return routeInclude;
+  } else {
+    const slugExists = await this.findOne({ slug });
+    return slugExists;
+  }
 };
 
 storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
