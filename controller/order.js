@@ -83,6 +83,22 @@ const createOrder = async (req, res) => {
   }
 };
 
+const trackOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      'printfulOrderMetadata.id': req.body.orderNo,
+    });
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    res.status(200).json({ order, message: 'Order tracked successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
+  trackOrder,
 };
