@@ -3,6 +3,7 @@ const twilioClient = require('../config/twilio');
 const AppError = require('../utils/appError');
 const { catchAsync } = require('./error');
 const User = require('../models/user');
+const Vendor = require('../models/vendor');
 
 const twilioOtpService = async phoneNo => {
   try {
@@ -73,10 +74,12 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
 
 exports.verifyOTP = catchAsync(async (req, res) => {
   try {
+    console.log(req.body.phoneNo);
     const otp = await twilioClient.verify
       .services(process.env.TWILIO_MERCHPALS_VERIFICATION_SERVICE)
       .verificationChecks.create({ to: req.body.phoneNo, code: req.body.code });
 
+    console.log(otp);
     if (!otp.valid) {
       throw new Error('Invalid OTP!');
     }
@@ -85,6 +88,7 @@ exports.verifyOTP = catchAsync(async (req, res) => {
     res.status(200).json({ user });
   } catch (err) {
     console.log('verifyOTP func', err.status, err.message);
+    console.log(err);
     res.status(400).json({ message: err.message });
   }
 });
@@ -131,12 +135,29 @@ exports.login = async (req, res) => {
 
 exports.loggedInUserInfo = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.userData._id }).select(
-      '-password',
-    );
+    const user = await User.findOne({ _id: req.userData._id }).select('-password');
     res.status(200).json({ user });
   } catch (error) {
     console.log('loggedInUserInfo errorr', error);
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.sendOTPWithNewPhoneNo = catchAsync(async (req, res) => {
+  try {
+    const { oldPhoneNo, newPhoneNo } = req.body;
+
+    const oldPhoneExists = await User.findOne({ phoneNo: newPhoneNo });
+    if (oldPhoneExists) {
+      throw new Error('Phone number already exists');
+    }
+
+    await twilioOtpService(newPhoneNo);
+    await User.updatePhoneNo(oldPhoneNo, newPhoneNo);
+    await Vendor.updatePhoneNo(oldPhoneNo, newPhoneNo);
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (err) {
+    console.log('sendOTPWithNewPhoneNo func', err.status, err);
+    res.status(400).json({ message: err.message });
+  }
+});

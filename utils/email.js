@@ -40,10 +40,10 @@ const sendEmail = async options => {
 
   // 2) Define the email options
   const mailOptions = {
-    from: 'Merchpals <support@merchpals.com>',
+    from: 'Merchpals <no-reply@merchpals.com>',
     to: options.email,
     subject: options.subject,
-    text: options.text,
+    // text: options.text,
   };
   console.log({ mailOptions });
 
@@ -56,8 +56,9 @@ const sendEmail = async options => {
     });
     return;
   } else {
-    mailOptions.message = options.message;
+    mailOptions.message = options.text;
   }
+
   // 3) Actually send the email
   await transporter.sendMail(mailOptions);
 };

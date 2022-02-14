@@ -17,12 +17,11 @@ module.exports = function (products) {
       name: product.productId.name,
       image: product.productId.image,
       slug: product.productId.slug,
-      productMappings: labelledMappings,
+      details: product.productId.details,
     };
 
     delete formattedproduct._id;
 
     return formattedproduct;
   });
-
 };

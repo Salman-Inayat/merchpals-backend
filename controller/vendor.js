@@ -17,10 +17,7 @@ const getVendorInfo = async (req, res) => {
 const matchPassword = async (req, res) => {
   try {
     console.log(req.userData);
-    const isPasswordmatched = await User.matchPassword(
-      req.userData._id,
-      req.body.currentPassword,
-    );
+    const isPasswordmatched = await User.matchPassword(req.userData._id, req.body.currentPassword);
 
     res.status(200).json({ isPasswordmatched, message: 'Password matched' });
   } catch (error) {
@@ -47,7 +44,8 @@ const updatePassword = async (req, res) => {
 const updateName = async (req, res) => {
   try {
     console.log(req.body.name);
-    const user = await User.updateName(req.userData._id, req.body.name);
+    await User.updateName(req.userData._id, req.body.name);
+    await Vendor.updateName(req.userData._id, req.body.name);
 
     res.status(200).json({ message: 'Name updated successfully' });
   } catch (error) {
