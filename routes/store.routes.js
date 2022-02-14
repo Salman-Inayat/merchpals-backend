@@ -25,7 +25,8 @@ router.route('/').post(
   addStore,
 );
 
-router.route('/validate-slug/:slug').get(validateSlug);
+// router.route('/validate-slug/:slug').get(validateSlug);
+router.route('/validate-slug').post(validateSlug);
 router.route('/designs').get(auth, designs);
 router.route('/design/:designId').get(auth, singleDesign);
 router.route('/design/:designId/').put(auth, upload.array(), uploadBase64, updateDesign);

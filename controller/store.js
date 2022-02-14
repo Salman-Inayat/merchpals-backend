@@ -9,7 +9,6 @@ const addStore = async (req, res) => {
     // console.log('designURL', req.designURL);
     const data = {
       name: req.body.name,
-      slug: req.body.slug,
       design: req.body.design,
       logo: req.files.logo[0].location,
       coverAvatar: req.files.coverAvatar[0].location,
@@ -44,10 +43,12 @@ const storeInfo = async (req, res) => {
 
 const validateSlug = async (req, res) => {
   try {
-    const store = await Store.findOne({ slug: decodeURI(req.params.slug) });
+    const { storeName } = req.body;
+
+    const store = await Store.ValidateStoreSlug(storeName);
 
     if (store) {
-      throw new Error('Slug already taken');
+      throw new Error('Store name already taken');
     }
     res.status(200).json({ message: 'valid' });
   } catch (error) {
@@ -55,6 +56,19 @@ const validateSlug = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+// const validateSlug = async (req, res) => {
+//   try {
+//     const store = await Store.findOne({ slug: decodeURI(req.params.slug) });
+
+//     if (store) {
+//       throw new Error('Slug already taken');
+//     }
+//     res.status(200).json({ message: 'valid' });
+//   } catch (error) {
+//     console.log('validateSlug', error.message);
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
 const getStoreBySlug = async (req, res) => {
   try {
