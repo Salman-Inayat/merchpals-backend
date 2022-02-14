@@ -6,7 +6,6 @@ const path = require('path');
 const cors = require('cors');
 const schedule = require('node-schedule');
 var multer = require('multer');
-var upload = multer();
 // Route Imports
 const appRoutesV1 = require('./routes');
 const moveBalanceFromEsrowToVendorWallet = require('./jobs/moveBalanceFromEsrowToVendorWallet');
@@ -58,7 +57,6 @@ mongoose
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(upload.array());
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {

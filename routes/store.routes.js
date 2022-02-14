@@ -28,7 +28,7 @@ router.route('/').post(
 router.route('/validate-slug/:slug').get(validateSlug);
 router.route('/designs').get(auth, designs);
 router.route('/design/:designId').get(auth, singleDesign);
-router.route('/design/:designId/').put(auth, uploadBase64, updateDesign);
+router.route('/design/:designId/').put(auth, upload.array(), uploadBase64, updateDesign);
 router.route('/design/products/:designId').get(singleDesignProducts);
 router.route('/design/products/:designId').put(auth, updateDesignProducts);
 router.route('/add-design').post(auth, uploadBase64, addDesign);

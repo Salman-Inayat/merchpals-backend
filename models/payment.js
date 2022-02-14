@@ -115,6 +115,8 @@ paymentSchema.statics.createAndChargeCustomer = async function (
 
   const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
 
+  printfulOrderResponse.id = `MP-${printfulOrderResponse.id}`;
+
   if (printfulOrderResponse.code === 400) {
     throw new Error(printfulOrderResponse.message);
   }
