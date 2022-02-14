@@ -3,6 +3,7 @@ const RELEASED = 'released';
 const SUCCEEDED = "succeeded";
 const FAILED = "failed";
 const DELETED = 'deleted';
+const PROCESSED = 'processed';
 
 module.exports = {
   PENDING,
@@ -10,4 +11,5 @@ module.exports = {
   SUCCEEDED,
   FAILED,
   DELETED,
+  PROCESSED,
 };

@@ -98,6 +98,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (
   await payment.save();
 
   const printfulDataFormatted = {
+    external_id: order._id,
     recipient: {
       address1: `${printfulData.recipient.aptNo} ${printfulData.recipient.street}`,
       city: printfulData.recipient.city,
