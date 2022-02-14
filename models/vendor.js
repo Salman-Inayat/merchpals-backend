@@ -111,4 +111,23 @@ vendorSchema.statics.updatePhoneNo = async function (oldPhoneNo, newPhoneNo) {
   }
 };
 
+// update vendor name
+vendorSchema.statics.updateName = async function (id, data) {
+  try {
+    console.log('id', id);
+    console.log('data', data);
+    const vendor = await this.findOneAndUpdate(
+      { userId: id },
+      {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        displayName: `${data.firstName} ${data.lastName}`,
+      },
+    );
+    return vendor;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = mongoose.model('vendor', vendorSchema);
