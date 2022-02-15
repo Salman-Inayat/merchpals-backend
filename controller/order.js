@@ -109,7 +109,6 @@ const trackOrder = async (req, res) => {
       trackingNumber: response.data.result?.shipments[0]?.tracking_number,
       trackingUrl: response.data.result?.shipments[0]?.tracking_url,
       carrier: response.data.result?.shipments[0]?.carrier,
-      dashboardUrl: response.data.result.dashboard_url,
     };
 
     res.status(200).json({ data, message: 'Order tracked successfully' });
