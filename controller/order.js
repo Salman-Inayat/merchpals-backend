@@ -6,6 +6,8 @@ const sendEmail = require('../utils/email');
 const { DELETED } = require('../constants/statuses');
 const design = require('../models/design');
 const { productsSlug } = require('../constants/productMappings');
+const axios = require('axios');
+const PRINTFUL_API = 'https://api.printful.com';
 
 const SendOrderEmail = async (orderId, req) => {
   const data = await Order.getOrderById(orderId);
@@ -92,7 +94,25 @@ const trackOrder = async (req, res) => {
       throw new Error('Order not found');
     }
 
-    res.status(200).json({ order, message: 'Order tracked successfully' });
+    const orderNo = req.body.orderNo;
+    const printfulOrderId = parseInt(orderNo.slice(3));
+
+    const response = await axios.get(`${PRINTFUL_API}/orders/${printfulOrderId}`, {
+      headers: {
+        authorization: `Basic ${process.env.PRINTFUL_API_KEY}`,
+      },
+    });
+
+    const data = {
+      orderNo,
+      status: order.status,
+      trackingNumber: response.data.result?.shipments[0]?.tracking_number,
+      trackingUrl: response.data.result?.shipments[0]?.tracking_url,
+      carrier: response.data.result?.shipments[0]?.carrier,
+      dashboardUrl: response.data.result.dashboard_url,
+    };
+
+    res.status(200).json({ data, message: 'Order tracked successfully' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
