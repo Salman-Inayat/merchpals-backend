@@ -297,6 +297,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
 storeSchema.statics.updateStoreData = async function (store) {
   const storeResult = await this.findOne({ _id: store.storeId });
   storeResult.name = store.name;
+  storeResult.slug = store.slug;
   storeResult.logo = store.logo;
   storeResult.coverAvatar = store.coverAvatar;
   storeResult.themeColor = store.themeColor;
