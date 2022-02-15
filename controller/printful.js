@@ -23,12 +23,11 @@ const calculatePrice = async (req, res) => {
 const orderUpdate = async (req, res) => {
   try {
     const data = req.body.data;
-    if (req.body.type === 'package_shipped') {
-      await Order.shipped(data.order.external_id);
-    }
+    console.log(req.body);
+    await Order.shipped(req.body.type, data.order.external_id);
     res.status(200).json({ message: 'Order updated' });
   } catch (error) {
-    console.log('calculatePrice func', error, error.result);
+    console.log('orderUpdate func', error, error.result);
     res.status(400).json({ message: error.message });
   }
 };
@@ -36,4 +35,3 @@ module.exports = {
   calculatePrice,
   orderUpdate,
 };
-orderUpdate;

@@ -4,7 +4,20 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const Store = require('./store');
 const { priceCalculation } = require('../services/printful');
 const { mapColor } = require('../utils/colorAndVariantMappingForOrder');
-const { DELETED, SUCCEEDED, PROCESSED } = require('../constants/statuses');
+const {
+  DELETED,
+  SUCCEEDED,
+  PROCESSED_BY_PRINTFUL,
+  RETURNED_BY_PRINTFUL,
+  CANCELLED_BY_PRINTFUL,
+} = require('../constants/statuses');
+
+const TYPE = {
+  package_shipped: PROCESSED_BY_PRINTFUL,
+  package_returned: RETURNED_BY_PRINTFUL,
+  order_canceled: CANCELLED_BY_PRINTFUL,
+};
+
 /**
  *
  * @field size
@@ -74,7 +87,13 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       default: SUCCEEDED,
-      enum: [SUCCEEDED, DELETED, PROCESSED],
+      enum: [
+        SUCCEEDED,
+        DELETED,
+        PROCESSED_BY_PRINTFUL,
+        RETURNED_BY_PRINTFUL,
+        CANCELLED_BY_PRINTFUL,
+      ],
     },
     printfulOrderMetadata: {
       type: Object,
@@ -209,10 +228,11 @@ orderSchema.statics.getOrderById = async function (orderId) {
   return mappedOrder;
 };
 
-orderSchema.statics.shipped = async function (printful_external_id) {
+orderSchema.statics.shipped = async function (type, printful_external_id) {
+  console.log({ type, printful_external_id });
   const updatedOrder = await this.findOneAndUpdate(
-    { _id: printful_external_id },
-    { status: PROCESSED },
+    { _id: '620a14e1c73695d427952979' },
+    { status: TYPE[type] },
   );
 };
 module.exports = mongoose.model('order', orderSchema);
