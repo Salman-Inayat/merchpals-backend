@@ -229,10 +229,10 @@ orderSchema.statics.getOrderById = async function (orderId) {
 };
 
 orderSchema.statics.shipped = async function (type, printful_external_id) {
-  console.log({ type, printful_external_id });
   const updatedOrder = await this.findOneAndUpdate(
-    { _id: '620a14e1c73695d427952979' },
+    { _id: printful_external_id },
     { status: TYPE[type] },
   );
 };
+
 module.exports = mongoose.model('order', orderSchema);
