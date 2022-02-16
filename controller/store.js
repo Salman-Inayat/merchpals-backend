@@ -147,6 +147,7 @@ const updateStoreData = async (req, res) => {
     const data = {
       storeId: req.body.storeId,
       name: req.body.name,
+      slug: req.body.name.replace(/\s+/g, '-').toLowerCase(),
       logo: req.files.logo ? req.files.logo[0].location : store.logo,
       coverAvatar: req.files.coverAvatar ? req.files.coverAvatar[0].location : store.coverAvatar,
       themeColor: req.body.themeColor ? req.body.themeColor : store.themeColor,

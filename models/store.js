@@ -224,10 +224,12 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
   const designId = mongoose.Types.ObjectId();
   const store = await this.findOne({ vendorId });
 
-  const productIds = data.products.map(p => p.productId);
+  const dataProducts = JSON.parse(data.products);
+
+  const productIds = dataProducts.map(p => p.productId);
   const products = await Product.find({ _id: { $in: productIds } });
 
-  data.products.forEach(product => {
+  dataProducts.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
     const price = dbProduct.minPrice;
 
@@ -247,9 +249,9 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.name,
-    url: data.design.imageUrl,
-    canvasJson: data.design.canvasJson,
+    name: data.design.designName,
+    designImages: data.design.designImages,
+    designJson: data.design.designJson,
     storeId: store,
   });
 
@@ -295,6 +297,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
 storeSchema.statics.updateStoreData = async function (store) {
   const storeResult = await this.findOne({ _id: store.storeId });
   storeResult.name = store.name;
+  storeResult.slug = store.slug;
   storeResult.logo = store.logo;
   storeResult.coverAvatar = store.coverAvatar;
   storeResult.themeColor = store.themeColor;
