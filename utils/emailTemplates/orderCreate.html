@@ -14,6 +14,36 @@
     <title></title>
 
     <style type="text/css">
+      .tshirt {
+        width: 30%;
+        margin-left: 35%;
+        margin-top: -20px;
+      }
+      .longsleeve {
+        width: 35%;
+        margin-left: 32%;
+        margin-top: 0%;
+      }
+      .hoodie {
+        width: 35%;
+        margin-left: 32%;
+        margin-top: 0%;
+      }
+      .Case {
+        width: 30%;
+        margin-left: 35%;
+        margin-top: 10%;
+      }
+      .poster {
+        width: 52%;
+        margin-left: 24%;
+        margin-top: 0%;
+      }
+      .mug {
+        width: 35%;
+        margin-left: 35%;
+        margin-top: 10%;
+      }
       @media (max-width: 550px) {
         #u_content_heading_9 .v-container-padding-padding {
           padding: 3px 10px 10px 30px !important;
@@ -25,15 +55,29 @@
       @media (max-width: 480px) {
         .confirmation {
           line-height: 140% !important;
+          font-size: 20px !important;
+        }
+        .orderid {
+          font-size: 16px !important;
         }
         .heading {
-          padding: 10px 0 0px 24px !important;
+          padding: 10px 0 0px 0px !important;
         }
         #u_content_heading_9 .v-container-padding-padding {
-          padding: 10px 0 0px 24px !important;
+          padding: 10px 0 0px 0px !important;
         }
         #u_content_image_6 .v-src-width {
           width: auto !important;
+        }
+        .productText {
+          font-size: 14px !important;
+        }
+        .productTextMargin {
+          margin-left: 20% !important;
+        }
+        .gotOrder {
+          font-size: 16px !important;
+          padding: 27px 5px 10px 11px !important;
         }
       }
       @media only screen and (min-width: 620px) {
@@ -103,7 +147,7 @@
         line-height: inherit;
       }
 
-      a[x-apple-data-detectors="true"] {
+      a[x-apple-data-detectors='true'] {
         color: inherit !important;
         text-decoration: none !important;
       }
@@ -155,10 +199,7 @@
           <td style="word-break: break-word !important">
             <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="background-color: #f8f8f8;"><![endif]-->
 
-            <div
-              class="u-row-container"
-              style="padding: 0px; background-color: transparent"
-            >
+            <div class="u-row-container" style="padding: 0px; background-color: transparent">
               <div
                 class="u-row"
                 style="
@@ -171,27 +212,15 @@
                   background-color: #040541;
                 "
               >
-                <div
-                  style="
-                    display: table;
-                    width: 100%;
-                    background-color: transparent;
-                  "
-                >
+                <div style="display: table; width: 100%; background-color: transparent">
                   <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #040541;"><![endif]-->
 
                   <!--[if (mso)|(IE)]><td align="center" width="600" style="background-color: #ffffff;width: 600px;padding: 30px 10px 0px 20px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                   <div
                     class="u-col u-col-100"
-                    style="
-                      max-width: 320px;
-                      min-width: 600px;
-                      display: table-cell;
-                    "
+                    style="max-width: 320px; min-width: 600px; display: table-cell"
                   >
-                    <div
-                      style="background-color: #ffffff; width: 100% !important"
-                    >
+                    <div style="background-color: #ffffff; width: 100% !important">
                       <!--[if (!mso)&(!IE)]><!--><div
                         style="
                           padding: 30px 10px 0px 20px;
@@ -212,7 +241,7 @@
                           <tbody>
                             <tr>
                               <td
-                                class="v-container-padding-padding"
+                                class="v-container-padding-padding gotOrder"
                                 style="
                                   overflow-wrap: break-word;
                                   word-break: break-word;
@@ -222,7 +251,7 @@
                                 align="left"
                               >
                                 <h2
-                                  class="v-font-size"
+                                  class="v-font-size gotOrder"
                                   style="
                                     margin: 0px;
                                     color: #141313;
@@ -234,7 +263,7 @@
                                     font-size: 18px;
                                   "
                                 >
-                                  We got your order!(<span> {{order}}</span>)
+                                  We got your order!(<span>{{orderId}}</span>)
                                 </h2>
                               </td>
                             </tr>
@@ -275,11 +304,9 @@
                                     font-size: 16px;
                                   "
                                 >
-                                  Thanks for your order! The order has processed
-                                  and your details are below. Please allow up to
-                                  3-5 business days for your tracking
-                                  information to be available and sent to your
-                                  email.
+                                  Thanks for your order! The order has processed and your details
+                                  are below. Please allow up to 3-5 business days for your tracking
+                                  information to be available and sent to your email.
                                 </h2>
                               </td>
                             </tr>
@@ -297,10 +324,7 @@
               </div>
             </div>
 
-            <div
-              class="u-row-container"
-              style="padding: 0px; background-color: transparent"
-            >
+            <div class="u-row-container" style="padding: 0px; background-color: transparent">
               <div
                 class="u-row"
                 style="
@@ -313,13 +337,7 @@
                   background-color: #ffffff;
                 "
               >
-                <div
-                  style="
-                    display: table;
-                    width: 100%;
-                    background-color: transparent;
-                  "
-                >
+                <div style="display: table; width: 100%; background-color: transparent">
                   <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #ffffff;"><![endif]-->
 
                   <!--[if (mso)|(IE)]><td align="center" width="82" style="width: 82px;padding: 3px 0px 0px 19px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;" valign="top"><![endif]-->
@@ -364,25 +382,16 @@
                               "
                               align="left"
                             >
-                              <table
-                                width="100%"
-                                cellpadding="0"
-                                cellspacing="0"
-                                border="0"
-                              >
+                              <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                   <td
-                                    style="
-                                      padding-right: 0px;
-                                      padding-left: 0px;
-                                      width: 80px;
-                                    "
+                                    style="padding-right: 0px; padding-left: 0px; width: 80px"
                                     align="justify"
                                   >
                                     <img
                                       align="justify"
                                       border="0"
-                                      src="images/tick.png"
+                                      src="{{tickImg}}"
                                       alt=""
                                       title=""
                                       style="
@@ -413,12 +422,11 @@
                                               text-align: left;
                                               word-wrap: break-word;
                                               font-weight: normal;
-                                              font-family: arial, helvetica,
-                                                sans-serif;
+                                              font-family: arial, helvetica, sans-serif;
                                               font-size: 16px;
                                             "
                                           >
-                                            Order #1002454
+                                            Order #{{orderId}}
                                           </h1>
 
                                           <h1
@@ -434,7 +442,8 @@
                                             "
                                           >
                                             <strong
-                                              >Thank you Rehman Ali!</strong
+                                              >Thank you {{customerFirstName}}
+                                              {{customerLastName}}</strong
                                             >
                                           </h1>
                                         </tr>
@@ -456,10 +465,7 @@
               </div>
             </div>
 
-            <div
-              class="u-row-container"
-              style="padding: 0px; background-color: transparent"
-            >
+            <div class="u-row-container" style="padding: 0px; background-color: transparent">
               <div
                 class="u-row"
                 style="
@@ -472,23 +478,13 @@
                   background-color: #ffffff;
                 "
               >
-                <div
-                  style="
-                    display: table;
-                    width: 100%;
-                    background-color: transparent;
-                  "
-                >
+                <div style="display: table; width: 100%; background-color: transparent">
                   <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #ffffff;"><![endif]-->
 
                   <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px 0px 40px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;" valign="top"><![endif]-->
                   <div
                     class="u-col u-col-100"
-                    style="
-                      max-width: 320px;
-                      min-width: 600px;
-                      display: table-cell;
-                    "
+                    style="max-width: 320px; min-width: 600px; display: table-cell"
                   >
                     <div
                       style="
@@ -587,7 +583,7 @@
                                 >
                                   <strong
                                     >Order Confirmation Number:<br /><span
-                                      >#1002356</span
+                                      >#{{orderId}}</span
                                     ></strong
                                   >
                                 </h1>
@@ -632,10 +628,7 @@
                                   "
                                 >
                                   <strong>Shipping to:</strong><br />
-                                  <span style="font-weight: bold"
-                                    >420 N block <br />Redondo Beach, CA
-                                    90267<br />United State</span
-                                  >
+                                  <span style="font-weight: bold">{{address}}</span>
                                 </h1>
                               </td>
                               <td>
@@ -660,37 +653,33 @@
                                         align="left"
                                       >
                                         <h1
-                                          class="v-font-size"
+                                          class="v-font-size orderid"
                                           style="
                                             margin: 0px;
                                             line-height: 140%;
                                             text-align: left;
                                             word-wrap: break-word;
                                             font-weight: normal;
-                                            font-family: arial, helvetica,
-                                              sans-serif;
+                                            font-family: arial, helvetica, sans-serif;
                                             font-size: 18px;
                                           "
                                         >
-                                          <strong>ORDER #</strong><br /><span
-                                            >1002667</span
-                                          >
+                                          <strong>ORDER #</strong><br /><span>{{orderId}}</span>
                                         </h1>
                                         <h1
-                                          class="v-font-size"
+                                          class="v-font-size orderid"
                                           style="
                                             margin-top: 5px;
                                             line-height: 140%;
                                             text-align: left;
                                             word-wrap: break-word;
                                             font-weight: normal;
-                                            font-family: arial, helvetica,
-                                              sans-serif;
+                                            font-family: arial, helvetica, sans-serif;
                                             font-size: 18px;
                                           "
                                         >
                                           <strong>ORDER DATE</strong><br /><span
-                                            >1002896</span
+                                            >{{orderDate}}</span
                                           >
                                         </h1>
                                       </td>
@@ -701,6 +690,7 @@
                             </tr>
                           </tbody>
                         </table>
+                        {{#each products}}
                         <table
                           style="
                             font-family: 'Montserrat', sans-serif;
@@ -725,47 +715,38 @@
                                 "
                                 align="left"
                               >
-                                <table
-                                  width="100%"
-                                  cellpadding="0"
-                                  cellspacing="0"
-                                  border="0"
-                                >
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                   <tr>
                                     <td
                                       style="
+                                        background-image: url('{{this.productImg}}');
+                                        background-repeat: no-repeat;
+                                        background-size: 100% 100%;
                                         padding-right: 0px;
-                                        padding-left: 10px;
+                                        padding-left: 0px;
+                                        outline: none;
+                                        text-decoration: none;
+                                        -ms-interpolation-mode: bicubic;
+                                        clear: both;
+                                        width: 37%;
+                                       position: relative;
+                                       
+                                      background-color:
+                                      {{this.productColor}};
                                       "
                                       align="left"
                                     >
                                       <img
+                                        class="v-src-width v-src-max-width {{this.productSlug}}"
                                         align="left"
                                         border="0"
-                                        src="images/hoodie.png"
-                                        alt=""
-                                        title=""
-                                        style="
-                                          outline: none;
-                                          text-decoration: none;
-                                          -ms-interpolation-mode: bicubic;
-                                          clear: both;
-                                          display: inline-block !important;
-                                          border: none;
-                                          height: auto;
-                                          float: none;
-                                          width: 100%;
-                                          max-width: 170.8px;
-                                        "
-                                        width="170.8"
-                                        class="v-src-width v-src-max-width"
+                                        src="{{this.designImg}}"
                                       />
                                     </td>
+
                                     <td>
                                       <table
-                                        style="
-                                          font-family: 'Montserrat', sans-serif;
-                                        "
+                                        style="font-family: 'Montserrat', sans-serif"
                                         role="presentation"
                                         cellpadding="0"
                                         cellspacing="0"
@@ -779,27 +760,29 @@
                                               style="
                                                 overflow-wrap: break-word;
                                                 word-break: break-word;
-                                                padding: 3px 10px 10px 60px;
-                                                font-family: 'Montserrat',
-                                                  sans-serif;
+                                                padding: 3px 10px 10px 100px;
+                                                font-family: 'Montserrat', sans-serif;
                                               "
                                               align="left"
                                             >
                                               <h1
-                                                class="v-font-size"
+                                                class="v-font-size productText productTextMargin"
                                                 style="
                                                   margin: 0px;
+                                                  margin-left: 12%;
                                                   line-height: 200%;
                                                   text-align: left;
                                                   word-wrap: break-word;
                                                   font-weight: normal;
-                                                  font-family: arial, helvetica,
-                                                    sans-serif;
-                                                  font-size: 19px;
+                                                  font-family: arial, helvetica, sans-serif;
+                                                  font-size: 16px;
+                                                  text-transform: uppercase;
                                                 "
                                               >
-                                                Hoodie // jimmy<br />Size: L<br />Quantity:
-                                                2<br />Color: Black<br />$47.89
+                                                {{this.productName}}<br />Size:
+                                                {{this.productSize}}<br />Quantity:
+                                                {{this.productQuantity}}<br />Color:
+                                                {{this.productColor}}<br />${{this.productTotalAmount}}
                                               </h1>
                                             </td>
                                           </tr>
@@ -812,6 +795,7 @@
                             </tr>
                           </tbody>
                         </table>
+                        {{/each}}
                         <table
                           style="
                             font-family: 'Montserrat', sans-serif;
@@ -838,43 +822,29 @@
                                 "
                                 align="left"
                               >
-                                <table
-                                  width="100%"
-                                  cellpadding="0"
-                                  cellspacing="0"
-                                  border="0"
-                                >
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                   <tr>
-                                    <td
-                                      style="
-                                        padding-right: 0px;
-                                        padding-left: 0px;
-                                      "
-                                      align="left"
-                                    >
+                                    <td style="padding-right: 0px; padding-left: 0px" align="left">
                                       <h1
-                                        class="v-font-size"
+                                        class="v-font-size productText"
                                         style="
                                           margin: 0px;
                                           line-height: 170%;
                                           text-align: left;
                                           word-wrap: break-word;
                                           font-weight: normal;
-                                          font-family: arial, helvetica,
-                                            sans-serif;
+                                          font-family: arial, helvetica, sans-serif;
                                           font-size: 16px;
                                           font-weight: bold;
                                         "
                                       >
-                                        Total Products<br />Order Cost<br />Total
-                                        Shipping<br /><br />Total Order
+                                        Total Products<br />Order Cost<br />Total Shipping<br /><br />Total
+                                        Order
                                       </h1>
                                     </td>
                                     <td>
                                       <table
-                                        style="
-                                          font-family: 'Montserrat', sans-serif;
-                                        "
+                                        style="font-family: 'Montserrat', sans-serif"
                                         role="presentation"
                                         cellpadding="0"
                                         cellspacing="0"
@@ -884,13 +854,12 @@
                                         <tbody>
                                           <tr>
                                             <td
-                                              class="v-container-padding-padding heading"
+                                              class="v-container-padding-padding heading productText"
                                               style="
                                                 overflow-wrap: break-word;
                                                 word-break: break-word;
                                                 padding: 3px 10px 10px 60px;
-                                                font-family: 'Montserrat',
-                                                  sans-serif;
+                                                font-family: 'Montserrat', sans-serif;
                                               "
                                               align="left"
                                             >
@@ -902,14 +871,14 @@
                                                   text-align: left;
                                                   word-wrap: break-word;
                                                   font-weight: normal;
-                                                  font-family: arial, helvetica,
-                                                    sans-serif;
+                                                  font-family: arial, helvetica, sans-serif;
                                                   font-size: 16px;
                                                   font-weight: bold;
                                                 "
                                               >
-                                                47.99 USD <br />7.99 USD<br />FREE<br /><br />56.78
-                                                USD
+                                                {{totalProducts}} USD
+                                                <br />{{orderCost}} USD<br />{{totalShipping}}
+                                                USD<br />{{totalOrder}} USD
                                               </h1>
                                             </td>
                                           </tr>
@@ -934,10 +903,7 @@
               </div>
             </div>
 
-            <div
-              class="u-row-container"
-              style="padding: 0px; background-color: transparent"
-            >
+            <div class="u-row-container" style="padding: 0px; background-color: transparent">
               <div
                 class="u-row"
                 style="
@@ -950,23 +916,13 @@
                   background-color: #ffffff;
                 "
               >
-                <div
-                  style="
-                    display: table;
-                    width: 100%;
-                    background-color: transparent;
-                  "
-                >
+                <div style="display: table; width: 100%; background-color: transparent">
                   <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #ffffff;"><![endif]-->
 
                   <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;" valign="top"><![endif]-->
                   <div
                     class="u-col u-col-100"
-                    style="
-                      max-width: 320px;
-                      min-width: 600px;
-                      display: table-cell;
-                    "
+                    style="max-width: 320px; min-width: 600px; display: table-cell"
                   >
                     <div
                       style="
@@ -1025,11 +981,8 @@
                                   <strong>Have Questions?<br /></strong
                                   ><span
                                     ><a
-                                      href="#"
-                                      style="
-                                        text-decoration: underline;
-                                        color: black;
-                                      "
+                                      href="{{faqUrl}}"
+                                      style="text-decoration: underline; color: black"
                                       >FAQ Here</a
                                     ></span
                                   >

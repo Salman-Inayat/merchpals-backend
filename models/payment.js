@@ -98,6 +98,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (
   await payment.save();
 
   const printfulDataFormatted = {
+    external_id: mongoose.Types.ObjectId(),
     recipient: {
       address1: `${printfulData.recipient.aptNo} ${printfulData.recipient.street}`,
       city: printfulData.recipient.city,
@@ -109,11 +110,13 @@ paymentSchema.statics.createAndChargeCustomer = async function (
     items: order.products.map(product => ({
       variant_id: product.productMapping.variantId,
       quantity: product.quantity,
-      files: [{ url: product.vendorProduct.designId.url }],
+      files: [{ url: product.vendorProduct.designId.designImages[2].imageUrl }],
     })),
   };
 
   const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
+
+  printfulOrderResponse.id = `MP-${printfulOrderResponse.id}`;
 
   if (printfulOrderResponse.code === 400) {
     throw new Error(printfulOrderResponse.message);
@@ -135,4 +138,4 @@ paymentSchema.statics.createAndChargeCustomer = async function (
 
   return payment;
 };
-module.exports = mongoose.model('payment', paymentSchema)
+module.exports = mongoose.model('payment', paymentSchema);

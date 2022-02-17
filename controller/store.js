@@ -7,15 +7,13 @@ const addStore = async (req, res) => {
     // console.log('logo', req.files.logo[0].location);
     // console.log('coverAvatar', req.files.coverAvatar[0].location);
     // console.log('designURL', req.designURL);
-    console.log('controller store', req.body.storeInfo.themeColor);
     const data = {
-      name: req.body.storeInfo.name,
-      slug: req.body.storeInfo.slug,
-      design: req.body.storeInfo.design,
-      logo: req.body.storeInfo.logo,
-      coverAvatar: req.body.storeInfo.coverAvatar,
-      products: JSON.parse(req.body.storeInfo.products),
-      themeColor: req.body.storeInfo.themeColor,
+      name: req.body.name,
+      design: req.body.design,
+      logo: req.files.logo[0].location,
+      coverAvatar: req.files.coverAvatar[0].location,
+      products: JSON.parse(req.body.products),
+      themeColor: req.body.themeColor,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);
@@ -45,10 +43,12 @@ const storeInfo = async (req, res) => {
 
 const validateSlug = async (req, res) => {
   try {
-    const store = await Store.findOne({ slug: decodeURI(req.params.slug) });
+    const { storeName } = req.body;
+
+    const store = await Store.ValidateStoreSlug(storeName);
 
     if (store) {
-      throw new Error('Slug already taken');
+      throw new Error('Store name already taken');
     }
     res.status(200).json({ message: 'valid' });
   } catch (error) {
@@ -56,6 +56,19 @@ const validateSlug = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+// const validateSlug = async (req, res) => {
+//   try {
+//     const store = await Store.findOne({ slug: decodeURI(req.params.slug) });
+
+//     if (store) {
+//       throw new Error('Slug already taken');
+//     }
+//     res.status(200).json({ message: 'valid' });
+//   } catch (error) {
+//     console.log('validateSlug', error.message);
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
 const getStoreBySlug = async (req, res) => {
   try {
@@ -109,10 +122,7 @@ const singleDesignProducts = async (req, res) => {
 
 const updateDesign = async (req, res) => {
   try {
-    const design = await Designs.updateDesign(
-      req.params.designId,
-      req.body.design,
-    );
+    const design = await Designs.updateDesign(req.params.designId, req.body.design);
     res.status(200).json({ design });
   } catch (error) {
     console.log('updateDesign', error.message);
@@ -122,11 +132,7 @@ const updateDesign = async (req, res) => {
 
 const updateDesignProducts = async (req, res) => {
   try {
-    const design = await Store.updateDesign(
-      req.params.designId,
-      req.userData.vendorId,
-      req.body,
-    );
+    const design = await Store.updateDesign(req.params.designId, req.userData.vendorId, req.body);
     res.status(200).json({ design });
   } catch (error) {
     console.log('updateDesignProducts', error.message);
@@ -136,8 +142,19 @@ const updateDesignProducts = async (req, res) => {
 
 const updateStoreData = async (req, res) => {
   try {
-    const store = await Store.updateStoreData(req.body.store);
-    res.status(200).json({ store });
+    const store = await Store.findById(req.body.storeId);
+
+    const data = {
+      storeId: req.body.storeId,
+      name: req.body.name,
+      slug: req.body.name.replace(/\s+/g, '-').toLowerCase(),
+      logo: req.files.logo ? req.files.logo[0].location : store.logo,
+      coverAvatar: req.files.coverAvatar ? req.files.coverAvatar[0].location : store.coverAvatar,
+      themeColor: req.body.themeColor ? req.body.themeColor : store.themeColor,
+    };
+
+    const updatedStore = await Store.updateStoreData(data);
+    res.status(200).json({ updatedStore });
   } catch (error) {
     console.log('updateStoreData', error.message);
     res.status(400).json({ message: error.message });

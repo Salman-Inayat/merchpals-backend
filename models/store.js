@@ -6,7 +6,7 @@ const Vendor = require('./vendor');
 const labelledSingleProduct = require('../utils/labelledSingleProduct');
 const labelledProductMappings = require('../utils/variantMappings');
 const Product = require('./product');
-
+const { systemRoutes } = require('../constants/systemRoutes');
 const storeSchema = new mongoose.Schema(
   {
     vendorId: {
@@ -106,17 +106,16 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.name,
-    url: data.design.imageUrl,
-    canvasJson: data.design.canvasJson,
+    name: data.design.designName,
+    // url: data.design.imageUrl,
+    designImages: data.design.designImages,
+    designJson: data.design.designJson,
     storeId,
   });
   console.log('model store', data.themeColor);
@@ -139,11 +138,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     themeColor: data.themeColor,
   });
 
-  const formattedStore = store.populate([
-    'vendorId',
-    'designs',
-    'productMappings',
-  ]);
+  const formattedStore = store.populate(['vendorId', 'designs', 'productMappings']);
 
   return formattedStore;
 };
@@ -155,9 +150,9 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name url' },
+          { path: 'designId', select: 'name designImages' },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
@@ -176,50 +171,49 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
       { path: 'vendorId', select: 'displayName email phoneNumber avatar' },
       {
         path: 'vendorProductIds',
-        select: 'designId productId productMappings',
+        select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name url' },
+          { path: 'designId', select: 'name designImages' },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
       },
     ])
     .lean();
+  console.log('vendore', store);
 
   store.vendorProductIds = labelledProductMappings(store.vendorProductIds);
   delete store.productMappings;
   return store;
 };
 
-storeSchema.statics.getStoreProductInfo = async function (
-  storeSlug,
-  productId,
-) {
+storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) {
   console.log({ storeSlug, productId });
   const store = await this.findOne({ slug: storeSlug });
   const productDetail = await VendorProduct.findOne({
     _id: productId, // need to be vendor productID
   })
     .populate([
-      { path: 'designId', select: 'name url' },
-      { path: 'productId', select: 'name image slug basePrice' },
+      { path: 'designId', select: 'name designImages' },
+      { path: 'productId', select: 'name image slug basePrice details shippingText' },
       {
         path: 'productMappings',
         select: 'productId keyId variantId productNumberedId color variant',
       },
     ])
     .lean();
-    
+
   let formattedProduct = {
     vendorProductId: productDetail._id,
     ...productDetail,
     ...productDetail.productId,
-    productId: productDetail.productId._id
+    productId: productDetail.productId._id,
+    details: productDetail.productId.details,
+    shippingText: productDetail.productId.shippingText,
   };
-  
+
   delete formattedProduct.productId;
   const formattedMappings = labelledSingleProduct(formattedProduct);
-  
   return formattedMappings;
 };
 
@@ -230,10 +224,12 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
   const designId = mongoose.Types.ObjectId();
   const store = await this.findOne({ vendorId });
 
-  const productIds = data.products.map(p => p.productId);
+  const dataProducts = JSON.parse(data.products);
+
+  const productIds = dataProducts.map(p => p.productId);
   const products = await Product.find({ _id: { $in: productIds } });
 
-  data.products.forEach(product => {
+  dataProducts.forEach(product => {
     const dbProduct = products.find(p => p._id.equals(product.productId));
     const price = dbProduct.minPrice;
 
@@ -247,17 +243,15 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.name,
-    url: data.design.imageUrl,
-    canvasJson: data.design.canvasJson,
+    name: data.design.designName,
+    designImages: data.design.designImages,
+    designJson: data.design.designJson,
     storeId: store,
   });
 
@@ -272,13 +266,13 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 storeSchema.statics.getDesigns = async function (vendorId) {
   const store = await this.findOne({ vendorId }).populate({
     path: 'designs',
-    select: 'name url',
+    select: 'name designImages',
   });
   return store.designs;
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name url canvasJson');
+  const design = await Design.findOne({ _id: designId }, 'name  designJson');
 
   return design;
 };
@@ -302,12 +296,28 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
 
 storeSchema.statics.updateStoreData = async function (store) {
   const storeResult = await this.findOne({ _id: store.storeId });
-  storeResult.name = store.storeData.name;
-  storeResult.logo = store.storeData.logo;
-  storeResult.coverAvatar = store.storeData.coverAvatar;
-  storeResult.themeColor = store.storeData.themeColor;
+  storeResult.name = store.name;
+  storeResult.slug = store.slug;
+  storeResult.logo = store.logo;
+  storeResult.coverAvatar = store.coverAvatar;
+  storeResult.themeColor = store.themeColor;
   await storeResult.save();
   return storeResult;
+};
+storeSchema.statics.ValidateStoreSlug = async function (storeName) {
+  const slug = storeName
+    .replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+    .toLowerCase()
+    .split(' ')
+    .join('-');
+  const routeInclude = systemRoutes.includes(slug);
+  console.log('router include or not', routeInclude);
+  if (routeInclude) {
+    return routeInclude;
+  } else {
+    const slugExists = await this.findOne({ slug });
+    return slugExists;
+  }
 };
 
 storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
@@ -353,9 +363,7 @@ storeSchema.statics.updateDesign = async function (designId, vendorId, data) {
     });
   });
 
-  const vendorProducts = await VendorProduct.insertMany(
-    formattedVendorProducts,
-  );
+  const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   const updatedDesign = await Design.updateOne(
     { _id: designId },

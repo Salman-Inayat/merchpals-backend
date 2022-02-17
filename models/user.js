@@ -111,6 +111,23 @@ userSchema.statics.updatePhoneVerification = async function (phoneNo) {
   }
 };
 
+userSchema.statics.updatePhoneNo = async function (oldPhoneNo, newPhoneNo) {
+  try {
+    console.log('oldPhoneNo', oldPhoneNo);
+    console.log('newPhoneNo', newPhoneNo);
+    const user = await this.findOneAndUpdate(
+      { phoneNo: oldPhoneNo },
+      {
+        phoneNo: newPhoneNo,
+        phoneNoVerified: false,
+      },
+    );
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 userSchema.statics.updatePassword = async function (data) {
   try {
     const password = await bcrypt.hash(data.password, 12);
