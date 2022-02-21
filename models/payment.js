@@ -116,12 +116,14 @@ paymentSchema.statics.createAndChargeCustomer = async function (
 
   const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
 
-  printfulOrderResponse.id = `MP-${printfulOrderResponse.id}`;
+  // printfulOrderResponse.id = `MP-${printfulOrderResponse.id}`;
 
   if (printfulOrderResponse.code === 400) {
     throw new Error(printfulOrderResponse.message);
   }
   order.printfulOrderMetadata = printfulOrderResponse;
+  order.orderNo = parseInt(`900${order.printfulOrderMetadata.id}`);
+
   await order.save();
 
   const profit = await calculateProfit(order, printfulOrderResponse.costs);

@@ -89,14 +89,14 @@ const createOrder = async (req, res) => {
 const trackOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
-      'printfulOrderMetadata.id': req.body.orderNo,
+      orderNo: req.body.orderNo,
     });
     if (!order) {
       throw new Error('Order not found');
     }
 
     const orderNo = req.body.orderNo;
-    const printfulOrderId = parseInt(orderNo.slice(3));
+    const printfulOrderId = orderNo.slice(3);
 
     const response = await axios.get(`${PRINTFUL_API}/orders/${printfulOrderId}`, {
       headers: {
@@ -114,6 +114,7 @@ const trackOrder = async (req, res) => {
 
     res.status(200).json({ data, message: 'Order tracked successfully' });
   } catch (error) {
+    console.log('track order controller', error);
     res.status(400).json({ message: error.message });
   }
 };

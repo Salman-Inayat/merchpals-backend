@@ -98,6 +98,9 @@ const orderSchema = new mongoose.Schema(
     printfulOrderMetadata: {
       type: Object,
     },
+    orderNo: {
+      type: Number,
+    },
     billingAddress: {
       aptNo: {
         type: String,
