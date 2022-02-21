@@ -3,32 +3,39 @@ const Designs = require('../models/design');
 
 const addStore = async (req, res) => {
   try {
-    const uploadedFiles = Object.entries(req.files).map(design => {
-      return {
-        name: design[0],
-        imageUrl: design[1][0].location,
-      };
-    });
+    // const uploadedFiles = Object.entries(req.files).map(design => {
+    //   return {
+    //     name: design[0],
+    //     imageUrl: design[1][0].location,
+    //   };
+    // });
 
-    const designImages = uploadedFiles.filter(function (el) {
-      return el.name != 'logo' && el.name != 'coverAvatar';
-    });
+    // const designImages = uploadedFiles.filter(function (el) {
+    //   return el.name != 'logo' && el.name != 'coverAvatar';
+    // });
 
     const data = {
       name: req.body.name,
       design: {
         designName: req.body.designName,
-        designJson: req.body.designJson,
-        designImages: designImages,
+        // designJson: req.body.designJson,
+        // designImages: designImages,
       },
-      logo: req.files.logo[0].location,
-      coverAvatar: req.files.coverAvatar[0].location,
+      // logo: req.files.logo[0].location,
+      // coverAvatar: req.files.coverAvatar[0].location,
+      urls: req.body.URLS,
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);
-    res.status(200).json({ store, message: 'Store created successfully' });
+    res.status(200).json({
+      data: {
+        store,
+        urls: data.urls,
+      },
+      message: 'Store created successfully',
+    });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });

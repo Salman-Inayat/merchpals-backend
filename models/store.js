@@ -108,14 +108,27 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
+  const urlArray = Object.entries(data.urls).map(url => {
+    return {
+      name: url[0],
+      imageUrl: url[1],
+    };
+  });
+
+  const designs = urlArray.filter(function (el) {
+    return el.name != 'logo' && el.name != 'coverAvatar';
+  });
+
+  console.log('DESIGNS:::::::::::::::: ', designs);
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.designName,
-    // url: data.design.imageUrl,
-    designImages: data.design.designImages,
-    designJson: data.design.designJson,
+    // designImages: data.design.designImages,
+    // designJson: data.design.designJson,
+    designImages: designs,
     storeId,
   });
   console.log('model store', data.themeColor);
@@ -124,7 +137,8 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     name: data.name,
     vendorId,
     designs: [designId],
-    logo: data.logo,
+    // logo: data.logo,
+    logo: data.urls.logo,
     socialHandles: {
       youtube: data.youtube,
       twitch: data.twitch,
@@ -132,7 +146,8 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
       tiktok: data.tiktok,
     },
     slug,
-    coverAvatar: data.coverAvatar,
+    // coverAvatar: data.coverAvatar,
+    coverAvatar: data.urls.coverAvatar,
     productMappings: allProductsMappings,
     vendorProductIds: vendorProducts.map(p => p._id),
     themeColor: data.themeColor,

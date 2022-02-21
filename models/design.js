@@ -38,7 +38,7 @@ const designSchema = new mongoose.Schema(
     },
     designJson: {
       type: String,
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true },

@@ -13,19 +13,20 @@ const {
   updateStoreData,
 } = require('../controller/store');
 const auth = require('../middleware/auth');
-const { upload, uploadBase64 } = require('../middleware/multer');
+const { upload, uploadBase64, generatePresignedURLs } = require('../middleware/multer');
 
 router.route('/').post(
   auth,
-  upload.fields([
-    { name: '3600x3600', maxCount: 1 },
-    { name: '2700x2700', maxCount: 1 },
-    { name: '1050x1050', maxCount: 1 },
-    { name: '879x1833', maxCount: 1 },
-    { name: 'thumbnail', maxCount: 1 },
-    { name: 'logo', maxCount: 1 },
-    { name: 'coverAvatar', maxCount: 1 },
-  ]),
+  // upload.fields([
+  //   { name: '3600x3600', maxCount: 1 },
+  //   { name: '2700x2700', maxCount: 1 },
+  //   { name: '1050x1050', maxCount: 1 },
+  //   { name: '879x1833', maxCount: 1 },
+  //   { name: 'thumbnail', maxCount: 1 },
+  //   { name: 'logo', maxCount: 1 },
+  //   { name: 'coverAvatar', maxCount: 1 },
+  // ]),
+  generatePresignedURLs,
   addStore,
 );
 

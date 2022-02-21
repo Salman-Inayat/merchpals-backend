@@ -1,7 +1,8 @@
 const multer = require('multer');
 const aws = require('aws-sdk');
 const multerS3 = require('multer-s3');
-const BUCKET_NAME = 'merchpals-mvp';
+// const BUCKET_NAME = 'merchpals-mvp';
+const BUCKET_NAME = 'dummy-merchpals';
 
 aws.config.update({
   accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
@@ -29,7 +30,6 @@ const upload = multer({
       cb(null, 'stores/' + req.userData._id + '/' + file.originalname + '-' + makeid(10));
     },
   }),
-  limits: { fileSize: 5000000 },
 });
 
 const signatures = {
@@ -112,7 +112,66 @@ const uploadBase64 = async (req, res, next) => {
   next();
 };
 
+const generatePresignedURLs = async (req, res, next) => {
+  const s3 = new aws.S3();
+
+  const logoURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'logo', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const coverAvatarURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'coverAvatar', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const designVariant1URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'designVariant1', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const designVariant2URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'designVariant2', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const designVariant3URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'designVariant3', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const designVariant4URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'designVariant4', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  const designVariant5URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: 'designVariant5', //filename
+    Expires: 60 * 5, //time to expire in seconds
+  });
+
+  req.body.URLS = {
+    logo: logoURL,
+    coverAvatar: coverAvatarURL,
+    variant1: designVariant1URL,
+    variant2: designVariant2URL,
+    variant3: designVariant3URL,
+    variant4: designVariant4URL,
+    variant5: designVariant5URL,
+  };
+
+  next();
+};
+
 module.exports = {
   upload,
   uploadBase64,
+  generatePresignedURLs,
 };
