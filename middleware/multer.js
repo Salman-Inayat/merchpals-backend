@@ -29,6 +29,7 @@ const upload = multer({
       cb(null, 'stores/' + req.userData._id + '/' + file.originalname + '-' + makeid(10));
     },
   }),
+  limits: { fileSize: 5000000 },
 });
 
 const signatures = {

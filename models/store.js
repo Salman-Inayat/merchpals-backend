@@ -217,7 +217,8 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
   return formattedMappings;
 };
 
-storeSchema.statics.createDesign = async function (data, vendorId) {
+storeSchema.statics.createDesign = async function (req, vendorId) {
+  const data = req.body;
   let allProductsMappings = [];
   let formattedVendorProducts = [];
 
@@ -245,13 +246,20 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
+  const designImages = Object.entries(req.files).map(design => {
+    return {
+      name: design[0],
+      imageUrl: design[1][0].location,
+    };
+  });
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.designName,
-    designImages: data.design.designImages,
-    designJson: data.design.designJson,
+    name: data.designName,
+    designImages: designImages,
+    designJson: data.designJson,
     storeId: store,
   });
 

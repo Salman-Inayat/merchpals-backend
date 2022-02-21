@@ -44,10 +44,17 @@ const designSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-designSchema.statics.updateDesign = async function (designId, data) {
+designSchema.statics.updateDesign = async function (designId, req) {
+  const designImages = Object.entries(req.files).map(design => {
+    return {
+      name: design[0],
+      imageUrl: design[1][0].location,
+    };
+  });
+
   const updatedFields = {
-    designJson: data.designJson,
-    designImages: data.designImages,
+    designJson: req.body.designJson,
+    designImages: designImages,
   };
 
   const design = await this.findByIdAndUpdate(

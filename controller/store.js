@@ -3,13 +3,24 @@ const Designs = require('../models/design');
 
 const addStore = async (req, res) => {
   try {
-    // console.log('req', req.body);
-    // console.log('logo', req.files.logo[0].location);
-    // console.log('coverAvatar', req.files.coverAvatar[0].location);
-    // console.log('designURL', req.designURL);
+    const uploadedFiles = Object.entries(req.files).map(design => {
+      return {
+        name: design[0],
+        imageUrl: design[1][0].location,
+      };
+    });
+
+    const designImages = uploadedFiles.filter(function (el) {
+      return el.name != 'logo' && el.name != 'coverAvatar';
+    });
+
     const data = {
       name: req.body.name,
-      design: req.body.design,
+      design: {
+        designName: req.body.designName,
+        designJson: req.body.designJson,
+        designImages: designImages,
+      },
       logo: req.files.logo[0].location,
       coverAvatar: req.files.coverAvatar[0].location,
       products: JSON.parse(req.body.products),
@@ -92,7 +103,7 @@ const designs = async (req, res) => {
 
 const addDesign = async (req, res) => {
   try {
-    const design = await Store.createDesign(req.body, req.userData.vendorId);
+    const design = await Store.createDesign(req, req.userData.vendorId);
     res.status(200).json({ design });
   } catch (error) {
     console.log('addDesign', error.message);
@@ -122,7 +133,9 @@ const singleDesignProducts = async (req, res) => {
 
 const updateDesign = async (req, res) => {
   try {
-    const design = await Designs.updateDesign(req.params.designId, req.body.design);
+    // const design = await Designs.updateDesign(req.params.designId, req.body.design);
+    const design = await Designs.updateDesign(req.params.designId, req);
+
     res.status(200).json({ design });
   } catch (error) {
     console.log('updateDesign', error.message);
