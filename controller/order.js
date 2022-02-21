@@ -16,7 +16,7 @@ const SendOrderEmail = async (orderId, req) => {
     totalProducts = data.price,
     totalAmount = data.totalAmount;
 
-  console.log(data);
+  console.log('order fetched data', data);
   data.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
@@ -46,8 +46,8 @@ const SendOrderEmail = async (orderId, req) => {
     faqUrl: req.get('origin') + '/faq',
   };
 
-  console.log('replacements', replacements);
-  return replacements;
+  // console.log('replacements', replacements);
+  return data;
 };
 
 const createOrder = async (req, res) => {
@@ -64,9 +64,10 @@ const createOrder = async (req, res) => {
       req.body.printfulData,
       req.body.storeUrl,
     );
+    console.log('order', order);
     await Payment.createAndChargeCustomer(req.body.payment, order, recordId, req.body.printfulData);
     const data = await SendOrderEmail(order._id, req);
-    console.log('function response', data);
+
     await sendEmail({
       email: req.body.customer.email,
       subject: 'order sent',
@@ -75,7 +76,7 @@ const createOrder = async (req, res) => {
       // text: 'rehman ali text',
     });
 
-    res.status(200).json({ order, message: 'Order created successfully' });
+    res.status(200).json({ order, data, message: 'Order created successfully' });
   } catch (error) {
     await Order.findByIdAndUpdate(orderId, { $set: { status: DELETED } });
     await Payment.findByIdAndRemove(paymentId);
