@@ -55,8 +55,8 @@ mongoose
     console.log('connection failed');
   });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ extended: true, limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {
