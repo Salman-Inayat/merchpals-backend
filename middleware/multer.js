@@ -7,7 +7,8 @@ const BUCKET_NAME = 'dummy-merchpals';
 aws.config.update({
   accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
   secretAccessKey: 'gVr6A976ziFZhfXDFH1kYIche731om7UcQPwDrMY',
-  region: 'us-east-2',
+  // region: 'us-east-2',
+  region: 'us-east-1',
 });
 
 const makeid = length => {
@@ -113,59 +114,138 @@ const uploadBase64 = async (req, res, next) => {
 };
 
 const generatePresignedURLs = async (req, res, next) => {
-  const s3 = new aws.S3();
-
-  const logoURL = s3.getSignedUrl('getObject', {
+  const s3 = new aws.S3({
+    accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
+    secretAccessKey: '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',
+    region: 'us-east-1',
     Bucket: BUCKET_NAME,
-    Key: 'logo', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    signatureVersion: 'v4',
   });
 
-  const coverAvatarURL = s3.getSignedUrl('getObject', {
+  // getUrls to be stored in the db
+  const getLogoURL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'coverAvatar', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/logo.png`,
   });
 
-  const designVariant1URL = s3.getSignedUrl('getObject', {
+  const getLoverAvatarURL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'designVariant1', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/coverAvatar.png`,
   });
 
-  const designVariant2URL = s3.getSignedUrl('getObject', {
+  const getDesignVariant1URL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'designVariant2', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/designVariant1.png`,
   });
 
-  const designVariant3URL = s3.getSignedUrl('getObject', {
+  const getDesignVariant2URL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'designVariant3', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/designVariant2.png`,
   });
 
-  const designVariant4URL = s3.getSignedUrl('getObject', {
+  const getDesignVariant3URL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'designVariant4', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/designVariant3.png`,
   });
 
-  const designVariant5URL = s3.getSignedUrl('getObject', {
+  const getDesignVariant4URL = s3.getSignedUrl('getObject', {
     Bucket: BUCKET_NAME,
-    Key: 'designVariant5', //filename
-    Expires: 60 * 5, //time to expire in seconds
+    Key: `uploads/${req.userData._id}/designVariant4.png`,
+  });
+
+  const getDesignVariant5URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant5.png`,
+  });
+
+  const getDesignJsonURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/design.json`,
+  });
+
+  // putUrls to be sent to the frontend where PUT request is made
+
+  const putLogoURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/logo.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putCoverAvatarURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/coverAvatar.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant1URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant1.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant2URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant2.png`,
+
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant3URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant3.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant4URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant4.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant5URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant5.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignJsonURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/design.json`,
+    Expires: 600 * 5,
+    ContentType: 'application/json',
   });
 
   req.body.URLS = {
-    logo: logoURL,
-    coverAvatar: coverAvatarURL,
-    variant1: designVariant1URL,
-    variant2: designVariant2URL,
-    variant3: designVariant3URL,
-    variant4: designVariant4URL,
-    variant5: designVariant5URL,
+    putUrls: {
+      logo: putLogoURL,
+      coverAvatar: putCoverAvatarURL,
+      variant1: putDesignVariant1URL,
+      variant2: putDesignVariant2URL,
+      variant3: putDesignVariant3URL,
+      variant4: putDesignVariant4URL,
+      variant5: putDesignVariant5URL,
+      designJson: putDesignJsonURL,
+    },
+    getUrls: {
+      logo: getLogoURL,
+      coverAvatar: getLoverAvatarURL,
+      variant1: getDesignVariant1URL,
+      variant2: getDesignVariant2URL,
+      variant3: getDesignVariant3URL,
+      variant4: getDesignVariant4URL,
+      variant5: getDesignVariant5URL,
+      designJson: getDesignJsonURL,
+    },
   };
+
+  console.log(req.body.URLS.getUrls);
 
   next();
 };

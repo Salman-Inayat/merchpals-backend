@@ -1,5 +1,6 @@
 const Store = require('../models/store');
 const Designs = require('../models/design');
+const { generatePresignedURLs } = require('../utils/generateUrls');
 
 const addStore = async (req, res) => {
   try {
@@ -14,6 +15,7 @@ const addStore = async (req, res) => {
     //   return el.name != 'logo' && el.name != 'coverAvatar';
     // });
 
+    const urls = generatePresignedURLs();
     const data = {
       name: req.body.name,
       design: {
@@ -21,9 +23,7 @@ const addStore = async (req, res) => {
         // designJson: req.body.designJson,
         // designImages: designImages,
       },
-      // logo: req.files.logo[0].location,
-      // coverAvatar: req.files.coverAvatar[0].location,
-      urls: req.body.URLS,
+      urls: urls,
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
     };
@@ -32,7 +32,7 @@ const addStore = async (req, res) => {
     res.status(200).json({
       data: {
         store,
-        urls: data.urls,
+        urls: urls.putUrls,
       },
       message: 'Store created successfully',
     });
