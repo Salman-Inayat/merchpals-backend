@@ -209,6 +209,10 @@ orderSchema.statics.getOrderById = async function (orderId) {
         path: 'customer',
       },
       {
+        path: 'storeId',
+        select: 'name',
+      },
+      {
         path: 'products',
         populate: [
           {
