@@ -4,26 +4,13 @@ const { generatePresignedURLs } = require('../utils/generateUrls');
 
 const addStore = async (req, res) => {
   try {
-    // const uploadedFiles = Object.entries(req.files).map(design => {
-    //   return {
-    //     name: design[0],
-    //     imageUrl: design[1][0].location,
-    //   };
-    // });
-
-    // const designImages = uploadedFiles.filter(function (el) {
-    //   return el.name != 'logo' && el.name != 'coverAvatar';
-    // });
-
     const urls = generatePresignedURLs();
     const data = {
       name: req.body.name,
       design: {
         designName: req.body.designName,
-        // designJson: req.body.designJson,
-        // designImages: designImages,
       },
-      urls: urls,
+      urls: urls.getUrls,
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
     };

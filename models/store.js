@@ -108,24 +108,20 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const urlArray = Object.entries(data.urls.getUrls).map(url => {
-    return {
-      name: url[0],
-      imageUrl: url[1],
-    };
+  const designs = data.urls.filter(function (el) {
+    return el.name != 'logo.png' && el.name != 'cover-avatar.png' && el.name != 'design.json';
   });
 
-  const designs = urlArray.filter(function (el) {
-    return el.name != 'logo' && el.name != 'coverAvatar' && el.name != 'designJson';
-  });
+  const designJson = data.urls.find(el => el.name === 'design.json');
+  const logo = data.urls.find(el => el.name === 'logo.png');
+  const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
 
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.designName,
-    // designImages: data.design.designImages,
-    designJson: data.urls.getUrls.designJson,
+    designJson: designJson.imageUrl,
     designImages: designs,
     storeId,
   });
@@ -135,8 +131,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     name: data.name,
     vendorId,
     designs: [designId],
-    // logo: data.logo,
-    logo: data.urls.getUrls.logo,
+    logo: logo.imageUrl,
     socialHandles: {
       youtube: data.youtube,
       twitch: data.twitch,
@@ -144,8 +139,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
       tiktok: data.tiktok,
     },
     slug,
-    // coverAvatar: data.coverAvatar,
-    coverAvatar: data.urls.getUrls.coverAvatar,
+    coverAvatar: coverAvatar.imageUrl,
     productMappings: allProductsMappings,
     vendorProductIds: vendorProducts.map(p => p._id),
     themeColor: data.themeColor,
