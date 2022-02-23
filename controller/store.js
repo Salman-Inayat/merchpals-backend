@@ -135,10 +135,19 @@ const singleDesignProducts = async (req, res) => {
 
 const updateDesign = async (req, res) => {
   try {
+    const urls = generateDesignPresignedURLs();
+
+    req.body = {
+      ...req.body,
+      urls: urls.getUrls,
+    };
+
     // const design = await Designs.updateDesign(req.params.designId, req.body.design);
     const design = await Designs.updateDesign(req.params.designId, req);
 
-    res.status(200).json({ design });
+    const response = urls.putUrls;
+
+    res.status(200).json({ response });
   } catch (error) {
     console.log('updateDesign', error.message);
     res.status(400).json({ message: error.message });
