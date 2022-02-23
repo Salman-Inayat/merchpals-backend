@@ -226,6 +226,7 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
 
 storeSchema.statics.createDesign = async function (req, vendorId) {
   const data = req.body;
+
   let allProductsMappings = [];
   let formattedVendorProducts = [];
 
@@ -253,12 +254,9 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const designImages = Object.entries(req.files).map(design => {
-    return {
-      name: design[0],
-      imageUrl: design[1][0].location,
-    };
-  });
+  const designJson = data.urls.find(el => el.name === 'design.json');
+  data.urls.pop();
+  const designImages = data.urls;
 
   const newDesign = await Design.create({
     _id: designId,
@@ -266,7 +264,7 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
     vendorProductIds: vendorProducts,
     name: data.designName,
     designImages: designImages,
-    designJson: data.designJson,
+    designJson: designJson.imageUrl,
     storeId: store,
   });
 

@@ -1,14 +1,14 @@
 const multer = require('multer');
 const aws = require('aws-sdk');
 const multerS3 = require('multer-s3');
-// const BUCKET_NAME = 'merchpals-mvp';
-const BUCKET_NAME = 'dummy-merchpals';
+const BUCKET_NAME = 'merchpals-mvp';
+// const BUCKET_NAME = 'dummy-merchpals';
 
 aws.config.update({
   accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
   secretAccessKey: 'gVr6A976ziFZhfXDFH1kYIche731om7UcQPwDrMY',
-  // region: 'us-east-2',
-  region: 'us-east-1',
+  region: 'us-east-2',
+  // region: 'us-east-1',
 });
 
 const makeid = length => {
