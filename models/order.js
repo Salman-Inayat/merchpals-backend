@@ -158,17 +158,25 @@ orderSchema.statics.createOrder = async function (
   order.billingAddress = printfulData.recipient;
 
   await order.save();
-  const fullOrder = await this.findOne({ _id: order._id }).populate({
-    path: 'products',
-    populate: [
-      {
-        path: 'vendorProduct',
-        select: 'designId price',
-        populate: { path: 'designId', select: 'designImages' },
-      },
-      { path: 'productMapping' },
-    ],
-  });
+  const fullOrder = await this.findOne({ _id: order._id }).populate([
+    {
+      path: 'customer',
+    },
+    {
+      path: 'products',
+      populate: [
+        {
+          path: 'vendorProduct',
+          select: 'designId productId price',
+          populate: [
+            { path: 'designId', select: 'designImages' },
+            { path: 'productId', select: 'name image minPrice basePrice slug' },
+          ],
+        },
+        { path: 'productMapping' },
+      ],
+    },
+  ]);
 
   return fullOrder;
 };
