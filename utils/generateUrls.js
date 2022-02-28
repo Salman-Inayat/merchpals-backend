@@ -21,12 +21,15 @@ const generatePresignedURLs = () => {
   const urlNames = [
     'logo.png',
     'cover-avatar.png',
-    '3600x3600.png',
-    '2700x2700.png',
-    '1050x1050.png',
-    '879x1833.png',
-    'thumbnail.png',
-    'design.json',
+    'front-3600x3600.png',
+    'front-2700x2700.png',
+    'front-1050x1050.png',
+    'front-879x1833.png',
+    'front-thumbnail.png',
+    'front-design.json',
+    'back-2700x2700.png',
+    'back-thumbnail.png',
+    'back-design.json',
   ];
 
   const getUrls = urlNames.map(name => {
@@ -77,12 +80,15 @@ const generateDesignPresignedURLs = () => {
   const id = uuidv4();
 
   const urlNames = [
-    '3600x3600.png',
-    '2700x2700.png',
-    '1050x1050.png',
-    '879x1833.png',
-    'thumbnail.png',
-    'design.json',
+    'front-3600x3600.png',
+    'front-2700x2700.png',
+    'front-1050x1050.png',
+    'front-879x1833.png',
+    'front-thumbnail.png',
+    'front-design.json',
+    'back-2700x2700.png',
+    'back-thumbnail.png',
+    'back-design.json',
   ];
 
   const getUrls = urlNames.map(name => {

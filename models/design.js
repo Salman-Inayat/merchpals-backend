@@ -32,14 +32,22 @@ const designSchema = new mongoose.Schema(
     //   type: String,
     //   required: true,
     // },
-    designImages: {
-      type: [Object],
+    frontDesign: {
+      type: Object,
       required: true,
     },
-    designJson: {
-      type: String,
-      // required: true,
+    backDesign: {
+      type: Object,
+      required: true,
     },
+    // designImages: {
+    //   type: [Object],
+    //   required: true,
+    // },
+    // designJson: {
+    //   type: String,
+    //   // required: true,
+    // },
   },
   { timestamps: true },
 );
