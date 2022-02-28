@@ -110,7 +110,22 @@ paymentSchema.statics.createAndChargeCustomer = async function (
     items: order.products.map(product => ({
       variant_id: product.productMapping.variantId,
       quantity: product.quantity,
-      files: [{ url: product.vendorProduct.designId.designImages[2].imageUrl }],
+      files: [
+        {
+          url:
+            product.vendorProduct.productId.name === 'Long Sleeve' ||
+            product.vendorProduct.productId.name === 'Tee' ||
+            product.vendorProduct.productId.name === 'Hoodie'
+              ? product.vendorProduct.designId.designImages[1].imageUrl
+              : product.vendorProduct.productId.name === 'Poster'
+              ? product.vendorProduct.designId.designImages[0].imageUrl
+              : product.vendorProduct.productId.name === 'Mug'
+              ? product.vendorProduct.designId.designImages[2].imageUrl
+              : product.vendorProduct.productId.name === 'Case'
+              ? product.vendorProduct.designId.designImages[3].imageUrl
+              : product.vendorProduct.designId.designImages[0].imageUrl,
+        },
+      ],
     })),
   };
 

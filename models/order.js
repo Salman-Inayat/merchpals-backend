@@ -163,8 +163,11 @@ orderSchema.statics.createOrder = async function (
     populate: [
       {
         path: 'vendorProduct',
-        select: 'designId price',
-        populate: { path: 'designId', select: 'designImages' },
+        select: 'designId price productId',
+        populate: [
+          { path: 'designId', select: 'designImages' },
+          { path: 'productId', select: 'name' },
+        ],
       },
       { path: 'productMapping' },
     ],
