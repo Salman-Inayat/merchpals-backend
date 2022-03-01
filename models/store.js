@@ -184,7 +184,11 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
         path: 'vendorProductIds',
         select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name front.designImages' },
+          {
+            path: 'designId',
+            select: 'name frontDesign',
+            populate: [{ path: 'frontDesign', select: 'designImages' }],
+          },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
@@ -205,7 +209,11 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
         path: 'vendorProductIds',
         select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name front.designImages' },
+          {
+            path: 'designId',
+            select: 'name frontDesign',
+            populate: [{ path: 'frontDesign', select: 'designImages' }],
+          },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
@@ -226,7 +234,11 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
     _id: productId, // need to be vendor productID
   })
     .populate([
-      { path: 'designId', select: 'name front.designImages' },
+      {
+        path: 'designId',
+        select: 'name frontDesign',
+        populate: [{ path: 'frontDesign', select: 'designImages' }],
+      },
       { path: 'productId', select: 'name image slug basePrice details shippingText' },
       {
         path: 'productMappings',
@@ -304,13 +316,19 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 storeSchema.statics.getDesigns = async function (vendorId) {
   const store = await this.findOne({ vendorId }).populate({
     path: 'designs',
-    select: 'name front.designImages',
+    select: 'name frontDesign',
+    populate: [{ path: 'frontDesign', select: 'designImages' }],
   });
   return store.designs;
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name  front.designJson');
+  const design = await Design.findOne({ _id: designId }, 'name frontDesign backDesign', {
+    populate: [
+      { path: 'frontDesign', select: 'designJson' },
+      { path: 'backDesign', select: 'designJson' },
+    ],
+  });
 
   return design;
 };
@@ -321,7 +339,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
       path: 'vendorProductIds',
       select: 'designId productId productMappings price',
       populate: [
-        { path: 'designId', select: 'name url' },
+        { path: 'designId', select: 'name frontDesign backDesign' },
         { path: 'productId', select: 'name image slug basePrice' },
         { path: 'productMappings' },
       ],

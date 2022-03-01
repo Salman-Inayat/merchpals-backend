@@ -169,7 +169,7 @@ orderSchema.statics.createOrder = async function (
           path: 'vendorProduct',
           select: 'designId productId price',
           populate: [
-            { path: 'designId', select: 'front.designImages' },
+            { path: 'designId', select: 'front', populate: { path: 'designImages' } },
             { path: 'productId', select: 'name image minPrice basePrice slug' },
           ],
         },
@@ -194,7 +194,12 @@ orderSchema.statics.getOrders = async function (vendorId) {
             path: 'vendorProduct',
             select: 'designId productId price',
             populate: [
-              { path: 'designId', select: 'name front.designImages' },
+              {
+                path: 'designId',
+                select: 'name frontDesign',
+                populate: [{ path: 'frontDesign', select: 'designImages' }],
+              },
+
               { path: 'productId', select: 'name image minPrice basePrice slug' },
             ],
           },
@@ -227,7 +232,11 @@ orderSchema.statics.getOrderById = async function (orderId) {
             path: 'vendorProduct',
             select: 'designId productId price',
             populate: [
-              { path: 'designId', select: 'name front.designImages' },
+              {
+                path: 'designId',
+                select: 'name frontDesign',
+                populate: [{ path: 'frontDesign', select: 'designImages' }],
+              },
               { path: 'productId', select: 'name image minPrice basePrice slug' },
             ],
           },
