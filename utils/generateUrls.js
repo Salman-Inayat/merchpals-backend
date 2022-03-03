@@ -6,16 +6,14 @@ aws.config.update({
   secretAccessKey: process.env.AWS_MP_SYSTEM_SECRET_KEY,
   region: process.env.AWS_S3_REGION,
 });
-
+const s3 = new aws.S3({
+  accessKeyId: process.env.AWS_MP_SYSTEM_ACCESS_ID,
+  secretAccessKey: process.env.AWS_MP_SYSTEM_SECRET_KEY,
+  region: process.env.AWS_S3_REGION,
+  Bucket: process.env.AWS_S3_DESIGN_BUCKET,
+  signatureVersion: 'v4',
+});
 const generatePresignedURLs = () => {
-  const s3 = new aws.S3({
-    accessKeyId: process.env.AWS_MP_SYSTEM_ACCESS_ID,
-    secretAccessKey: process.env.AWS_MP_SYSTEM_SECRET_KEY,
-    region: process.env.AWS_S3_REGION,
-    Bucket: process.env.AWS_S3_DESIGN_BUCKET,
-    signatureVersion: 'v4',
-  });
-
   const id = uuidv4();
 
   const urlNames = [
@@ -33,11 +31,6 @@ const generatePresignedURLs = () => {
   ];
 
   const getUrls = urlNames.map(name => {
-    const params = {
-      Bucket: process.env.AWS_S3_DESIGN_BUCKET,
-      Key: `${id}/${name}`,
-    };
-
     const URL = `https://${process.env.AWS_S3_DESIGN_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${id}/${name}`;
     return {
       name,
@@ -69,14 +62,6 @@ const generatePresignedURLs = () => {
 };
 
 const generateDesignPresignedURLs = () => {
-  const s3 = new aws.S3({
-    accessKeyId: process.env.AWS_MP_SYSTEM_ACCESS_ID,
-    secretAccessKey: process.env.AWS_MP_SYSTEM_SECRET_KEY,
-    region: process.env.AWS_S3_REGION,
-    Bucket: process.env.AWS_S3_DESIGN_BUCKET,
-    signatureVersion: 'v4',
-  });
-
   const id = uuidv4();
 
   const urlNames = [
@@ -92,11 +77,6 @@ const generateDesignPresignedURLs = () => {
   ];
 
   const getUrls = urlNames.map(name => {
-    const params = {
-      Bucket: process.env.AWS_S3_DESIGN_BUCKET,
-      Key: `${id}/${name}`,
-    };
-
     const URL = `https://${process.env.AWS_S3_DESIGN_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${id}/${name}`;
     return {
       name,
@@ -126,8 +106,43 @@ const generateDesignPresignedURLs = () => {
 
   return urls;
 };
+const generateProfileUrls = () => {
+  const id = uuidv4();
 
+  const urlNames = ['logo.png', 'cover-avatar.png'];
+
+  const getUrls = urlNames.map(name => {
+    const URL = `https://${process.env.AWS_S3_DESIGN_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${id}/${name}`;
+    return {
+      name,
+      imageUrl: URL,
+    };
+  });
+
+  const putUrls = urlNames.map(name => {
+    const params = {
+      Bucket: process.env.AWS_S3_DESIGN_BUCKET,
+      Key: `${id}/${name}`,
+      Expires: 60 * 5,
+      ContentType: 'image/png',
+    };
+
+    const URL = s3.getSignedUrl('putObject', params);
+    return {
+      name,
+      imageUrl: URL,
+    };
+  });
+
+  const urls = {
+    putUrls,
+    getUrls,
+  };
+
+  return urls;
+};
 module.exports = {
   generatePresignedURLs,
   generateDesignPresignedURLs,
+  generateProfileUrls,
 };

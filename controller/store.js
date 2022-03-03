@@ -1,6 +1,10 @@
 const Store = require('../models/store');
 const Designs = require('../models/design');
-const { generatePresignedURLs, generateDesignPresignedURLs } = require('../utils/generateUrls');
+const {
+  generatePresignedURLs,
+  generateDesignPresignedURLs,
+  generateProfileUrls,
+} = require('../utils/generateUrls');
 
 const addStore = async (req, res) => {
   try {
@@ -28,7 +32,35 @@ const addStore = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+const AddStoreAfter = async (req, res) => {
+  console.log('add store after', req.body);
+  try {
+    const urls = generateProfileUrls();
+    const data = {
+      name: req.body.name,
+      urls: urls.getUrls,
+      themeColor: req.body.themeColor,
+      socialHandles: {
+        tiktok: req.body.tiktok,
+        instagram: req.body.instagram,
+        youtube: req.body.youtube,
+        twitch: req.body.twitch,
+      },
+    };
+    const store = await Store.createStoreAndEssenceAfter(req.userData, data);
 
+    res.status(200).json({
+      data: {
+        store,
+        urls: urls.putUrls,
+      },
+      message: 'Store created successfully',
+    });
+  } catch (error) {
+    console.log('addStore error', error.message);
+    res.status(400).json({ message: error.message });
+  }
+};
 /**
  *
  * @modelFunc {getLabeledInfo} it will always be the naming convention for the functions on
@@ -90,8 +122,8 @@ const designs = async (req, res) => {
     const designs = await Store.getDesigns(req.userData.vendorId);
     res.status(200).json({ designs });
   } catch (e) {
-    console.log('designs', error.message);
-    res.status(400).json({ message: error.message });
+    console.log('designs', e.message);
+    res.status(400).json({ message: e.message });
   }
 };
 
@@ -187,6 +219,7 @@ const updateStoreData = async (req, res) => {
 
 module.exports = {
   addStore,
+  AddStoreAfter,
   storeInfo,
   validateSlug,
   getStoreBySlug,

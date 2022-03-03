@@ -85,7 +85,6 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   const vendorId = await Vendor.findOne({ userId: userData._id });
   let allProductsMappings = [];
   let formattedVendorProducts = [];
-
   data.products.forEach(product => {
     allProductsMappings.push(...product.productMappings);
   });
@@ -173,6 +172,44 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   const formattedStore = store.populate(['vendorId', 'designs', 'productMappings']);
 
   return formattedStore;
+};
+storeSchema.statics.createStoreAndEssenceAfter = async function (userData, data) {
+  const slug = data.name
+    .replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+    .toLowerCase()
+    .split(' ')
+    .join('-');
+
+  const slugExists = await this.findOne({ slug });
+
+  if (slugExists) {
+    throw new Error('Slug already taken');
+  }
+
+  const storeId = mongoose.Types.ObjectId();
+
+  const vendorId = await Vendor.findOne({ userId: userData._id });
+  console.log('vendor id', vendorId);
+  const logo = data.urls.find(el => el.name === 'logo.png');
+  const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
+
+  const store = await this.create({
+    _id: storeId,
+    name: data.name,
+    vendorId,
+    logo: logo.imageUrl,
+    socialHandles: {
+      youtube: data.youtube,
+      twitch: data.twitch,
+      instagram: data.instagram,
+      tiktok: data.tiktok,
+    },
+    slug,
+    coverAvatar: coverAvatar.imageUrl,
+    themeColor: data.themeColor,
+  });
+  console.log('create store successfully', store);
+  return store;
 };
 
 storeSchema.statics.getLabeledInfo = async function (userId) {
