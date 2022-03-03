@@ -55,13 +55,24 @@ const designSchema = new mongoose.Schema(
 designSchema.statics.updateDesign = async function (designId, req) {
   const data = req.body;
 
-  const designJson = data.urls.find(el => el.name === 'design.json');
-  data.urls.pop();
-  const designImages = data.urls;
+  const frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+  const backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+
+  const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
+  const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
+
+  console.log('frontDesignImages', frontDesignImages);
+  console.log('backDesignImages', backDesignImages);
 
   const updatedFields = {
-    designJson: designJson.imageUrl,
-    designImages: designImages,
+    frontDesign: {
+      designJson: frontDesignJson.imageUrl,
+      designImages: frontDesignImages,
+    },
+    backDesign: {
+      designJson: backDesignJson.imageUrl,
+      designImages: backDesignImages,
+    },
   };
 
   const design = await this.findByIdAndUpdate(
