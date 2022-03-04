@@ -23,6 +23,7 @@ const calculatePrice = async (req, res) => {
 const orderUpdate = async (req, res) => {
   try {
     const data = req.body.data;
+    console.log('update order data', data, req.body.type);
     await Order.shipped(req.body.type, data.order.external_id);
 
     res.status(200).json({ message: 'Order updated' });
