@@ -35,7 +35,7 @@ const SendOrderEmail = async (orderId, req) => {
     address: data.billingAddress.street,
     orderDate: data.createdAt.slice(0, 10).replace(/-/g, '/'),
     totalProducts: totalProducts,
-    orderCost: (data.tax * totalAmount).toFixed(2),
+    orderCost: (data.tax * totalProducts).toFixed(2),
     totalShipping: data.shippingCost,
     totalOrder: totalAmount,
     products: product,
@@ -83,12 +83,12 @@ const createOrder = async (req, res) => {
 const trackOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
-      'orderNo': req.body.orderNo,
+      orderNo: req.body.orderNo,
     });
     if (!order) {
       throw new Error('Order not found');
     }
-    
+
     const orderNo = req.body.orderNo;
     const printfulOrderId = parseInt(orderNo.slice(3));
 
