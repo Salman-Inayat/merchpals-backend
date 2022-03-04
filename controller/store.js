@@ -8,7 +8,8 @@ const {
 
 const addStore = async (req, res) => {
   try {
-    const urls = generatePresignedURLs();
+    const canvasMode = req.body.canvasModes;
+    const urls = generatePresignedURLs(canvasMode);
     const data = {
       name: req.body.name,
       design: {
@@ -129,7 +130,10 @@ const designs = async (req, res) => {
 
 const addDesign = async (req, res) => {
   try {
-    const urls = generateDesignPresignedURLs();
+    console.log('Request : ', req.body);
+    const canvasModes = req.body.canvasModes;
+
+    const urls = generateDesignPresignedURLs(canvasModes);
     const response = urls.putUrls;
 
     req.body = {
@@ -167,7 +171,9 @@ const singleDesignProducts = async (req, res) => {
 
 const updateDesign = async (req, res) => {
   try {
-    const urls = generateDesignPresignedURLs();
+    console.log('Request : ', req.body);
+    const canvasModes = req.body.canvasModes;
+    const urls = generateDesignPresignedURLs(canvasModes);
 
     req.body = {
       ...req.body,

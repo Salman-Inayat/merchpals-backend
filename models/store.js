@@ -126,7 +126,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
       designImages: frontDesignImages,
     },
     backDesign: {
-      designJson: backDesignJson.imageUrl,
+      designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
     },
     storeId,
@@ -339,7 +339,7 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
       designImages: frontDesignImages,
     },
     backDesign: {
-      designJson: backDesignJson.imageUrl,
+      designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
     },
     storeId: store,

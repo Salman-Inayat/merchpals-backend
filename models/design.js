@@ -70,7 +70,7 @@ designSchema.statics.updateDesign = async function (designId, req) {
       designImages: frontDesignImages,
     },
     backDesign: {
-      designJson: backDesignJson.imageUrl,
+      designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
     },
   };
