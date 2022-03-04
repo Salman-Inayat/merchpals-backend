@@ -13,10 +13,13 @@ const s3 = new aws.S3({
   Bucket: process.env.AWS_S3_DESIGN_BUCKET,
   signatureVersion: 'v4',
 });
-const generatePresignedURLs = () => {
+
+const generatePresignedURLs = canvasModes => {
+  const bothModes = canvasModes.front == true && canvasModes.back == true;
+
   const id = uuidv4();
 
-  const urlNames = [
+  let urlNames = [
     'logo.png',
     'cover-avatar.png',
     'front-3600x3600.png',
@@ -25,10 +28,11 @@ const generatePresignedURLs = () => {
     'front-879x1833.png',
     'front-thumbnail.png',
     'front-design.json',
-    'back-2700x2700.png',
-    'back-thumbnail.png',
-    'back-design.json',
   ];
+
+  if (bothModes) {
+    urlNames = [...urlNames, 'back-2700x2700.png', 'back-thumbnail.png', 'back-design.json'];
+  }
 
   const getUrls = urlNames.map(name => {
     const URL = `https://${process.env.AWS_S3_DESIGN_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${id}/${name}`;
@@ -61,20 +65,23 @@ const generatePresignedURLs = () => {
   return urls;
 };
 
-const generateDesignPresignedURLs = () => {
+const generateDesignPresignedURLs = canvasModes => {
+  const bothModes = canvasModes.front == true && canvasModes.back == true;
+
   const id = uuidv4();
 
-  const urlNames = [
+  let urlNames = [
     'front-3600x3600.png',
     'front-2700x2700.png',
     'front-1050x1050.png',
     'front-879x1833.png',
     'front-thumbnail.png',
     'front-design.json',
-    'back-2700x2700.png',
-    'back-thumbnail.png',
-    'back-design.json',
   ];
+
+  if (bothModes) {
+    urlNames = [...urlNames, 'back-2700x2700.png', 'back-thumbnail.png', 'back-design.json'];
+  }
 
   const getUrls = urlNames.map(name => {
     const URL = `https://${process.env.AWS_S3_DESIGN_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${id}/${name}`;
@@ -106,6 +113,7 @@ const generateDesignPresignedURLs = () => {
 
   return urls;
 };
+
 const generateProfileUrls = () => {
   const id = uuidv4();
 
