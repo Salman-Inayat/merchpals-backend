@@ -55,7 +55,7 @@ const SendOrderEmail = async (order, req) => {
     address: order.billingAddress.street,
     orderDate: convert(order.createdAt.toString()),
     totalProducts: totalProducts,
-    orderCost: order.tax,
+    orderCost: (order.tax * totalProducts).toFixed(2),
     totalShipping: order.shippingCost,
     totalOrder: totalAmount,
     products: product,
