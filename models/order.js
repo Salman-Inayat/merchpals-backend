@@ -251,10 +251,29 @@ orderSchema.statics.getOrderById = async function (orderId) {
   const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)));
   return mappedOrder;
 };
+orderSchema.statics.getOrderByOrderNo = async function (orderNo) {
+  const fullOrder = await this.findOne({ orderNo: orderNo }).populate([
+    {
+      path: 'customer',
+    },
+    {
+      path: 'products',
+      populate: [
+        {
+          path: 'vendorProduct',
+          select: ' productId',
+          populate: [{ path: 'productId', select: 'name' }],
+        },
+      ],
+    },
+  ]);
 
-orderSchema.statics.shipped = async function (type, printful_external_id) {
+  return fullOrder;
+};
+
+orderSchema.statics.shipped = async function (type, printful_id) {
   const updatedOrder = await this.findOneAndUpdate(
-    { _id: printful_external_id },
+    { orderNo: printful_id },
     { status: TYPE[type] },
   );
 };
