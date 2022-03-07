@@ -14,7 +14,7 @@ const createAccount = async (req, res) => {
         transfers: { requested: true },
       },
       business_type: 'individual',
-      business_profile: { url: process.env.STRIPE_CONNECT_REDIRECT_URL },
+      // business_profile: { url: process.env.STRIPE_CONNECT_REDIRECT_URL },
     });
     console.log({ userData: req.userData });
     console.log({ accountId: account.id });
@@ -95,9 +95,7 @@ const payout = async (req, res) => {
 
       await Transaction.handleSuccessfulPayout(transaction);
 
-      const vendorHistory = await Transaction.transactionHistory(
-        req.userData.vendorId,
-      );
+      const vendorHistory = await Transaction.transactionHistory(req.userData.vendorId);
 
       res.status(200).json({
         vendorHistory,
@@ -115,9 +113,7 @@ const payout = async (req, res) => {
 
 const getTransactionHistory = async (req, res) => {
   try {
-    const vendorHistory = await Transaction.transactionHistory(
-      req.userData.vendorId,
-    );
+    const vendorHistory = await Transaction.transactionHistory(req.userData.vendorId);
 
     res.status(200).json({ vendorHistory });
   } catch (error) {
@@ -133,9 +129,7 @@ const getAccountDashboardLink = async (req, res) => {
       vendorId: req.userData.vendorId,
     });
 
-    const link = await stripe.accounts.createLoginLink(
-      vendorStripe.stripeAccountId,
-    );
+    const link = await stripe.accounts.createLoginLink(vendorStripe.stripeAccountId);
 
     res.status(200).json({ link });
   } catch (error) {
@@ -150,9 +144,7 @@ const getPendingBalance = async (req, res) => {
       userId: req.userData._id,
     });
 
-    const balanceData = await Escrow.calculatePendingEscrowsForVendor(
-      vendor._id,
-    );
+    const balanceData = await Escrow.calculatePendingEscrowsForVendor(vendor._id);
 
     res.status(200).json({
       balanceData,
@@ -178,7 +170,14 @@ const getEscrowTransactions = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
+const deleteAccount = async (req, res) => {
+  try {
+    const vendorStripe = await VendorStripInfo.deleteOne({ vendorId: req.userData.vendorId });
+    res.status(200).json(vendorStripe);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 module.exports = {
   createAccount,
   getAccountInfo,
@@ -187,4 +186,5 @@ module.exports = {
   getAccountDashboardLink,
   getPendingBalance,
   getEscrowTransactions,
+  deleteAccount,
 };

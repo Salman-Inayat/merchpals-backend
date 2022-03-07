@@ -85,7 +85,6 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
   const vendorId = await Vendor.findOne({ userId: userData._id });
   let allProductsMappings = [];
   let formattedVendorProducts = [];
-
   data.products.forEach(product => {
     allProductsMappings.push(...product.productMappings);
   });
@@ -108,11 +107,12 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const designs = data.urls.filter(function (el) {
-    return el.name != 'logo.png' && el.name != 'cover-avatar.png' && el.name != 'design.json';
-  });
+  const frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 7);
+  const backDesignImages = data.urls.filter((design, idx) => idx > 7 && idx < data.urls.length - 1);
 
-  const designJson = data.urls.find(el => el.name === 'design.json');
+  const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
+  const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
+
   const logo = data.urls.find(el => el.name === 'logo.png');
   const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
 
@@ -121,10 +121,17 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.designName,
-    designJson: designJson.imageUrl,
-    designImages: designs,
+    frontDesign: {
+      designJson: frontDesignJson.imageUrl,
+      designImages: frontDesignImages,
+    },
+    backDesign: {
+      designJson: backDesignJson?.imageUrl || '',
+      designImages: backDesignImages,
+    },
     storeId,
   });
+
   console.log('model store', data.themeColor);
   const store = await this.create({
     _id: storeId,
@@ -149,6 +156,44 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   return formattedStore;
 };
+storeSchema.statics.createStoreAndEssenceAfter = async function (userData, data) {
+  const slug = data.name
+    .replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+    .toLowerCase()
+    .split(' ')
+    .join('-');
+
+  const slugExists = await this.findOne({ slug });
+
+  if (slugExists) {
+    throw new Error('Slug already taken');
+  }
+
+  const storeId = mongoose.Types.ObjectId();
+
+  const vendorId = await Vendor.findOne({ userId: userData._id });
+  console.log('vendor id', vendorId);
+  const logo = data.urls.find(el => el.name === 'logo.png');
+  const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
+
+  const store = await this.create({
+    _id: storeId,
+    name: data.name,
+    vendorId,
+    logo: logo.imageUrl,
+    socialHandles: {
+      youtube: data.youtube,
+      twitch: data.twitch,
+      instagram: data.instagram,
+      tiktok: data.tiktok,
+    },
+    slug,
+    coverAvatar: coverAvatar.imageUrl,
+    themeColor: data.themeColor,
+  });
+  console.log('create store successfully', store);
+  return store;
+};
 
 storeSchema.statics.getLabeledInfo = async function (userId) {
   let vendor = await Vendor.findOne({ userId });
@@ -159,7 +204,14 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
         path: 'vendorProductIds',
         select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name designImages' },
+          {
+            path: 'designId',
+            select: 'name frontDesign backDesign',
+            populate: [
+              { path: 'frontDesign', select: 'designImages' },
+              { path: 'backDesign', select: 'designImages' },
+            ],
+          },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
@@ -180,7 +232,14 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
         path: 'vendorProductIds',
         select: 'designId productId productMappings price',
         populate: [
-          { path: 'designId', select: 'name designImages' },
+          {
+            path: 'designId',
+            select: 'name frontDesign backDesign',
+            populate: [
+              { path: 'frontDesign', select: 'designImages' },
+              { path: 'backDesign', select: 'designImages' },
+            ],
+          },
           { path: 'productId', select: 'name image slug basePrice' },
           { path: 'productMappings' },
         ],
@@ -201,7 +260,14 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
     _id: productId, // need to be vendor productID
   })
     .populate([
-      { path: 'designId', select: 'name designImages' },
+      {
+        path: 'designId',
+        select: 'name frontDesign backDesign',
+        populate: [
+          { path: 'frontDesign', select: 'designImages' },
+          { path: 'backDesign', select: 'designImages' },
+        ],
+      },
       { path: 'productId', select: 'name image slug basePrice details shippingText' },
       {
         path: 'productMappings',
@@ -254,17 +320,28 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const designJson = data.urls.find(el => el.name === 'design.json');
-  data.urls.pop();
-  const designImages = data.urls;
+  const frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+  const backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+
+  const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
+  const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
+
+  console.log('frontDesignImages', frontDesignImages);
+  console.log('backDesignImages', backDesignImages);
 
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.designName,
-    designImages: designImages,
-    designJson: designJson.imageUrl,
+    frontDesign: {
+      designJson: frontDesignJson.imageUrl,
+      designImages: frontDesignImages,
+    },
+    backDesign: {
+      designJson: backDesignJson?.imageUrl || '',
+      designImages: backDesignImages,
+    },
     storeId: store,
   });
 
@@ -279,13 +356,19 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 storeSchema.statics.getDesigns = async function (vendorId) {
   const store = await this.findOne({ vendorId }).populate({
     path: 'designs',
-    select: 'name designImages',
+    select: 'name frontDesign',
+    populate: [{ path: 'frontDesign', select: 'designImages' }],
   });
   return store.designs;
 };
 
 storeSchema.statics.getSingleDesign = async function (designId) {
-  const design = await Design.findOne({ _id: designId }, 'name  designJson');
+  const design = await Design.findOne({ _id: designId }, 'name frontDesign backDesign', {
+    populate: [
+      { path: 'frontDesign', select: 'designJson' },
+      { path: 'backDesign', select: 'designJson' },
+    ],
+  });
 
   return design;
 };
@@ -296,7 +379,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
       path: 'vendorProductIds',
       select: 'designId productId productMappings price',
       populate: [
-        { path: 'designId', select: 'name url' },
+        { path: 'designId', select: 'name frontDesign backDesign' },
         { path: 'productId', select: 'name image slug basePrice' },
         { path: 'productMappings' },
       ],

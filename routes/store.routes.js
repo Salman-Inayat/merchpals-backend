@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const {
   addStore,
+  AddStoreAfter,
   storeInfo,
   validateSlug,
   getStoreBySlug,
@@ -16,6 +17,7 @@ const auth = require('../middleware/auth');
 const { upload, uploadBase64, generatePresignedURLs } = require('../middleware/multer');
 
 router.route('/').post(auth, addStore);
+router.route('/add-store-after').post(auth, AddStoreAfter);
 
 // router.route('/validate-slug/:slug').get(validateSlug);
 router.route('/validate-slug').post(validateSlug);
