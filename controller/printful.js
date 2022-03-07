@@ -24,6 +24,7 @@ const orderUpdate = async (req, res) => {
   try {
     const data = req.body.data;
     await Order.shipped(req.body.type, data.order.external_id);
+
     res.status(200).json({ message: 'Order updated' });
   } catch (error) {
     console.log('orderUpdate func', error, error.result);

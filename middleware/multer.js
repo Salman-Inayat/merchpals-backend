@@ -2,11 +2,13 @@ const multer = require('multer');
 const aws = require('aws-sdk');
 const multerS3 = require('multer-s3');
 const BUCKET_NAME = 'merchpals-mvp';
+// const BUCKET_NAME = 'dummy-merchpals';
 
 aws.config.update({
   accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
   secretAccessKey: 'gVr6A976ziFZhfXDFH1kYIche731om7UcQPwDrMY',
   region: 'us-east-2',
+  // region: 'us-east-1',
 });
 
 const makeid = length => {
@@ -111,7 +113,145 @@ const uploadBase64 = async (req, res, next) => {
   next();
 };
 
+const generatePresignedURLs = async (req, res, next) => {
+  const s3 = new aws.S3({
+    accessKeyId: 'AKIAWUDRFMMZSL2ATNGU',
+    secretAccessKey: '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',
+    region: 'us-east-1',
+    Bucket: BUCKET_NAME,
+    signatureVersion: 'v4',
+  });
+
+  // getUrls to be stored in the db
+  const getLogoURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/logo.png`,
+  });
+
+  const getLoverAvatarURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/coverAvatar.png`,
+  });
+
+  const getDesignVariant1URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant1.png`,
+  });
+
+  const getDesignVariant2URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant2.png`,
+  });
+
+  const getDesignVariant3URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant3.png`,
+  });
+
+  const getDesignVariant4URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant4.png`,
+  });
+
+  const getDesignVariant5URL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant5.png`,
+  });
+
+  const getDesignJsonURL = s3.getSignedUrl('getObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/design.json`,
+  });
+
+  // putUrls to be sent to the frontend where PUT request is made
+
+  const putLogoURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/logo.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putCoverAvatarURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/coverAvatar.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant1URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant1.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant2URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant2.png`,
+
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant3URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant3.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant4URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant4.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignVariant5URL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/designVariant5.png`,
+    Expires: 600 * 5,
+    ContentType: 'image/png',
+  });
+
+  const putDesignJsonURL = s3.getSignedUrl('putObject', {
+    Bucket: BUCKET_NAME,
+    Key: `uploads/${req.userData._id}/design.json`,
+    Expires: 600 * 5,
+    ContentType: 'application/json',
+  });
+
+  req.body.URLS = {
+    putUrls: {
+      logo: putLogoURL,
+      coverAvatar: putCoverAvatarURL,
+      variant1: putDesignVariant1URL,
+      variant2: putDesignVariant2URL,
+      variant3: putDesignVariant3URL,
+      variant4: putDesignVariant4URL,
+      variant5: putDesignVariant5URL,
+      designJson: putDesignJsonURL,
+    },
+    getUrls: {
+      logo: getLogoURL,
+      coverAvatar: getLoverAvatarURL,
+      variant1: getDesignVariant1URL,
+      variant2: getDesignVariant2URL,
+      variant3: getDesignVariant3URL,
+      variant4: getDesignVariant4URL,
+      variant5: getDesignVariant5URL,
+      designJson: getDesignJsonURL,
+    },
+  };
+
+  console.log(req.body.URLS.getUrls);
+
+  next();
+};
+
 module.exports = {
   upload,
   uploadBase64,
+  generatePresignedURLs,
 };

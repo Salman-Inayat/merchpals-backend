@@ -1,23 +1,28 @@
 const Store = require('../models/store');
 const Designs = require('../models/design');
+const { generatePresignedURLs, generateDesignPresignedURLs } = require('../utils/generateUrls');
 
 const addStore = async (req, res) => {
   try {
-    // console.log('req', req.body);
-    // console.log('logo', req.files.logo[0].location);
-    // console.log('coverAvatar', req.files.coverAvatar[0].location);
-    // console.log('designURL', req.designURL);
+    const urls = generatePresignedURLs();
     const data = {
       name: req.body.name,
-      design: req.body.design,
-      logo: req.files.logo[0].location,
-      coverAvatar: req.files.coverAvatar[0].location,
+      design: {
+        designName: req.body.designName,
+      },
+      urls: urls.getUrls,
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);
-    res.status(200).json({ store, message: 'Store created successfully' });
+    res.status(200).json({
+      data: {
+        store,
+        urls: urls.putUrls,
+      },
+      message: 'Store created successfully',
+    });
   } catch (error) {
     console.log('addStore', error.message);
     res.status(400).json({ message: error.message });
@@ -92,8 +97,16 @@ const designs = async (req, res) => {
 
 const addDesign = async (req, res) => {
   try {
-    const design = await Store.createDesign(req.body, req.userData.vendorId);
-    res.status(200).json({ design });
+    const urls = generateDesignPresignedURLs();
+    const response = urls.putUrls;
+
+    req.body = {
+      ...req.body,
+      urls: urls.getUrls,
+    };
+    const design = await Store.createDesign(req, req.userData.vendorId);
+
+    res.status(200).json({ response, message: 'success' });
   } catch (error) {
     console.log('addDesign', error.message);
     res.status(400).json({ message: error.message });
@@ -122,8 +135,19 @@ const singleDesignProducts = async (req, res) => {
 
 const updateDesign = async (req, res) => {
   try {
-    const design = await Designs.updateDesign(req.params.designId, req.body.design);
-    res.status(200).json({ design });
+    const urls = generateDesignPresignedURLs();
+
+    req.body = {
+      ...req.body,
+      urls: urls.getUrls,
+    };
+
+    // const design = await Designs.updateDesign(req.params.designId, req.body.design);
+    const design = await Designs.updateDesign(req.params.designId, req);
+
+    const response = urls.putUrls;
+
+    res.status(200).json({ response });
   } catch (error) {
     console.log('updateDesign', error.message);
     res.status(400).json({ message: error.message });

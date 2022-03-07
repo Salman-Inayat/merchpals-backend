@@ -98,6 +98,9 @@ const orderSchema = new mongoose.Schema(
     printfulOrderMetadata: {
       type: Object,
     },
+    orderNo: {
+      type: Number,
+    },
     billingAddress: {
       aptNo: {
         type: String,
@@ -160,8 +163,11 @@ orderSchema.statics.createOrder = async function (
     populate: [
       {
         path: 'vendorProduct',
-        select: 'designId price',
-        populate: { path: 'designId', select: 'designImages' },
+        select: 'designId price productId',
+        populate: [
+          { path: 'designId', select: 'designImages' },
+          { path: 'productId', select: 'name' },
+        ],
       },
       { path: 'productMapping' },
     ],
@@ -204,6 +210,10 @@ orderSchema.statics.getOrderById = async function (orderId) {
     .populate([
       {
         path: 'customer',
+      },
+      {
+        path: 'storeId',
+        select: 'name',
       },
       {
         path: 'products',

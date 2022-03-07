@@ -108,14 +108,21 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
+  const designs = data.urls.filter(function (el) {
+    return el.name != 'logo.png' && el.name != 'cover-avatar.png' && el.name != 'design.json';
+  });
+
+  const designJson = data.urls.find(el => el.name === 'design.json');
+  const logo = data.urls.find(el => el.name === 'logo.png');
+  const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
     name: data.design.designName,
-    // url: data.design.imageUrl,
-    designImages: data.design.designImages,
-    designJson: data.design.designJson,
+    designJson: designJson.imageUrl,
+    designImages: designs,
     storeId,
   });
   console.log('model store', data.themeColor);
@@ -124,7 +131,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     name: data.name,
     vendorId,
     designs: [designId],
-    logo: data.logo,
+    logo: logo.imageUrl,
     socialHandles: {
       youtube: data.youtube,
       twitch: data.twitch,
@@ -132,7 +139,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
       tiktok: data.tiktok,
     },
     slug,
-    coverAvatar: data.coverAvatar,
+    coverAvatar: coverAvatar.imageUrl,
     productMappings: allProductsMappings,
     vendorProductIds: vendorProducts.map(p => p._id),
     themeColor: data.themeColor,
@@ -217,7 +224,9 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
   return formattedMappings;
 };
 
-storeSchema.statics.createDesign = async function (data, vendorId) {
+storeSchema.statics.createDesign = async function (req, vendorId) {
+  const data = req.body;
+
   let allProductsMappings = [];
   let formattedVendorProducts = [];
 
@@ -245,13 +254,17 @@ storeSchema.statics.createDesign = async function (data, vendorId) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
+  const designJson = data.urls.find(el => el.name === 'design.json');
+  data.urls.pop();
+  const designImages = data.urls;
+
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
     vendorProductIds: vendorProducts,
-    name: data.design.designName,
-    designImages: data.design.designImages,
-    designJson: data.design.designJson,
+    name: data.designName,
+    designImages: designImages,
+    designJson: designJson.imageUrl,
     storeId: store,
   });
 

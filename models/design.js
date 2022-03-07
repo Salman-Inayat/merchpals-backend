@@ -38,16 +38,22 @@ const designSchema = new mongoose.Schema(
     },
     designJson: {
       type: String,
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true },
 );
 
-designSchema.statics.updateDesign = async function (designId, data) {
+designSchema.statics.updateDesign = async function (designId, req) {
+  const data = req.body;
+
+  const designJson = data.urls.find(el => el.name === 'design.json');
+  data.urls.pop();
+  const designImages = data.urls;
+
   const updatedFields = {
-    designJson: data.designJson,
-    designImages: data.designImages,
+    designJson: designJson.imageUrl,
+    designImages: designImages,
   };
 
   const design = await this.findByIdAndUpdate(

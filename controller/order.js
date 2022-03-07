@@ -15,8 +15,6 @@ const SendOrderEmail = async (orderId, req) => {
   let product = [],
     totalProducts = data.price,
     totalAmount = data.totalAmount;
-
-  console.log(data);
   data.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
@@ -29,16 +27,15 @@ const SendOrderEmail = async (orderId, req) => {
       productSize: productitem.productMapping.variant.label,
     });
   });
-  //TODO: we need to change orderId direction when we fix the orderId place
 
   const replacements = {
-    orderId: data.printfulOrderMetadata.id,
+    orderId: data.orderNo,
     customerFirstName: data.customer.firstName,
     customerLastName: data.customer.lastName,
     address: data.billingAddress.street,
     orderDate: data.createdAt.slice(0, 10).replace(/-/g, '/'),
     totalProducts: totalProducts,
-    orderCost: data.tax,
+    orderCost: (data.tax * totalProducts).toFixed(2),
     totalShipping: data.shippingCost,
     totalOrder: totalAmount,
     products: product,
@@ -46,7 +43,6 @@ const SendOrderEmail = async (orderId, req) => {
     faqUrl: req.get('origin') + '/faq',
   };
 
-  console.log('replacements', replacements);
   return replacements;
 };
 
@@ -66,7 +62,7 @@ const createOrder = async (req, res) => {
     );
     await Payment.createAndChargeCustomer(req.body.payment, order, recordId, req.body.printfulData);
     const data = await SendOrderEmail(order._id, req);
-    console.log('function response', data);
+
     await sendEmail({
       email: req.body.customer.email,
       subject: 'order sent',
@@ -75,12 +71,11 @@ const createOrder = async (req, res) => {
       // text: 'rehman ali text',
     });
 
-    res.status(200).json({ order, message: 'Order created successfully' });
+    res.status(200).json({ order, data, message: 'Order created successfully' });
   } catch (error) {
     await Order.findByIdAndUpdate(orderId, { $set: { status: DELETED } });
     await Payment.findByIdAndRemove(paymentId);
 
-    console.log('create order controller', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -88,7 +83,7 @@ const createOrder = async (req, res) => {
 const trackOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
-      'printfulOrderMetadata.id': req.body.orderNo,
+      orderNo: req.body.orderNo,
     });
     if (!order) {
       throw new Error('Order not found');

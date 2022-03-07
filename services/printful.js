@@ -94,12 +94,11 @@ const priceCalculation = async data => {
     if (taxResponse.code === 400) {
       throw new Error(taxResponse.message);
     }
-
     const shippingResponse = await printfulShipping(data);
     orderActualAmount = await calculateAmount(data.items);
     taxAmount = Number((orderActualAmount * Number(taxResponse.rate)).toFixed(2));
+    shippingAmount = shippingResponse.rate === 'FREE' ? Number('0') : Number(shippingResponse.rate);
     amountWithTaxAndShipping = Number((orderActualAmount + shippingAmount + taxAmount).toFixed(2));
-
     return {
       taxRate: taxResponse.rate,
       shippingAmount: shippingResponse.rate,
