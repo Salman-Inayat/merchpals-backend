@@ -17,8 +17,8 @@ const convert = str => {
 const SendOrderEmail = async (order, req) => {
   let product = [],
     totalProducts = order.price,
-    totalAmount = order.totalAmount,
-    productName = [];
+    totalAmount = order.totalAmount;
+
   order.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
@@ -32,22 +32,6 @@ const SendOrderEmail = async (order, req) => {
     });
   });
 
-  order.products.forEach(productitem => {
-    productName.push({
-      productName: productitem.vendorProduct.productId.name,
-    });
-  });
-  const replacements_second_email = {
-    orderId: order.orderNo,
-    customerFirstName: order.customer.firstName,
-    customerLastName: order.customer.lastName,
-    phone: order.customer.phoneNo,
-    address: order.billingAddress.street,
-    city: order.billingAddress.city,
-    zip: order.billingAddress.zip,
-    country: order.billingAddress.country,
-    product: productName,
-  };
   const replacements = {
     orderId: order.orderNo,
     customerFirstName: order.customer.firstName,
