@@ -22,7 +22,7 @@ const SendOrderEmail = async (order, req) => {
   order.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
+      designImg: productitem.vendorProduct.designId.frontDesign.designImages[4].imageUrl,
       productQuantity: productitem.quantity,
       productColor: productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
@@ -64,6 +64,7 @@ const createOrder = async (req, res) => {
       req.body.printfulData,
       req.body.storeUrl,
     );
+
     await Payment.createAndChargeCustomer(req.body.payment, order, recordId, req.body.printfulData);
     const data = await SendOrderEmail(order, req);
 
