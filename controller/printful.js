@@ -25,7 +25,7 @@ const orderUpdate = async (req, res) => {
   // console.log('request', req);
   try {
     const data = req.body.data;
-    let productName = ['tee', 'rehman'];
+    let productName = [];
     // console.log('update order data', data, req.body.type);
     data.order.id = parseInt(`900${data.order.id}`);
     // console.log('oder id', data.order.id);
