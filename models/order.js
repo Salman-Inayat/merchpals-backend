@@ -234,7 +234,7 @@ orderSchema.statics.getOrderById = async function (orderId) {
             populate: [
               {
                 path: 'designId',
-                select: 'name frontDesign',
+                select: 'name frontDesign backDesign',
                 populate: [{ path: 'frontDesign', select: 'designImages' }],
               },
               { path: 'productId', select: 'name image minPrice basePrice slug' },
