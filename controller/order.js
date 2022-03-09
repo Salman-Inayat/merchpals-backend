@@ -8,17 +8,21 @@ const design = require('../models/design');
 const { productsSlug } = require('../constants/productMappings');
 const axios = require('axios');
 const PRINTFUL_API = 'https://api.printful.com';
-
-const SendOrderEmail = async (orderId, req) => {
-  const data = await Order.getOrderById(orderId);
-
+const convert = str => {
+  var date = new Date(str),
+    mnth = ('0' + (date.getMonth() + 1)).slice(-2),
+    day = ('0' + date.getDate()).slice(-2);
+  return [date.getFullYear(), mnth, day].join('/');
+};
+const SendOrderEmail = async (order, req) => {
   let product = [],
-    totalProducts = data.price,
-    totalAmount = data.totalAmount;
-  data.products.forEach(productitem => {
+    totalProducts = order.price,
+    totalAmount = order.totalAmount;
+
+  order.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      designImg: productitem.vendorProduct.designId.designImages[4].imageUrl,
+      designImg: productitem.vendorProduct.designId.frontDesign.designImages[4].imageUrl,
       productQuantity: productitem.quantity,
       productColor: productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
@@ -29,20 +33,20 @@ const SendOrderEmail = async (orderId, req) => {
   });
 
   const replacements = {
-    orderId: data.orderNo,
-    customerFirstName: data.customer.firstName,
-    customerLastName: data.customer.lastName,
-    address: data.billingAddress.street,
-    orderDate: data.createdAt.slice(0, 10).replace(/-/g, '/'),
+    orderId: order.orderNo,
+    customerFirstName: order.customer.firstName,
+    customerLastName: order.customer.lastName,
+    address: order.billingAddress.street,
+    orderDate: convert(order.createdAt.toString()),
     totalProducts: totalProducts,
-    orderCost: (data.tax * totalProducts).toFixed(2),
-    totalShipping: data.shippingCost,
+    orderCost: (order.tax * totalProducts).toFixed(2),
+    totalShipping: order.shippingCost,
     totalOrder: totalAmount,
     products: product,
     tickImg: req.get('origin') + '/assets/img/tick.png',
     faqUrl: req.get('origin') + '/faq',
   };
-
+  // replacements.orderDate = replacements.orderDate.slice(0, 10).replace(/-/g, '/');
   return replacements;
 };
 
@@ -60,8 +64,9 @@ const createOrder = async (req, res) => {
       req.body.printfulData,
       req.body.storeUrl,
     );
+
     await Payment.createAndChargeCustomer(req.body.payment, order, recordId, req.body.printfulData);
-    const data = await SendOrderEmail(order._id, req);
+    const data = await SendOrderEmail(order, req);
 
     await sendEmail({
       email: req.body.customer.email,

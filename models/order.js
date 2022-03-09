@@ -158,20 +158,25 @@ orderSchema.statics.createOrder = async function (
   order.billingAddress = printfulData.recipient;
 
   await order.save();
-  const fullOrder = await this.findOne({ _id: order._id }).populate({
-    path: 'products',
-    populate: [
-      {
-        path: 'vendorProduct',
-        select: 'designId price productId',
-        populate: [
-          { path: 'designId', select: 'designImages' },
-          { path: 'productId', select: 'name' },
-        ],
-      },
-      { path: 'productMapping' },
-    ],
-  });
+  const fullOrder = await this.findOne({ _id: order._id }).populate([
+    {
+      path: 'customer',
+    },
+    {
+      path: 'products',
+      populate: [
+        {
+          path: 'vendorProduct',
+          select: 'designId productId price',
+          populate: [
+            { path: 'designId', select: 'frontDesign' },
+            { path: 'productId', select: 'name image minPrice basePrice slug' },
+          ],
+        },
+        { path: 'productMapping' },
+      ],
+    },
+  ]);
 
   return fullOrder;
 };
@@ -189,7 +194,12 @@ orderSchema.statics.getOrders = async function (vendorId) {
             path: 'vendorProduct',
             select: 'designId productId price',
             populate: [
-              { path: 'designId', select: 'name designImages' },
+              {
+                path: 'designId',
+                select: 'name frontDesign',
+                populate: [{ path: 'frontDesign', select: 'designImages' }],
+              },
+
               { path: 'productId', select: 'name image minPrice basePrice slug' },
             ],
           },
@@ -222,7 +232,11 @@ orderSchema.statics.getOrderById = async function (orderId) {
             path: 'vendorProduct',
             select: 'designId productId price',
             populate: [
-              { path: 'designId', select: 'name designImages' },
+              {
+                path: 'designId',
+                select: 'name frontDesign',
+                populate: [{ path: 'frontDesign', select: 'designImages' }],
+              },
               { path: 'productId', select: 'name image minPrice basePrice slug' },
             ],
           },
@@ -237,10 +251,29 @@ orderSchema.statics.getOrderById = async function (orderId) {
   const mappedOrder = mapColor(JSON.parse(JSON.stringify(order)));
   return mappedOrder;
 };
+orderSchema.statics.getOrderByOrderNo = async function (orderNo) {
+  const fullOrder = await this.findOne({ orderNo: orderNo }).populate([
+    {
+      path: 'customer',
+    },
+    {
+      path: 'products',
+      populate: [
+        {
+          path: 'vendorProduct',
+          select: ' productId',
+          populate: [{ path: 'productId', select: 'name' }],
+        },
+      ],
+    },
+  ]);
 
-orderSchema.statics.shipped = async function (type, printful_external_id) {
+  return fullOrder;
+};
+
+orderSchema.statics.shipped = async function (type, printful_id) {
   const updatedOrder = await this.findOneAndUpdate(
-    { _id: printful_external_id },
+    { orderNo: printful_id },
     { status: TYPE[type] },
   );
 };

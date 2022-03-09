@@ -115,14 +115,14 @@ paymentSchema.statics.createAndChargeCustomer = async function (
             product.vendorProduct.productId.name === 'Long Sleeve' ||
             product.vendorProduct.productId.name === 'Tee' ||
             product.vendorProduct.productId.name === 'Hoodie'
-              ? product.vendorProduct.designId.designImages[1].imageUrl
+              ? product.vendorProduct.designId.frontDesign.designImages[1].imageUrl
               : product.vendorProduct.productId.name === 'Poster'
-              ? product.vendorProduct.designId.designImages[0].imageUrl
+              ? product.vendorProduct.designId.frontDesign.designImages[0].imageUrl
               : product.vendorProduct.productId.name === 'Mug'
-              ? product.vendorProduct.designId.designImages[2].imageUrl
+              ? product.vendorProduct.designId.frontDesign.designImages[2].imageUrl
               : product.vendorProduct.productId.name === 'Case'
-              ? product.vendorProduct.designId.designImages[3].imageUrl
-              : product.vendorProduct.designId.designImages[0].imageUrl,
+              ? product.vendorProduct.designId.frontDesign.designImages[3].imageUrl
+              : product.vendorProduct.designId.frontDesign.designImages[0].imageUrl,
         },
       ],
     })),
