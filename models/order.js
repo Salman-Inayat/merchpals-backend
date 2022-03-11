@@ -267,7 +267,6 @@ orderSchema.statics.getOrderByOrderNo = async function (orderNo) {
       ],
     },
   ]);
-
   return fullOrder;
 };
 
