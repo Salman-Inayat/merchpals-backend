@@ -125,30 +125,35 @@ paymentSchema.statics.createAndChargeCustomer = async function (
               ? product.vendorProduct.designId.frontDesign.designImages[3].imageUrl
               : product.vendorProduct.designId.frontDesign.designImages[0].imageUrl,
         },
-        // (product.vendorProduct.productId.name === 'Long Sleeve' ||
-        //   product.vendorProduct.productId.name === 'Tee' ||
-        //   product.vendorProduct.productId.name === 'Hoodie') &&
-        // product.vendorProduct?.designId?.backDesign?.designImages.length > 0
-        //   ? {
-        //       type: 'back',
-        //       url: product.vendorProduct.designId.backDesign.designImages[0].imageUrl,
-        //     }
-        //   : {},
+        (product.vendorProduct.productId.name === 'Long Sleeve' ||
+          product.vendorProduct.productId.name === 'Tee' ||
+          product.vendorProduct.productId.name === 'Hoodie') &&
+        product.vendorProduct?.designId?.backDesign?.designImages.length > 0
+          ? {
+              type: 'back',
+              url: product.vendorProduct.designId.backDesign.designImages[0].imageUrl,
+            }
+          : {},
       ],
     })),
   };
 
-  // console.log(printfulDataFormatted.items);
+  const formattedItemFiles = printfulDataFormatted.items.map((item, index) => {
+    const modified = item.files.filter(value => Object.keys(value).length !== 0);
 
-  // const formattedItemFiles = printfulDataFormatted.items.map(item => {
-  //   return item.files.filter(value => Object.keys(value).length !== 0);
-  // });
+    if (modified.length == 1) {
+      delete modified[0].type;
+    }
 
-  // const printfulItems = printfulDataFormatted.items.map((item, index) => {
-  //   item.files = formattedItemFiles[index];
-  // });
+    return modified;
+  });
 
-  // printfulDataFormatted.items = printfulItems;
+  const printfulItems = printfulDataFormatted.items.map((item, index) => {
+    item.files = formattedItemFiles[index];
+    return item;
+  });
+
+  printfulDataFormatted.items = printfulItems;
 
   const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
 
