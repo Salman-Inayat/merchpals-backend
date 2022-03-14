@@ -61,17 +61,17 @@ designSchema.statics.updateDesign = async function (designId, req) {
   const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
   const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
 
-  console.log('frontDesignImages', frontDesignImages);
-  console.log('backDesignImages', backDesignImages);
-
+  console.log('Shapes: ', data.shapes);
   const updatedFields = {
     frontDesign: {
       designJson: frontDesignJson.imageUrl,
       designImages: frontDesignImages,
+      shape: data.shapes.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
+      shape: data.shapes.back,
     },
   };
 

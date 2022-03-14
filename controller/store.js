@@ -47,6 +47,7 @@ const AddStoreAfter = async (req, res) => {
         youtube: req.body.youtube,
         twitch: req.body.twitch,
       },
+      shapes: req.body.shapes,
     };
     const store = await Store.createStoreAndEssenceAfter(req.userData, data);
 
