@@ -124,10 +124,12 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     frontDesign: {
       designJson: frontDesignJson.imageUrl,
       designImages: frontDesignImages,
+      shape: data.shapes.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
+      shape: data.shapes.back,
     },
     storeId,
   });
@@ -326,9 +328,6 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
   const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
   const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
 
-  console.log('frontDesignImages', frontDesignImages);
-  console.log('backDesignImages', backDesignImages);
-
   const newDesign = await Design.create({
     _id: designId,
     vendorId,
@@ -337,10 +336,12 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
     frontDesign: {
       designJson: frontDesignJson.imageUrl,
       designImages: frontDesignImages,
+      shape: data.shapes.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
+      shape: data.shapes.back,
     },
     storeId: store,
   });

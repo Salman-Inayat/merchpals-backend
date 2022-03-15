@@ -22,16 +22,13 @@ const calculatePrice = async (req, res) => {
 };
 
 const orderUpdate = async (req, res) => {
-  // console.log('request', req);
   try {
     const data = req.body.data;
     let productName = [];
-    // console.log('update order data', data, req.body.type);
-    data.order.id = parseInt(`900${data.order.id}`);
-    // console.log('oder id', data.order.id);
-    await Order.shipped(req.body.type, data.order.id);
+    data.order.order.id = parseInt(`900${data.order.order.id}`);
+    await Order.shipped(req.body.type, data.order.order.id);
     if (req.body.type === 'package_shipped') {
-      const order = await Order.getOrderByOrderNo(data.order.id);
+      const order = await Order.getOrderByOrderNo(data.order.order.id);
       order.products.forEach(productitem => {
         productName.push(productitem.vendorProduct.productId.name);
       });
@@ -50,7 +47,6 @@ const orderUpdate = async (req, res) => {
         productName: productName.join(','),
       };
       const userEmail = order.customer.email;
-      console.log('replacments', replacements, userEmail);
       await sendEmail({
         email: userEmail,
         subject: `Your order is on the way! (${order.orderNo})`,

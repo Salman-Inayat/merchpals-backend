@@ -111,6 +111,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (
       quantity: product.quantity,
       files: [
         {
+          type: 'front',
           url:
             product.vendorProduct.productId.name === 'Long Sleeve' ||
             product.vendorProduct.productId.name === 'Tee' ||
@@ -124,13 +125,37 @@ paymentSchema.statics.createAndChargeCustomer = async function (
               ? product.vendorProduct.designId.frontDesign.designImages[3].imageUrl
               : product.vendorProduct.designId.frontDesign.designImages[0].imageUrl,
         },
+        (product.vendorProduct.productId.name === 'Long Sleeve' ||
+          product.vendorProduct.productId.name === 'Tee' ||
+          product.vendorProduct.productId.name === 'Hoodie') &&
+        product.vendorProduct?.designId?.backDesign?.designImages.length > 0
+          ? {
+              type: 'back',
+              url: product.vendorProduct.designId.backDesign.designImages[0].imageUrl,
+            }
+          : {},
       ],
     })),
   };
 
-  const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
+  const formattedItemFiles = printfulDataFormatted.items.map((item, index) => {
+    const modified = item.files.filter(value => Object.keys(value).length !== 0);
 
-  // printfulOrderResponse.id = `MP-${printfulOrderResponse.id}`;
+    if (modified.length == 1) {
+      delete modified[0].type;
+    }
+
+    return modified;
+  });
+
+  const printfulItems = printfulDataFormatted.items.map((item, index) => {
+    item.files = formattedItemFiles[index];
+    return item;
+  });
+
+  printfulDataFormatted.items = printfulItems;
+
+  const printfulOrderResponse = await printfulOrder(printfulDataFormatted);
 
   if (printfulOrderResponse.code === 400) {
     throw new Error(printfulOrderResponse.message);

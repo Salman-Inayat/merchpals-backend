@@ -440,9 +440,9 @@
                         style="
                           padding: 0;
                           margin: 0;
-                          padding-top: 20px;
-                          padding-left: 20px;
-                          padding-right: 20px;
+                          padding-top: 10px;
+                          padding-left: 10px;
+                          padding-right: 10px;
                         "
                       >
                         <table
@@ -460,7 +460,7 @@
                             <td
                               valign="top"
                               align="center"
-                              style="padding: 0; margin: 0; width: 560px"
+                              style="padding: 0; margin: 0; width: 580px"
                             >
                               <table
                                 width="100%"
@@ -497,7 +497,7 @@
                                         color: #333333;
                                       "
                                     >
-                                      Your order is on the way! ({{orderNo}})&nbsp; &nbsp; &nbsp;
+                                      Your order is on the way! (100802)&nbsp; &nbsp; &nbsp;
                                     </h3>
                                   </td>
                                 </tr>
@@ -524,21 +524,34 @@
                                       "
                                     >
                                       As promised, we're letting you know that your order
-                                      #{{orderNo}} has been shipped out!<br /><br />Tracking
-                                      number:{{tracking_number}}<br />Tracking Link:
-                                      <a href="#">{{tracking_url}}</a><br />Carrier : {{carrier}}<br /><br />Your
-                                      order Information:<br />{{customerFirstName}}
-                                      {{customerLastName}}<br />
-                                      {{productName}}<br />
+                                      <strong>#{{orderNo}}</strong>
+                                      has been shipped out!<br /><br />
+                                      <strong>Tracking number:</strong>
+                                      {{tracking_number}}<br />
+
+                                      <strong>Tracking Link: </strong>
+                                      {{tracking_url}} <br /><strong>Carrier:</strong>
+                                      {{carrier}}
+                                      <br /><br /><strong>Your order Information:</strong
+                                      ><br /><strong> Name:</strong> {{customerFirstName}}
+                                      {{customerLastName}}<br /><strong> Products Name</strong>:
+                                      "{{productName}}"<br />
+                                      <strong>Address:</strong>
                                       {{address}}<br />
-                                      <!-- {{LINKRECIPIENTADDRESS2HERE}} <br /> -->
-                                      {{city}}<br />
-                                      {{zip}}<br />
-                                      {{country}}<br />{{phone}}<br /><br />Note that it can take up
-                                      to 48 hours for racking information to show up in the
-                                      carrier's tracking system. International shipment tracking may
-                                      take a few days to display any updates.&nbsp;&nbsp;<br /><br /><br />Thank
-                                      you for shopping with us!
+                                      <!-- <strong>Address:</strong> [LINK RECIPIENT
+                                      ADDRESS2 HERE]<br /> -->
+
+                                      <strong>City:</strong> {{city}}<br />
+                                      <strong>Zip Code:</strong> {{zip}}<br />
+                                      <strong>Country:</strong>
+                                      {{country}}<br />
+                                      <strong>Contact Number:</strong>
+                                      +{{phone}}<br /><br />
+                                      Note that it can take up to 48 hours for racking information
+                                      to show up in the carrier's tracking system. International
+                                      shipment tracking may take a few days to display any
+                                      updates.&nbsp;&nbsp;<br /><br /><br />
+                                      Thank you for shopping with us!
                                     </p>
                                   </td>
                                 </tr>
