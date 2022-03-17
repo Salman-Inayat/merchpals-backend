@@ -24,7 +24,15 @@ const SendOrderEmail = async (order, req) => {
       productImg: productitem.vendorProduct.productId.image,
       designImg: productitem.vendorProduct.designId.frontDesign.designImages[4].imageUrl,
       productQuantity: productitem.quantity,
-      productColor: productitem.productMapping.color.label,
+      productColorName: productitem.productMapping.color.label,
+      productColor:
+        productitem.productMapping.color.label === 'white'
+          ? '#fff'
+          : productitem.productMapping.color.label === 'navy'
+          ? '#262d4f'
+          : productitem.productMapping.color.label === 'black'
+          ? '#121616'
+          : productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
       productSlug: productitem.vendorProduct.productId.slug,
       productTotalAmount: (productitem.quantity * productitem.vendorProduct.price).toFixed(2),
@@ -70,7 +78,7 @@ const createOrder = async (req, res) => {
 
     await sendEmail({
       email: req.body.customer.email,
-      subject: 'order sent',
+      subject: `We've Received Your Order! (#${data.orderId})`,
       template: 'orderCreate',
       replacements: data,
       // text: 'rehman ali text',
