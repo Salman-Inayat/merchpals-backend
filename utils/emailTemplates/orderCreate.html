@@ -52,7 +52,20 @@
       .productTextMarginCase {
         line-height: 200%;
       }
-      @media (max-width: 550px) {
+      .productCharges {
+        margin-left: 22% !important;
+        margin-right: 46% !important;
+        text-align: right !important;
+      }
+      @media (max-width: 620px) {
+        .productTextMargin {
+          margin-left: 47% !important;
+        }
+        .productCharges {
+          margin-right: 34% !important;
+        }
+      }
+      @media (max-width: 580px) {
         #u_content_heading_9 .v-container-padding-padding {
           padding: 3px 10px 10px 30px !important;
         }
@@ -67,14 +80,25 @@
         }
         .productTextMargin {
           line-height: 140%;
-          margin-left: 27% !important;
+          margin-left: 31% !important;
         }
         .productTextMarginCase {
           line-height: 140%;
           margin-left: 15% !important;
         }
-      }
-      @media (max-width: 480px) {
+        .productCharges {
+          margin-left: 0% !important;
+          margin-right: 58% !important;
+          text-align: right !important;
+        }
+        .productText {
+          font-size: 14px !important;
+        }
+
+        .gotOrder {
+          font-size: 16px !important;
+          padding: 27px 5px 10px 11px !important;
+        }
         .confirmation {
           line-height: 140% !important;
           font-size: 20px !important;
@@ -85,19 +109,13 @@
         .heading {
           padding: 10px 0 0px 20px !important;
         }
+      }
+      @media (max-width: 480px) {
         #u_content_heading_9 .v-container-padding-padding {
           padding: 10px 0 0px 0px !important;
         }
         #u_content_image_6 .v-src-width {
           width: auto !important;
-        }
-        .productText {
-          font-size: 14px !important;
-        }
-
-        .gotOrder {
-          font-size: 16px !important;
-          padding: 27px 5px 10px 11px !important;
         }
       }
       @media only screen and (min-width: 620px) {
@@ -858,12 +876,10 @@
                                     </td>
                                     <td style="padding-right: 0px; padding-left: 0px" align="left">
                                       <h1
-                                        class="v-font-size productText"
+                                        class="v-font-size productText productCharges"
                                         style="
                                           margin: 0px;
-                                          margin-left: 20%;
                                           line-height: 170%;
-                                          text-align: left;
                                           word-wrap: break-word;
                                           font-weight: normal;
                                           font-family: arial, helvetica, sans-serif;
