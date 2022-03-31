@@ -19,6 +19,8 @@ const addStore = async (req, res) => {
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
       shapes: req.body.shapes,
+      mobileBackgroundImage: req.body.mobileBackgroundImage,
+      canvasModes: req.body.canvasModes,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);

@@ -22,7 +22,10 @@ const SendOrderEmail = async (order, req) => {
   order.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      designImg: productitem.vendorProduct.designId.frontDesign.designImages[4].imageUrl,
+
+      designImg:
+        productitem.vendorProduct.designId?.frontDesign?.designImages[4]?.imageUrl ||
+        productitem.vendorProduct.designId?.backDesign?.designImages[1]?.imageUrl,
       productQuantity: productitem.quantity,
       productColorName: productitem.productMapping.color.label,
       productColor:
@@ -45,6 +48,11 @@ const SendOrderEmail = async (order, req) => {
     customerFirstName: order.customer.firstName,
     customerLastName: order.customer.lastName,
     address: order.billingAddress.street,
+    city: order.billingAddress.city,
+    zip: order.billingAddress.zip,
+    country: order.billingAddress.country,
+    aptNo: order.billingAddress.aptNo,
+    state: order.billingAddress.state,
     orderDate: convert(order.createdAt.toString()),
     totalProducts: totalProducts,
     orderCost: (order.tax * totalProducts).toFixed(2),
@@ -54,6 +62,10 @@ const SendOrderEmail = async (order, req) => {
     tickImg: req.get('origin') + '/assets/img/tick.png',
     faqUrl: req.get('origin') + '/faq',
   };
+
+  let regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+  console.log(regionNames.of(replacements.country));
+  replacements.country = regionNames.of(replacements.country);
   // replacements.orderDate = replacements.orderDate.slice(0, 10).replace(/-/g, '/');
   return replacements;
 };

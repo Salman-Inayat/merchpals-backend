@@ -107,11 +107,23 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 7);
-  const backDesignImages = data.urls.filter((design, idx) => idx > 7 && idx < data.urls.length - 1);
+  let frontDesignImages, backDesignImages;
+  const canvasModes = data.canvasModes;
+  if (canvasModes.front == false && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 5);
+    backDesignImages = data.urls.filter((design, idx) => idx > 4 && idx < data.urls.length - 1);
+  } else if (canvasModes.front == true && canvasModes.back == false) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 7);
+    backDesignImages = [];
+  } else if (canvasModes.front == true && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 7);
+    backDesignImages = data.urls.filter((design, idx) => idx > 7 && idx < data.urls.length - 1);
+  }
 
-  const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
-  const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
+  const frontDesignJson = data.urls.find(
+    el => el.name === 'front-design.json' && 'front-design.json',
+  );
+  const backDesignJson = data.urls.find(el => el.name === 'back-design.json' && 'back-design.json');
 
   const logo = data.urls.find(el => el.name === 'logo.png');
   const coverAvatar = data.urls.find(el => el.name === 'cover-avatar.png');
@@ -122,14 +134,16 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     vendorProductIds: vendorProducts,
     name: data.design.designName,
     frontDesign: {
-      designJson: frontDesignJson.imageUrl,
+      designJson: frontDesignJson.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
+      mobileBackgroundImage: data?.mobileBackgroundImage?.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
       shape: data.shapes.back,
+      mobileBackgroundImage: data?.mobileBackgroundImage?.back,
     },
     storeId,
   });
@@ -322,8 +336,19 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
-  const frontDesignImages = data.urls.filter((design, idx) => idx < 5);
-  const backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+  let frontDesignImages, backDesignImages;
+  console.log(req.body.canvasModes);
+  const canvasModes = req.body.canvasModes;
+  if (canvasModes.front == false && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 3);
+    backDesignImages = data.urls.filter((design, idx) => idx > 2 && idx < data.urls.length - 1);
+  } else if (canvasModes.front == true && canvasModes.back == false) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+    backDesignImages = [];
+  } else if (canvasModes.front == true && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+    backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+  }
 
   const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
   const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
@@ -334,14 +359,16 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
     vendorProductIds: vendorProducts,
     name: data.designName,
     frontDesign: {
-      designJson: frontDesignJson.imageUrl,
+      designJson: frontDesignJson.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
+      mobileBackgroundImage: data.mobileBackgroundImage.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
       shape: data.shapes.back,
+      mobileBackgroundImage: data.mobileBackgroundImage.back,
     },
     storeId: store,
   });
@@ -357,8 +384,14 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
 storeSchema.statics.getDesigns = async function (vendorId) {
   const store = await this.findOne({ vendorId }).populate({
     path: 'designs',
-    select: 'name frontDesign',
-    populate: [{ path: 'frontDesign', select: 'designImages' }],
+    select: 'name frontDesign backDesign',
+    populate: [
+      { path: 'frontDesign', select: 'designImages' },
+      {
+        path: 'backDesign',
+        select: 'designImages',
+      },
+    ],
   });
   return store.designs;
 };
