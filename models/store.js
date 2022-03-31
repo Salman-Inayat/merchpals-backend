@@ -113,10 +113,10 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 5);
     backDesignImages = data.urls.filter((design, idx) => idx > 4 && idx < data.urls.length - 1);
   } else if (canvasModes.front == true && canvasModes.back == false) {
-    frontDesignImages = data.urls.filter((design, idx) => idx < 7);
+    frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 7);
     backDesignImages = [];
   } else if (canvasModes.front == true && canvasModes.back == true) {
-    frontDesignImages = data.urls.filter((design, idx) => idx < 7);
+    frontDesignImages = data.urls.filter((design, idx) => idx > 1 && idx < 7);
     backDesignImages = data.urls.filter((design, idx) => idx > 7 && idx < data.urls.length - 1);
   }
 
@@ -228,7 +228,7 @@ storeSchema.statics.getLabeledInfo = async function (userId) {
               { path: 'backDesign', select: 'designImages' },
             ],
           },
-          { path: 'productId', select: 'name image slug basePrice' },
+          { path: 'productId', select: 'name image slug basePrice backImage' },
           { path: 'productMappings' },
         ],
       },
@@ -256,7 +256,7 @@ storeSchema.statics.getLabeledInfoBySlug = async function (slug) {
               { path: 'backDesign', select: 'designImages' },
             ],
           },
-          { path: 'productId', select: 'name image slug basePrice' },
+          { path: 'productId', select: 'name image slug basePrice backImage' },
           { path: 'productMappings' },
         ],
       },
@@ -284,7 +284,7 @@ storeSchema.statics.getStoreProductInfo = async function (storeSlug, productId) 
           { path: 'backDesign', select: 'designImages' },
         ],
       },
-      { path: 'productId', select: 'name image slug basePrice details shippingText' },
+      { path: 'productId', select: 'name image slug basePrice details shippingText backImage' },
       {
         path: 'productMappings',
         select: 'productId keyId variantId productNumberedId color variant',
@@ -337,7 +337,7 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
   const vendorProducts = await VendorProduct.insertMany(formattedVendorProducts);
 
   let frontDesignImages, backDesignImages;
-  console.log(req.body.canvasModes);
+
   const canvasModes = req.body.canvasModes;
   if (canvasModes.front == false && canvasModes.back == true) {
     frontDesignImages = data.urls.filter((design, idx) => idx < 3);
@@ -362,13 +362,13 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
       designJson: frontDesignJson.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
-      mobileBackgroundImage: data.mobileBackgroundImage.front,
+      mobileBackgroundImage: data?.mobileBackgroundImage?.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
       shape: data.shapes.back,
-      mobileBackgroundImage: data.mobileBackgroundImage.back,
+      mobileBackgroundImage: data?.mobileBackgroundImage?.back,
     },
     storeId: store,
   });
@@ -414,7 +414,7 @@ storeSchema.statics.getSingleDesignProducts = async function (designId) {
       select: 'designId productId productMappings price',
       populate: [
         { path: 'designId', select: 'name frontDesign backDesign' },
-        { path: 'productId', select: 'name image slug basePrice' },
+        { path: 'productId', select: 'name image slug basePrice backImage' },
         { path: 'productMappings' },
       ],
     })

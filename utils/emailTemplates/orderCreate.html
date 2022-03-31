@@ -31,9 +31,7 @@
         margin-top: 0%;
       }
       .Case {
-        width: 30%;
-        margin-left: 35%;
-        margin-top: 10%;
+        width: 71%;
       }
       .poster {
         width: 52%;
@@ -48,12 +46,32 @@
       .main_products {
         width: 26%;
       }
+      .productTextMargin {
+        line-height: 200%;
+      }
+      .productTextMarginCase {
+        line-height: 200%;
+      }
       @media (max-width: 550px) {
         #u_content_heading_9 .v-container-padding-padding {
           padding: 3px 10px 10px 30px !important;
         }
         #u_content_image_6 .v-src-width {
           width: auto !important;
+        }
+        .Case {
+          width: 78%;
+        }
+        .main_products {
+          width: 30%;
+        }
+        .productTextMargin {
+          line-height: 140%;
+          margin-left: 27% !important;
+        }
+        .productTextMarginCase {
+          line-height: 140%;
+          margin-left: 15% !important;
         }
       }
       @media (max-width: 480px) {
@@ -65,7 +83,7 @@
           font-size: 16px !important;
         }
         .heading {
-          padding: 10px 0 0px 0px !important;
+          padding: 10px 0 0px 20px !important;
         }
         #u_content_heading_9 .v-container-padding-padding {
           padding: 10px 0 0px 0px !important;
@@ -76,15 +94,10 @@
         .productText {
           font-size: 14px !important;
         }
-        .productTextMargin {
-          margin-left: 20% !important;
-        }
+
         .gotOrder {
           font-size: 16px !important;
           padding: 27px 5px 10px 11px !important;
-        }
-        .main_products {
-          width: 49%;
         }
       }
       @media only screen and (min-width: 620px) {
@@ -184,6 +197,21 @@
       color: #000000;
     "
   >
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <!--Handlebars-->
+    <script type="text/javascript" src="handlebars.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+          if (v1 === v2) {
+            return;
+            options.fn(this);
+          }
+          return options.inverse(this);
+        });
+      });
+    </script>
+
     <!--[if IE]><div class="ie-container"><![endif]-->
     <!--[if mso]><div class="mso-container"><![endif]-->
     <table
@@ -237,8 +265,6 @@
                           border-bottom: 0px solid transparent;
                         "
                       ><!--<![endif]-->
-                       
-
                         <table
                           id="u_content_heading_9"
                           style="font-family: 'Montserrat', sans-serif"
@@ -269,7 +295,7 @@
                                     text-align: left;
                                     word-wrap: break-word;
                                     font-weight: normal;
-                                    font-family: andale mono, times;
+                                    font-family: times;
                                     font-size: 16px;
                                   "
                                 >
@@ -597,9 +623,13 @@
                                   "
                                 >
                                   <strong>Shipping to:</strong><br />
-                                  <span style="font-weight: bold">{{address}}</span>
+                                  <span
+                                    >{{aptNo}} {{address}}, {{city}}, {{state}} {{zip}},
+                                    {{country}}</span
+                                  >
                                 </h1>
                               </td>
+
                               <td>
                                 <table
                                   style="font-family: 'Montserrat', sans-serif"
@@ -659,6 +689,7 @@
                             </tr>
                           </tbody>
                         </table>
+
                         {{#each products}}
                         <table
                           style="
@@ -686,6 +717,44 @@
                               >
                                 <table cellpadding="0" cellspacing="0" border="0">
                                   <tr>
+                                    {{#if this.productStatus}}
+                                    <td>
+                                      <img
+                                        class="v-src-width v-src-max-width
+                                                {{this.productSlug}}"
+                                        align="left"
+                                        border="0"
+                                        src="{{this.productImg}}"
+                                        style="
+                                        background-image: url('{{this.designImg}}');
+                                        background-size: 37% 79%;
+                                        background-repeat: no-repeat;
+                                        background-position: center;
+                                      
+                                      "
+                                      />
+                                    </td>
+                                    <td style="width: 55%">
+                                      <h1
+                                        class="v-font-size productText productTextMarginCase"
+                                        style="
+                                          margin: 0px;
+                                          margin-left: 31%;
+
+                                          text-align: left;
+                                          word-wrap: break-word;
+                                          font-weight: normal;
+                                          font-family: arial, helvetica, sans-serif;
+                                          font-size: 16px;
+                                          text-transform: uppercase;
+                                        "
+                                      >
+                                        {{this.productName}}<br />Size: {{this.productSize}}<br />Quantity:
+                                        {{this.productQuantity}}<br />Color:
+                                        {{this.productColorName}}<br />${{this.productTotalAmount}}
+                                      </h1>
+                                    </td>
+                                    {{else}}
                                     <td
                                       class="main_products"
                                       style="
@@ -704,20 +773,20 @@
                                       align="left"
                                     >
                                       <img
-                                        class="v-src-width v-src-max-width {{this.productSlug}}"
+                                        class="v-src-width v-src-max-width
+                                                {{this.productSlug}}"
                                         align="left"
                                         border="0"
                                         src="{{this.designImg}}"
                                       />
                                     </td>
-
                                     <td style="width: 55%">
                                       <h1
                                         class="v-font-size productText productTextMargin"
                                         style="
                                           margin: 0px;
                                           margin-left: 44%;
-                                          line-height: 200%;
+
                                           text-align: left;
                                           word-wrap: break-word;
                                           font-weight: normal;
@@ -731,6 +800,7 @@
                                         {{this.productColorName}}<br />${{this.productTotalAmount}}
                                       </h1>
                                     </td>
+                                    {{/if}}
                                   </tr>
                                 </table>
                               </td>
@@ -738,6 +808,7 @@
                           </tbody>
                         </table>
                         {{/each}}
+
                         <table
                           style="
                             font-family: 'Montserrat', sans-serif;

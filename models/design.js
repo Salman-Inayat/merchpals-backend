@@ -57,6 +57,7 @@ designSchema.statics.updateDesign = async function (designId, req) {
 
   let frontDesignImages, backDesignImages;
   const canvasModes = data.canvasModes;
+
   if (canvasModes.front == false && canvasModes.back == true) {
     frontDesignImages = data.urls.filter((design, idx) => idx < 3);
     backDesignImages = data.urls.filter((design, idx) => idx > 2 && idx < data.urls.length - 1);

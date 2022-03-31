@@ -25,10 +25,10 @@ const orderUpdate = async (req, res) => {
   try {
     const data = req.body.data;
     let productName = [];
-    data.order.order.id = parseInt(`900${data.order.order.id}`);
-    await Order.shipped(req.body.type, data.order.order.id);
+    const orderId = req.query.testid ? parseInt(`900${req.query.testid}`) : data.order.order.id;
+    await Order.shipped(req.body.type, orderId);
     if (req.body.type === 'package_shipped') {
-      const order = await Order.getOrderByOrderNo(data.order.order.id);
+      const order = await Order.getOrderByOrderNo(orderId);
       order.products.forEach(productitem => {
         productName.push(productitem.vendorProduct.productId.name);
       });
@@ -49,7 +49,7 @@ const orderUpdate = async (req, res) => {
       const userEmail = order.customer.email;
       await sendEmail({
         email: userEmail,
-        subject: `Your order is on the way! (${order.orderNo})`,
+        subject: `Your order is on the way! (${replacements.orderNo})`,
         template: 'shippedEmail',
         replacements: replacements,
       });

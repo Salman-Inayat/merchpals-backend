@@ -8,6 +8,7 @@ const design = require('../models/design');
 const { productsSlug } = require('../constants/productMappings');
 const axios = require('axios');
 const PRINTFUL_API = 'https://api.printful.com';
+
 const convert = str => {
   var date = new Date(str),
     mnth = ('0' + (date.getMonth() + 1)).slice(-2),
@@ -24,8 +25,11 @@ const SendOrderEmail = async (order, req) => {
       productImg: productitem.vendorProduct.productId.image,
 
       designImg:
-        productitem.vendorProduct.designId?.frontDesign?.designImages[4]?.imageUrl ||
-        productitem.vendorProduct.designId?.backDesign?.designImages[1]?.imageUrl,
+        productitem.vendorProduct.productId.slug === 'Case'
+          ? productitem.vendorProduct.designId?.frontDesign?.designImages[3]?.imageUrl ||
+            productitem.vendorProduct.designId?.frontDesign?.designImages[2]?.imageUrl
+          : productitem.vendorProduct.designId?.frontDesign?.designImages[4]?.imageUrl ||
+            productitem.vendorProduct.designId?.backDesign?.designImages[1]?.imageUrl,
       productQuantity: productitem.quantity,
       productColorName: productitem.productMapping.color.label,
       productColor:
@@ -38,6 +42,7 @@ const SendOrderEmail = async (order, req) => {
           : productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
       productSlug: productitem.vendorProduct.productId.slug,
+      productStatus: productitem.vendorProduct.productId.slug === 'Case' ? true : false,
       productTotalAmount: (productitem.quantity * productitem.vendorProduct.price).toFixed(2),
       productSize: productitem.productMapping.variant.label,
     });
