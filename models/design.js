@@ -99,4 +99,18 @@ designSchema.statics.updateDesign = async function (designId, req) {
   return design;
 };
 
+designSchema.statics.updateDesignName = async function (designId, designName) {
+  const design = await this.findByIdAndUpdate(
+    designId,
+    {
+      $set: {
+        name: designName,
+      },
+    },
+    { new: true },
+  );
+
+  return design;
+};
+
 module.exports = mongoose.model('design', designSchema);

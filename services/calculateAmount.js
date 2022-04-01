@@ -46,7 +46,7 @@ const calculateProfit = async (order, merchantCost) => {
   //     return (product.price - product.productId.basePrice) * p.quantity;
   //   })
   //   .reduce((sum, curr) => sum + curr, 0);
-  const profit = order.price - (0.029 * order.price + 0.3) - merchantCost.total;
+  const profit = order.totalAmount - (0.029 * order.totalAmount + 0.3) - merchantCost.total;
 
   return Number(profit.toFixed(2));
 };
