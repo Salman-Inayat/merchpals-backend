@@ -110,28 +110,47 @@ paymentSchema.statics.createAndChargeCustomer = async function (
       variant_id: product.productMapping.variantId,
       quantity: product.quantity,
       files: [
-        {
-          type: 'front',
-          url:
-            product.vendorProduct.productId.name === 'Long Sleeve' ||
-            product.vendorProduct.productId.name === 'Tee' ||
-            product.vendorProduct.productId.name === 'Hoodie'
-              ? product.vendorProduct.designId.frontDesign.designImages[1].imageUrl
-              : product.vendorProduct.productId.name === 'Poster'
-              ? product.vendorProduct.designId.frontDesign.designImages[0].imageUrl
-              : product.vendorProduct.productId.name === 'Mug'
-              ? product.vendorProduct.designId.frontDesign.designImages[2].imageUrl
-              : product.vendorProduct.productId.name === 'Case'
-              ? product.vendorProduct.designId.frontDesign.designImages[3].imageUrl
-              : product.vendorProduct.designId.frontDesign.designImages[0].imageUrl,
-        },
+        product.vendorProduct?.designId?.frontDesign?.designImages?.length > 0
+          ? product.vendorProduct?.designId?.frontDesign?.designImages.length == 3
+            ? product.vendorProduct.productId.name !== 'Long Sleeve' &&
+              product.vendorProduct.productId.name !== 'Tee' &&
+              product.vendorProduct.productId.name !== 'Hoodie' && {
+                type: 'default',
+                url:
+                  product.vendorProduct.productId.name === 'Poster'
+                    ? product.vendorProduct.designId.frontDesign.designImages[0]?.imageUrl
+                    : product.vendorProduct.productId.name === 'Mug'
+                    ? product.vendorProduct.designId.frontDesign.designImages[1]?.imageUrl
+                    : product.vendorProduct.productId.name === 'Case'
+                    ? product.vendorProduct.designId.frontDesign.designImages[2]?.imageUrl
+                    : {},
+              }
+            : product.vendorProduct.productId.name === 'Long Sleeve' ||
+              product.vendorProduct.productId.name === 'Tee' ||
+              product.vendorProduct.productId.name === 'Hoodie'
+            ? {
+                type: 'front',
+                url: product.vendorProduct.designId.frontDesign.designImages[1]?.imageUrl,
+              }
+            : {
+                type: 'default',
+                url:
+                  product.vendorProduct.productId.name === 'Poster'
+                    ? product.vendorProduct.designId.frontDesign.designImages[0]?.imageUrl
+                    : product.vendorProduct.productId.name === 'Mug'
+                    ? product.vendorProduct.designId.frontDesign.designImages[2]?.imageUrl
+                    : product.vendorProduct.productId.name === 'Case'
+                    ? product.vendorProduct.designId.frontDesign.designImages[3]?.imageUrl
+                    : {},
+              }
+          : {},
         (product.vendorProduct.productId.name === 'Long Sleeve' ||
           product.vendorProduct.productId.name === 'Tee' ||
           product.vendorProduct.productId.name === 'Hoodie') &&
         product.vendorProduct?.designId?.backDesign?.designImages.length > 0
           ? {
               type: 'back',
-              url: product.vendorProduct.designId.backDesign.designImages[0].imageUrl,
+              url: product.vendorProduct.designId.backDesign.designImages[0]?.imageUrl,
             }
           : {},
       ],
@@ -140,10 +159,6 @@ paymentSchema.statics.createAndChargeCustomer = async function (
 
   const formattedItemFiles = printfulDataFormatted.items.map((item, index) => {
     const modified = item.files.filter(value => Object.keys(value).length !== 0);
-
-    if (modified.length == 1) {
-      delete modified[0].type;
-    }
 
     return modified;
   });

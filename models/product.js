@@ -57,6 +57,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    backImage: {
+      type: String,
+      required: true,
+    },
     slug: {
       type: String,
       enum: productsSlug,

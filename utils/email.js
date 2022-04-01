@@ -56,7 +56,7 @@ const sendEmail = async options => {
     });
     return;
   } else {
-    mailOptions.message = options.text;
+    mailOptions.text = options.text;
   }
 
   // 3) Actually send the email

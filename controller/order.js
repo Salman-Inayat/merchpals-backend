@@ -8,6 +8,7 @@ const design = require('../models/design');
 const { productsSlug } = require('../constants/productMappings');
 const axios = require('axios');
 const PRINTFUL_API = 'https://api.printful.com';
+
 const convert = str => {
   var date = new Date(str),
     mnth = ('0' + (date.getMonth() + 1)).slice(-2),
@@ -22,7 +23,13 @@ const SendOrderEmail = async (order, req) => {
   order.products.forEach(productitem => {
     product.push({
       productImg: productitem.vendorProduct.productId.image,
-      designImg: productitem.vendorProduct.designId.frontDesign.designImages[4].imageUrl,
+
+      designImg:
+        productitem.vendorProduct.productId.slug === 'Case'
+          ? productitem.vendorProduct.designId?.frontDesign?.designImages[3]?.imageUrl ||
+            productitem.vendorProduct.designId?.frontDesign?.designImages[2]?.imageUrl
+          : productitem.vendorProduct.designId?.frontDesign?.designImages[4]?.imageUrl ||
+            productitem.vendorProduct.designId?.backDesign?.designImages[1]?.imageUrl,
       productQuantity: productitem.quantity,
       productColorName: productitem.productMapping.color.label,
       productColor:
@@ -35,6 +42,7 @@ const SendOrderEmail = async (order, req) => {
           : productitem.productMapping.color.label,
       productName: productitem.vendorProduct.productId.name,
       productSlug: productitem.vendorProduct.productId.slug,
+      productStatus: productitem.vendorProduct.productId.slug === 'Case' ? true : false,
       productTotalAmount: (productitem.quantity * productitem.vendorProduct.price).toFixed(2),
       productSize: productitem.productMapping.variant.label,
     });
@@ -45,15 +53,24 @@ const SendOrderEmail = async (order, req) => {
     customerFirstName: order.customer.firstName,
     customerLastName: order.customer.lastName,
     address: order.billingAddress.street,
+    city: order.billingAddress.city,
+    zip: order.billingAddress.zip,
+    country: order.billingAddress.country,
+    aptNo: order.billingAddress.aptNo,
+    state: order.billingAddress.state,
     orderDate: convert(order.createdAt.toString()),
-    totalProducts: totalProducts,
+    totalProducts: totalProducts.toFixed(2),
     orderCost: (order.tax * totalProducts).toFixed(2),
-    totalShipping: order.shippingCost,
-    totalOrder: totalAmount,
+    totalShipping: order.shippingCost.toFixed(2),
+    totalOrder: totalAmount.toFixed(2),
     products: product,
     tickImg: req.get('origin') + '/assets/img/tick.png',
     faqUrl: req.get('origin') + '/faq',
   };
+
+  let regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+  console.log(regionNames.of(replacements.country));
+  replacements.country = regionNames.of(replacements.country);
   // replacements.orderDate = replacements.orderDate.slice(0, 10).replace(/-/g, '/');
   return replacements;
 };

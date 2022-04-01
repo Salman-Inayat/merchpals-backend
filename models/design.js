@@ -55,8 +55,19 @@ const designSchema = new mongoose.Schema(
 designSchema.statics.updateDesign = async function (designId, req) {
   const data = req.body;
 
-  const frontDesignImages = data.urls.filter((design, idx) => idx < 5);
-  const backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+  let frontDesignImages, backDesignImages;
+  const canvasModes = data.canvasModes;
+
+  if (canvasModes.front == false && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 3);
+    backDesignImages = data.urls.filter((design, idx) => idx > 2 && idx < data.urls.length - 1);
+  } else if (canvasModes.front == true && canvasModes.back == false) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+    backDesignImages = [];
+  } else if (canvasModes.front == true && canvasModes.back == true) {
+    frontDesignImages = data.urls.filter((design, idx) => idx < 5);
+    backDesignImages = data.urls.filter((design, idx) => idx > 5 && idx < data.urls.length - 1);
+  }
 
   const frontDesignJson = data.urls.find(el => el.name === 'front-design.json');
   const backDesignJson = data.urls.find(el => el.name === 'back-design.json');
@@ -64,14 +75,16 @@ designSchema.statics.updateDesign = async function (designId, req) {
   console.log('Shapes: ', data.shapes);
   const updatedFields = {
     frontDesign: {
-      designJson: frontDesignJson.imageUrl,
+      designJson: frontDesignJson?.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
+      mobileBackgroundImage: data.mobileBackgroundImage.front,
     },
     backDesign: {
       designJson: backDesignJson?.imageUrl || '',
       designImages: backDesignImages,
       shape: data.shapes.back,
+      mobileBackgroundImage: data.mobileBackgroundImage.back,
     },
   };
 
@@ -79,6 +92,20 @@ designSchema.statics.updateDesign = async function (designId, req) {
     designId,
     {
       $set: updatedFields,
+    },
+    { new: true },
+  );
+
+  return design;
+};
+
+designSchema.statics.updateDesignName = async function (designId, designName) {
+  const design = await this.findByIdAndUpdate(
+    designId,
+    {
+      $set: {
+        name: designName,
+      },
     },
     { new: true },
   );

@@ -19,6 +19,8 @@ const addStore = async (req, res) => {
       products: JSON.parse(req.body.products),
       themeColor: req.body.themeColor,
       shapes: req.body.shapes,
+      mobileBackgroundImage: req.body.mobileBackgroundImage,
+      canvasModes: req.body.canvasModes,
     };
 
     const store = await Store.createStoreAndEssence(req.userData, data);
@@ -194,6 +196,16 @@ const updateDesign = async (req, res) => {
   }
 };
 
+const updateDesignName = async (req, res) => {
+  try {
+    const design = await Designs.updateDesignName(req.params.designId, req.body.designName);
+    res.status(200).json({ design });
+    console.log('design name ');
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const updateDesignProducts = async (req, res) => {
   try {
     const design = await Store.updateDesign(req.params.designId, req.userData.vendorId, req.body);
@@ -238,4 +250,5 @@ module.exports = {
   updateDesign,
   updateDesignProducts,
   updateStoreData,
+  updateDesignName,
 };
