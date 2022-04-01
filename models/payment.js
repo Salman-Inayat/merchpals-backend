@@ -118,11 +118,11 @@ paymentSchema.statics.createAndChargeCustomer = async function (
                 type: 'default',
                 url:
                   product.vendorProduct.productId.name === 'Poster'
-                    ? product.vendorProduct.designId.frontDesign.designImages[0].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[0]?.imageUrl
                     : product.vendorProduct.productId.name === 'Mug'
-                    ? product.vendorProduct.designId.frontDesign.designImages[1].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[1]?.imageUrl
                     : product.vendorProduct.productId.name === 'Case'
-                    ? product.vendorProduct.designId.frontDesign.designImages[2].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[2]?.imageUrl
                     : {},
               }
             : product.vendorProduct.productId.name === 'Long Sleeve' ||
@@ -130,17 +130,17 @@ paymentSchema.statics.createAndChargeCustomer = async function (
               product.vendorProduct.productId.name === 'Hoodie'
             ? {
                 type: 'front',
-                url: product.vendorProduct.designId.frontDesign.designImages[1].imageUrl,
+                url: product.vendorProduct.designId.frontDesign.designImages[1]?.imageUrl,
               }
             : {
                 type: 'default',
                 url:
                   product.vendorProduct.productId.name === 'Poster'
-                    ? product.vendorProduct.designId.frontDesign.designImages[0].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[0]?.imageUrl
                     : product.vendorProduct.productId.name === 'Mug'
-                    ? product.vendorProduct.designId.frontDesign.designImages[2].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[2]?.imageUrl
                     : product.vendorProduct.productId.name === 'Case'
-                    ? product.vendorProduct.designId.frontDesign.designImages[3].imageUrl
+                    ? product.vendorProduct.designId.frontDesign.designImages[3]?.imageUrl
                     : {},
               }
           : {},
@@ -150,7 +150,7 @@ paymentSchema.statics.createAndChargeCustomer = async function (
         product.vendorProduct?.designId?.backDesign?.designImages.length > 0
           ? {
               type: 'back',
-              url: product.vendorProduct.designId.backDesign.designImages[0].imageUrl,
+              url: product.vendorProduct.designId.backDesign.designImages[0]?.imageUrl,
             }
           : {},
       ],

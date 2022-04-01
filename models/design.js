@@ -75,7 +75,7 @@ designSchema.statics.updateDesign = async function (designId, req) {
   console.log('Shapes: ', data.shapes);
   const updatedFields = {
     frontDesign: {
-      designJson: frontDesignJson.imageUrl || '',
+      designJson: frontDesignJson?.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
       mobileBackgroundImage: data.mobileBackgroundImage.front,

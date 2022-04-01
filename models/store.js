@@ -134,7 +134,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     vendorProductIds: vendorProducts,
     name: data.design.designName,
     frontDesign: {
-      designJson: frontDesignJson.imageUrl || '',
+      designJson: frontDesignJson?.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
       mobileBackgroundImage: data?.mobileBackgroundImage?.front,
@@ -154,7 +154,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
     name: data.name,
     vendorId,
     designs: [designId],
-    logo: logo.imageUrl,
+    logo: logo?.imageUrl,
     socialHandles: {
       youtube: data.youtube,
       twitch: data.twitch,
@@ -162,7 +162,7 @@ storeSchema.statics.createStoreAndEssence = async function (userData, data) {
       tiktok: data.tiktok,
     },
     slug,
-    coverAvatar: coverAvatar.imageUrl,
+    coverAvatar: coverAvatar?.imageUrl,
     productMappings: allProductsMappings,
     vendorProductIds: vendorProducts.map(p => p._id),
     themeColor: data.themeColor,
@@ -196,7 +196,7 @@ storeSchema.statics.createStoreAndEssenceAfter = async function (userData, data)
     _id: storeId,
     name: data.name,
     vendorId,
-    logo: logo.imageUrl,
+    logo: logo?.imageUrl,
     socialHandles: {
       youtube: data.youtube,
       twitch: data.twitch,
@@ -204,7 +204,7 @@ storeSchema.statics.createStoreAndEssenceAfter = async function (userData, data)
       tiktok: data.tiktok,
     },
     slug,
-    coverAvatar: coverAvatar.imageUrl,
+    coverAvatar: coverAvatar?.imageUrl,
     themeColor: data.themeColor,
   });
   console.log('create store successfully', store);
@@ -359,7 +359,7 @@ storeSchema.statics.createDesign = async function (req, vendorId) {
     vendorProductIds: vendorProducts,
     name: data.designName,
     frontDesign: {
-      designJson: frontDesignJson.imageUrl || '',
+      designJson: frontDesignJson?.imageUrl || '',
       designImages: frontDesignImages,
       shape: data.shapes.front,
       mobileBackgroundImage: data?.mobileBackgroundImage?.front,
